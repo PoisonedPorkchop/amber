@@ -335,7 +335,7 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
         }
         setupres();
         MainFrame f = new MainFrame(null);
-
+        //Gets the required game instance of maid... But where is this made or initialized or used???
         Maid.getInstance();
 
         if (Utils.getprefb("fullscreen", false))

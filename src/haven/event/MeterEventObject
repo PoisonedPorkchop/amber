@@ -1,0 +1,7 @@
+public abstract class MeterEventObject {
+
+    public int value;
+
+    public MeterEventObject() {
+    }
+}
