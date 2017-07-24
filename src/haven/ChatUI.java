@@ -26,6 +26,9 @@
 
 package haven;
 
+import com.gtranslate.Language;
+import com.gtranslate.Translator;
+
 import java.io.*;
 import java.nio.charset.Charset;
 import java.util.*;
@@ -40,6 +43,12 @@ import java.text.AttributedCharacterIterator.Attribute;
 import java.net.URL;
 import java.util.regex.*;
 import java.awt.datatransfer.*;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URLEncoder;
+import org.json.JSONArray;
 
 public class ChatUI extends Widget {
     private static final Resource alarmsfx = Resource.local().loadwait("sfx/chatalarm");
@@ -159,6 +168,16 @@ public class ChatUI extends Widget {
             private final Text t;
 
             public SimpleMessage(String text, Color col, int w) {
+                /*Translator translate = Translator.getInstance();
+                Language language = Language.getInstance();
+                System.out.println("Got translate instance... " + text.trim());
+                String[] s = text.trim().split(" ");
+                String prefixLanguage = translate.detect(s[0]);
+                System.out.println("Detected language...");//en
+                String tL = language.getNameLanguage(prefixLanguage, Language.ENGLISH);
+                System.out.println(tL);
+                System.out.println("SimpleMessage Created: " + text);*/
+
                 if (Config.chattimestamp)
                     text = timestamp(text);
                 if (col == null)
@@ -180,6 +199,7 @@ public class ChatUI extends Widget {
             }
         }
 
+
         public Channel(boolean closable) {
             sb = add(new Scrollbar(0, 0, 0));
             if (closable)
@@ -189,6 +209,7 @@ public class ChatUI extends Widget {
         }
 
         public void append(Message msg) {
+            System.out.println("Message Append: " + msg.text());
             synchronized (msgs) {
                 msgs.add(msg);
                 int y = 0;
@@ -202,6 +223,8 @@ public class ChatUI extends Widget {
         }
 
         public void append(String line, Color col) {
+            //System Chat
+            System.out.println("APPEND APPEND!");
             append(new SimpleMessage(line, col, iw()));
         }
 
@@ -275,6 +298,7 @@ public class ChatUI extends Widget {
         }
 
         public void notify(Message msg, int urgency) {
+            System.out.println("Notified Message: " + msg.text().toString());
             getparent(ChatUI.class).notify(this, msg);
             updurgency(Math.max(this.urgency, urgency));
         }
@@ -671,6 +695,7 @@ public class ChatUI extends Widget {
                 if (col == null) col = Color.WHITE;
                 int urgency = (args.length > 2) ? (Integer) args[2] : 0;
                 Message cmsg = new SimpleMessage(line, col, iw());
+                System.out.println("Simple append?");
                 append(cmsg);
                 if (urgency > 0)
                     notify(cmsg, urgency);
@@ -700,7 +725,16 @@ public class ChatUI extends Widget {
 
             public NamedMessage(int from, String text, Color col, int w) {
                 this.from = from;
-                this.text = text;
+                trans tr = new trans();
+                String word = "";
+                try {
+                    word = tr.callUrlAndParseResult("auto", "en", text);
+                    System.out.println("Result was: " + text);
+                } catch (Exception e) {
+                    System.out.println("Failed to translate!");
+                    word = text;
+                }
+                this.text = word;
                 this.w = w;
                 this.col = col;
             }
@@ -777,9 +811,11 @@ public class ChatUI extends Widget {
 
                 if (from == null) {
                     MyMessage my = new MyMessage(line, iw());
+                    System.out.println("From == null");
                     append(my);
                     save(name, my.text().text, super.getparent(GameUI.class).buddies.getCharName());
                 } else {
+                    System.out.println("From not null.");
                     Message cmsg = new NamedMessage(from, line, fromcolor(from), iw());
                     append(cmsg);
                     if (urgency > 0)
@@ -817,10 +853,12 @@ public class ChatUI extends Widget {
                 }
                 if (from == null) {
                     MyMessage my = new MyMessage(line, iw());
+                    System.out.println("My message == null.");
                     append(my);
                     save(name, my.text().text, super.getparent(GameUI.class).buddies.getCharName());
                 } else {
                     Message cmsg = new NamedMessage(from, line, Utils.blendcol(col, Color.WHITE, 0.5), iw());
+                    System.out.println("My message.");
                     append(cmsg);
                     save(name, cmsg.text().text);
                     if (urgency > 0)
@@ -865,6 +903,7 @@ public class ChatUI extends Widget {
                 String line = (String) args[1];
                 if (t.equals("in")) {
                     Message cmsg = new InMessage(line, iw());
+                    System.out.println("uimsg IN");
                     append(cmsg);
                     notify(cmsg, 3);
                     
@@ -878,12 +917,14 @@ public class ChatUI extends Widget {
                     }
                 } else if (t.equals("out")) {
                     OutMessage om = new OutMessage(line, iw());
+                    System.out.println("uimsg OUT");
                     append(om);
                     save("Private Chat", om.text().text, super.getparent(GameUI.class).buddies.getCharName());
                 }
             } else if (msg == "err") {
                 String err = (String) args[0];
                 Message cmsg = new SimpleMessage(err, Color.RED, iw());
+                System.out.println("uimsg ERR");
                 append(cmsg);
                 notify(cmsg, 3);
             } else {
@@ -1368,6 +1409,7 @@ public class ChatUI extends Widget {
     }
 
     private static String timestamp(String text) {
+
         return "[" + new SimpleDateFormat("HH:mm").format(new Date()) + "] " + text;
     }
 
@@ -1391,6 +1433,48 @@ public class ChatUI extends Widget {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    private static class trans {
+        private String callUrlAndParseResult(String langFrom, String langTo,
+                                             String word) throws Exception {
+
+            String url = "https://translate.googleapis.com/translate_a/single?" +
+                    "client=gtx&" +
+                    "sl=" + langFrom +
+                    "&tl=" + langTo +
+                    "&dt=t&q=" + URLEncoder.encode(word, "UTF-8");
+
+            URL obj = new URL(url);
+            HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+            con.setRequestProperty("User-Agent", "Mozilla/5.0");
+
+            BufferedReader in = new BufferedReader(
+                    new InputStreamReader(con.getInputStream()));
+            String inputLine;
+            StringBuffer response = new StringBuffer();
+
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            in.close();
+
+            return parseResult(response.toString());
+        }
+
+        private String parseResult(String inputJson) throws Exception {
+  /*
+   * inputJson for word 'hello' translated to language Hindi from English-
+   * [[["नमस्ते","hello",,,1]],,"en"]
+   * We have to get 'नमस्ते ' from this json.
+   */
+
+            JSONArray jsonArray = new JSONArray(inputJson);
+            JSONArray jsonArray2 = (JSONArray) jsonArray.get(0);
+            JSONArray jsonArray3 = (JSONArray) jsonArray2.get(0);
+
+            return jsonArray3.get(0).toString();
         }
     }
 }
