@@ -27,6 +27,7 @@
 package haven;
 
 import com.jogamp.opengl.util.awt.Screenshot;
+import haven.music.SongPlayerThread;
 
 import java.awt.GraphicsConfiguration;
 import java.awt.Color;
@@ -89,6 +90,7 @@ public class HavenPanel extends GLCanvas implements Runnable, Console.Directory 
         if (Toolkit.getDefaultToolkit().getMaximumCursorColors() >= 256 || Config.hwcursor)
             cursmode = "awt";
         setCursor(Toolkit.getDefaultToolkit().createCustomCursor(TexI.mkbuf(new Coord(1, 1)), new java.awt.Point(), ""));
+        SongPlayerThread.comp = this;
     }
 
     public HavenPanel(int w, int h) {
