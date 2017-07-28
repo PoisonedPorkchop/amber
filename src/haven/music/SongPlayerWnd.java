@@ -87,7 +87,21 @@ public class SongPlayerWnd extends Window {
                     SongPlayerThread.stop = true;
             }
         };
-        add(btnb, new Coord(20, 30));
+        add(btnb, new Coord(20, 40));
+
+        Button btnc = new Button(50, "Delay") {
+            public void click() {
+                SongPlayerThread.startTime += 100;
+            }
+        };
+        add(btnc, new Coord(100, 40));
+
+        Button btnd = new Button(50, "Skip") {
+            public void click() {
+                SongPlayerThread.startTime -= 100;
+            }
+        };
+        add(btnd, new Coord(100, 80));
 
         CheckBox chkloop = new CheckBox("Loop") {
             {

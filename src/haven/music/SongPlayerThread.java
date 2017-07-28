@@ -45,7 +45,7 @@ public class SongPlayerThread extends Thread {
     public static ArrayList<WrappedShortMessage> notes = new ArrayList<WrappedShortMessage>();
 
     public static long startTime = System.currentTimeMillis();
-    public static long tickTime = 0;
+    public static double tickTime = 0;
     public static long targetTime = System.currentTimeMillis();
 
     public static int bpm = 90;
@@ -74,7 +74,8 @@ public class SongPlayerThread extends Thread {
                 startTime = System.currentTimeMillis();
                 for(WrappedShortMessage note : notes)
                 {
-                    targetTime = startTime + (tickTime*note.getTick());
+                    targetTime = startTime + ((long)(tickTime*((double)note.getTick())));
+
                     while(System.currentTimeMillis() < targetTime);
                     {
                         try {
@@ -155,10 +156,10 @@ public class SongPlayerThread extends Thread {
                 if (message instanceof ShortMessage) {
                     ShortMessage sm = (ShortMessage) message;
                     if (sm.getCommand() == NOTE_ON) {
-                        /**
-                         int key = sm.getData1();
-                         int octave = (key / 12) - 1;
-                         int note = key % 12;*/
+                        if(notes.size() >= 10)
+                        {
+                            System.out.println(event.getTick());
+                        }
                         WrappedShortMessage wsm = new WrappedShortMessage(sm, event.getTick());
                         wsm.setTick(event.getTick());
                         notes.add(wsm);
@@ -175,7 +176,7 @@ public class SongPlayerThread extends Thread {
             }
         }
 
-        tickTime = (long) (1000f / (resolution * (bpm/60)));
+        tickTime = (1000d / (resolution * (bpm/60)));
 
         hasSong = true;
         running = true;
