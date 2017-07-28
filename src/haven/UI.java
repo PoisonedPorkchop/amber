@@ -27,6 +27,7 @@
 package haven;
 
 import haven.livestock.LivestockManager;
+import haven.music.SongPlayerThread;
 
 import java.util.*;
 import java.awt.event.KeyEvent;
@@ -145,6 +146,7 @@ public class UI {
     }
 
     public void newwidget(int id, String type, int parent, Object[] pargs, Object... cargs) throws InterruptedException {
+
         if (Config.quickbelt && type.equals("wnd") && cargs[1].equals("Belt")) {
             type = "wnd-belt";
             pargs[1] = Utils.getprefc("Belt_c", new Coord(550, HavenPanel.h - 160));
@@ -169,6 +171,10 @@ public class UI {
             }
 
             bind(wdg, id);
+
+            if(type.contains("ui/music")) {
+                Glob.songPlayerThread.widg = wdg;
+            }
 
             // drop everything except water containers if in area mining mode
             if (Config.dropore && gui != null && gui.map != null && gui.map.areamine != null && wdg instanceof GItem) {
@@ -296,6 +302,12 @@ public class UI {
     }
 
     public void destroy(Widget wdg) {
+
+        if(wdg.toString().contains("haven.res.ui.music.MusicWnd"))
+        {
+            Glob.songPlayerThread.widg = null;
+        }
+
         for (Iterator<Grab> i = mousegrab.iterator(); i.hasNext(); ) {
             Grab g = i.next();
             if (g.wdg.hasparent(wdg))
