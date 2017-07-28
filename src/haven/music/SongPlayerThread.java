@@ -156,10 +156,6 @@ public class SongPlayerThread extends Thread {
                 if (message instanceof ShortMessage) {
                     ShortMessage sm = (ShortMessage) message;
                     if (sm.getCommand() == NOTE_ON) {
-                        if(notes.size() >= 10)
-                        {
-                            System.out.println(event.getTick());
-                        }
                         WrappedShortMessage wsm = new WrappedShortMessage(sm, event.getTick());
                         wsm.setTick(event.getTick());
                         notes.add(wsm);
@@ -170,6 +166,7 @@ public class SongPlayerThread extends Thread {
                     }
                     else
                     {
+
                     }
                 } else {
                 }

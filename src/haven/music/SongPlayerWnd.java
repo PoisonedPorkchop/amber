@@ -96,6 +96,7 @@ public class SongPlayerWnd extends Window {
         };
         add(btnc, new Coord(100, 40));
 
+
         Button btnd = new Button(50, "Skip") {
             public void click() {
                 SongPlayerThread.startTime -= 100;
