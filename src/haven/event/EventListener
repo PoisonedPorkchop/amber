@@ -1,0 +1,5 @@
+package have.event;
+
+public interface EventListener {
+
+}

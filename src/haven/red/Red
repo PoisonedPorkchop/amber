@@ -1,0 +1,19 @@
+public class Red
+{
+    public Red()
+    {
+
+    }
+
+    public void setUpChannels()
+    {
+
+    }
+
+    public void createServerConnection()
+    {
+
+    }
+
+
+}
