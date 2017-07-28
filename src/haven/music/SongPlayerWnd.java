@@ -113,6 +113,7 @@ public class SongPlayerWnd extends Window {
                 a = val;
                 SongPlayerThread.loop = val;
             }
+
         };
         add(chkloop, new Coord(350, 15));
 

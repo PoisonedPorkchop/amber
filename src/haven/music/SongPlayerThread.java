@@ -103,6 +103,7 @@ public class SongPlayerThread extends Thread {
 
                     int octave = (note.message.getData1() / 12);
 
+
                     int keymask = 0;
                     if(octave < octaveBase)
                         keymask = InputEvent.CTRL_MASK;
