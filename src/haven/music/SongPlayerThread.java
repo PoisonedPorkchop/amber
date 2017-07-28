@@ -55,6 +55,7 @@ public class SongPlayerThread extends Thread {
     public static boolean hasSong = false;
     public static boolean running = false;
     public static boolean loop = false;
+    public static boolean stop = false;
 
     public SongPlayerThread() {
         super("Music Thread");
@@ -83,48 +84,43 @@ public class SongPlayerThread extends Thread {
                         }
                     }
 
+                    if(stop) {
+                        running = false;
+                        stop = false;
+                        if(widg != null) {
+                            for (int key : keys) {
+                                KeyEvent keyevent1 = new KeyEvent(SongPlayerThread.comp, KeyEvent.KEY_RELEASED, System.currentTimeMillis(), InputEvent.CTRL_MASK, key, KeyEvent.CHAR_UNDEFINED);
+                                KeyEvent keyevent2 = new KeyEvent(SongPlayerThread.comp, KeyEvent.KEY_RELEASED, System.currentTimeMillis(), 0, key, KeyEvent.CHAR_UNDEFINED);
+                                KeyEvent keyevent3 = new KeyEvent(SongPlayerThread.comp, KeyEvent.KEY_RELEASED, System.currentTimeMillis(), InputEvent.SHIFT_MASK, key, KeyEvent.CHAR_UNDEFINED);
+                                widg.keyup(keyevent1);
+                                widg.keyup(keyevent2);
+                                widg.keyup(keyevent3);
+                            }
+                        }
+                        break;
+                    }
+
                     int octave = (note.message.getData1() / 12);
 
-                    System.out.println("Octave: " + octave + ", Normal: " + SongPlayerThread.octaveBase);
+                    int keymask = 0;
+                    if(octave < octaveBase)
+                        keymask = InputEvent.CTRL_MASK;
+                    if(octave > octaveBase)
+                        keymask = InputEvent.SHIFT_MASK;
 
-                    if(octave == octaveBase-1)
-                    {
-                        if(note.message.getCommand() == NOTE_ON)
-                        {
-                            KeyEvent keyevent2 = new KeyEvent(SongPlayerThread.comp, KeyEvent.KEY_PRESSED, System.currentTimeMillis(), InputEvent.CTRL_MASK, keys[note.message.getData1()%12], KeyEvent.CHAR_UNDEFINED);
-                            widg.keydown(keyevent2);
-                        }
-                        else
-                        {
-                            KeyEvent keyevent2 = new KeyEvent(SongPlayerThread.comp, KeyEvent.KEY_RELEASED, System.currentTimeMillis(), InputEvent.CTRL_MASK, keys[note.message.getData1()%12], KeyEvent.CHAR_UNDEFINED);
-                            widg.keyup(keyevent2);
+                    if(widg != null) {
+                        if (note.message.getCommand() == NOTE_ON) {
+                            KeyEvent keyevent = new KeyEvent(SongPlayerThread.comp, KeyEvent.KEY_PRESSED, System.currentTimeMillis(), keymask, keys[note.message.getData1() % 12], KeyEvent.CHAR_UNDEFINED);
+                            widg.keydown(keyevent);
+                        } else {
+                            KeyEvent keyevent = new KeyEvent(SongPlayerThread.comp, KeyEvent.KEY_RELEASED, System.currentTimeMillis(), keymask, keys[note.message.getData1() % 12], KeyEvent.CHAR_UNDEFINED);
+                            widg.keyup(keyevent);
                         }
                     }
-                    else if(octave == octaveBase)
+                    else
                     {
-                        if(note.message.getCommand() == NOTE_ON)
-                        {
-                            KeyEvent keyevent1 = new KeyEvent(SongPlayerThread.comp, KeyEvent.KEY_PRESSED, System.currentTimeMillis(), 0, keys[note.message.getData1()%12], KeyEvent.CHAR_UNDEFINED);
-                            widg.keydown(keyevent1);
-                        }
-                        else
-                        {
-                            KeyEvent keyevent1 = new KeyEvent(SongPlayerThread.comp, KeyEvent.KEY_RELEASED, System.currentTimeMillis(), 0, keys[note.message.getData1()%12], KeyEvent.CHAR_UNDEFINED);
-                            widg.keyup(keyevent1);
-                        }
-                    }
-                    else if(octave == octaveBase +1)
-                    {
-                        if(note.message.getCommand() == NOTE_ON)
-                        {
-                            KeyEvent keyevent2 = new KeyEvent(SongPlayerThread.comp, KeyEvent.KEY_PRESSED, System.currentTimeMillis(), InputEvent.SHIFT_MASK, keys[note.message.getData1()%12], KeyEvent.CHAR_UNDEFINED);
-                            widg.keydown(keyevent2);
-                        }
-                        else
-                        {
-                            KeyEvent keyevent2 = new KeyEvent(SongPlayerThread.comp, KeyEvent.KEY_RELEASED, System.currentTimeMillis(), InputEvent.SHIFT_MASK, keys[note.message.getData1()%12], KeyEvent.CHAR_UNDEFINED);
-                            widg.keyup(keyevent2);
-                        }
+                        running = false;
+                        break;
                     }
                 }
                 if (!loop)
