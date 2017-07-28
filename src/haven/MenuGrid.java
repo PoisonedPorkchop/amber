@@ -438,7 +438,6 @@ public class MenuGrid extends Widget {
         }
         else if(ad[1].equals("debug"))
         {
-
         }
     }
 
