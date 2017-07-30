@@ -87,14 +87,14 @@ public class SongPlayerWnd extends Window {
                     SongPlayerThread.stop = true;
             }
         };
-        add(btnb, new Coord(20, 40));
+        add(btnb, new Coord(29, 40));
 
         Button btnc = new Button(50, "Delay") {
             public void click() {
                 SongPlayerThread.startTime += 100;
             }
         };
-        add(btnc, new Coord(100, 40));
+        add(btnc, new Coord(100, 10));
 
 
         Button btnd = new Button(50, "Skip") {
@@ -102,9 +102,9 @@ public class SongPlayerWnd extends Window {
                 SongPlayerThread.startTime -= 100;
             }
         };
-        add(btnd, new Coord(100, 80));
+        add(btnd, new Coord(100, 40));
 
-        CheckBox chkloop = new CheckBox("Loop") {
+        CheckBox chkloopa = new CheckBox("Loop") {
             {
                 a = false;
             }
@@ -115,7 +115,20 @@ public class SongPlayerWnd extends Window {
             }
 
         };
-        add(chkloop, new Coord(350, 15));
+        add(chkloopa, new Coord(350, 10));
+
+        CheckBox chkloopb = new CheckBox("Grab") {
+            {
+                a = false;
+            }
+
+            public void set(boolean val) {
+                a = val;
+                SongPlayerThread.grab = val;
+            }
+
+        };
+        add(chkloopb, new Coord(350, 40));
 
         resize();
     }

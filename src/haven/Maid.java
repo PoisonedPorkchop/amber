@@ -10,7 +10,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.*;
-import haven.event.*;
 
 public class Maid {
     private static Maid instance = null;
@@ -23,11 +22,6 @@ public class Maid {
     private final ThreadGroup taskGroup;
     private HavenPanel haven;
     private Thread task, wait;
-    private TaskListener taskListener;
-    private CursorListener cursorListener;
-    private MeterListener meterListener;
-    private ItemListener itemListener;
-    private WidgetListener<?> widgetListener;
     private int menuGridId = 0;
 
     public Maid() {

@@ -281,6 +281,8 @@ public class UI {
     }
 
     public Grab grabkeys(Widget wdg) {
+        if(wdg.toString().contains("haven.res.ui.music.MusicWnd") && !SongPlayerThread.grab)
+            return null;
         if (wdg == null) throw (new NullPointerException());
         Grab g = new Grab(wdg) {
             public void remove() {

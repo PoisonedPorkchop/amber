@@ -56,6 +56,7 @@ public class SongPlayerThread extends Thread {
     public static boolean running = false;
     public static boolean loop = false;
     public static boolean stop = false;
+    public static boolean grab = false;
 
     public SongPlayerThread() {
         super("Music Thread");
