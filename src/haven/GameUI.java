@@ -28,6 +28,7 @@ package haven;
 
 import haven.automation.ErrorSysMsgCallback;
 import haven.automation.PickForageable;
+import haven.bot.SilkFarmerWnd;
 import haven.livestock.LivestockManager;
 import haven.music.SongPlayerWnd;
 import haven.resutil.FoodInfo;
@@ -79,6 +80,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     public LocalMiniMap mmap;
     public haven.timers.TimersWnd timerswnd;
     public SongPlayerWnd songplayerwnd;
+    public SilkFarmerWnd silkfarmerwnd;
     public QuickSlotsWdg quickslots;
     public StatusWdg statuswindow;
     public AlignPanel questpanel;
@@ -193,7 +195,11 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 
         songplayerwnd = new SongPlayerWnd(this);
         songplayerwnd.hide();
-        add(songplayerwnd, new Coord(HavenPanel.w / 2 - timerswnd.sz.x / 2, 100));
+        add(songplayerwnd, new Coord(HavenPanel.w / 2 - songplayerwnd.sz.x / 2, 100));
+
+        silkfarmerwnd = new SilkFarmerWnd(this);
+        silkfarmerwnd.hide();
+        add(silkfarmerwnd, new Coord(HavenPanel.w / 2 - silkfarmerwnd.sz.x / 2, 100));
 
         livestockwnd = new LivestockManager();
         livestockwnd.hide();

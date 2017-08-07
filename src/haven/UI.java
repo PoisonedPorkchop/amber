@@ -334,6 +334,12 @@ public class UI {
     }
 
     public void wdgmsg(Widget sender, String msg, Object... args) {
+        System.out.println();
+        System.out.print("Wdgmsg intercept: Sender = '" + sender.toString() + "', Message = '" + msg + "', Arguments = '");
+        for (Object arg : args) {
+            System.out.print(arg + ",");
+        }
+        System.out.print("'");
         int id;
         synchronized (this) {
             if (msg.endsWith("-identical"))
@@ -347,6 +353,14 @@ public class UI {
     }
 
     public void uimsg(int id, String msg, Object... args) {
+        if(!msg.equals("glut")) {
+            System.out.println();
+            System.out.print("UImsg intercept: id = '" + id + "', Message = '" + msg + "', Arguments = '");
+            for (Object arg : args) {
+                System.out.print(arg + ",");
+            }
+            System.out.print("'");
+        }
         synchronized (this) {
             Widget wdg = widgets.get(id);
             if (wdg != null)

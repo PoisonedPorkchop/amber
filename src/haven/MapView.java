@@ -28,6 +28,7 @@ package haven;
 
 import haven.GLProgram.VarID;
 import haven.automation.*;
+import haven.bot.SilkFarmer;
 import haven.pathfinder.PFListener;
 import haven.pathfinder.Pathfinder;
 import haven.resutil.BPRadSprite;
@@ -80,6 +81,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     public Thread pfthread;
     public SteelRefueler steelrefueler;
     private Thread musselPicker;
+    private SilkFarmer silkFarmer;
     private final PartyHighlight partyHighlight;
     public static final Set<Long> markedGobs = new HashSet<>();
     public static final Material.Colors markedFx = new Material.Colors(new Color(21, 127, 208, 255));
@@ -2352,6 +2354,8 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             steelrefueler.terminate();
         if (musselPicker != null)
             musselPicker.interrupt();
+        if (silkFarmer != null)
+            silkFarmer.interrupt();
     }
 
     public void removeCustomSprites(int id) {
@@ -2413,5 +2417,23 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     public void startMusselsPicker(Gob gob) {
         musselPicker = new Thread(new MusselPicker(gameui(), gob), "MusselPicker");
         musselPicker.start();
+    }
+
+    public void startSilkFarmer() {
+        silkFarmer = new SilkFarmer();
+        silkFarmer.interrupt();
+    }
+
+    public void stopSilkFarmer()
+    {
+        if(silkFarmer != null)
+            silkFarmer.interrupt();
+    }
+
+    public boolean isSilkFarmerRunning()
+    {
+        if(silkFarmer == null)
+            return false;
+        return true;
     }
 }

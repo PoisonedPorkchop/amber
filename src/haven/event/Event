@@ -1,8 +1,0 @@
-package haven.event;
-
-public class Event {
-
-    public Event() {
-    }
-
-}

@@ -1,5 +1,0 @@
-package haven.event;
-
-public interface CursorListener extends EventListener {
-    void onCursorChange(CursorEvent e);
-}

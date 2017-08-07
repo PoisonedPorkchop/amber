@@ -26,6 +26,7 @@
 
 package haven;
 
+import haven.bot.DreamBot;
 import haven.music.SongPlayerThread;
 
 import java.awt.*;

@@ -1,5 +1,0 @@
-package haven.event;
-
-public interface PackListener extends EventListener {
-    void onPackExecute(PackEvent packEvent);
-}
