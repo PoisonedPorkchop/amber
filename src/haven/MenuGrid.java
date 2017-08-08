@@ -28,13 +28,11 @@ package haven;
 
 import haven.Resource.AButton;
 import haven.automation.*;
-import haven.music.SongPlayerThread;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.font.TextAttribute;
 import java.awt.image.BufferedImage;
-import java.lang.reflect.Field;
 import java.util.*;
 import java.util.List;
 
@@ -42,7 +40,7 @@ public class MenuGrid extends Widget {
     public final static Coord bgsz = Inventory.invsq.sz().add(-1, -1);
     public final static Pagina next = new Pagina(null, Resource.local().loadwait("gfx/hud/sc-next").indir());
     public final static Pagina bk = new Pagina(null, Resource.local().loadwait("gfx/hud/sc-back").indir());
-    public final static RichText.Foundry ttfnd = new RichText.Foundry(TextAttribute.FAMILY, "SansSerif", TextAttribute.SIZE, Config.fontsizeglobal);
+    public final static RichText.Foundry ttfnd = new RichText.Foundry(TextAttribute.FAMILY, "SansSerif", TextAttribute.SIZE, Config.fontsizechat);
     public final Set<Pagina> paginae = new HashSet<Pagina>();
     private static Coord gsz = new Coord(4, 4);
     private Pagina cur, pressed, dragging, layout[][] = new Pagina[gsz.x][gsz.y];
@@ -451,20 +449,19 @@ public class MenuGrid extends Widget {
         }
         else if(ad[1].equals("debug"))
         {
-            /**OCache oc = HavenPanel.lui.sess.glob.oc;
-            List<Gob> cupboards = new ArrayList<Gob>();
+            /**MCache oc = HavenPanel.lui.sess.glob.map;
             synchronized (oc) {
                 for (Gob gob : oc) {
                     try {
                         Resource res = gob.getres();
-                        System.out.println(res.name);
+                        System.out.println(res.name + ": " + gob.id);
                     } catch (Exception e) {
                     }
                 }
             }*/
             //HavenPanel.lui.wdgmsg(Glob.songPlayerThread.widg, );
             //System.out.println("Class: " + Glob.songPlayerThread.widg.getClass());
-            for(Field field : Glob.songPlayerThread.widg.getClass().getDeclaredFields())
+            /**for(Field field : Glob.songPlayerThread.widg.getClass().getDeclaredFields())
             {
                 System.out.println("Field: " + field.getName());
             }
@@ -481,6 +478,7 @@ public class MenuGrid extends Widget {
             double n = System.currentTimeMillis() / 1000.0 + latcomp;
             Glob.songPlayerThread.widg.wdgmsg("play", new Object[] { 12, (float)((n - start)-1) });
             Glob.songPlayerThread.widg.wdgmsg("play", new Object[] { 16, (float)(n - start) });
+             */
         }
     }
 
