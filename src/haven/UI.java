@@ -27,6 +27,7 @@
 package haven;
 
 import haven.livestock.LivestockManager;
+import haven.music.SongPlayerThread;
 
 import java.util.*;
 import java.awt.event.KeyEvent;
@@ -145,6 +146,7 @@ public class UI {
     }
 
     public void newwidget(int id, String type, int parent, Object[] pargs, Object... cargs) throws InterruptedException {
+
         if (Config.quickbelt && type.equals("wnd") && cargs[1].equals("Belt")) {
             type = "wnd-belt";
             pargs[1] = Utils.getprefc("Belt_c", new Coord(550, HavenPanel.h - 160));
@@ -169,6 +171,10 @@ public class UI {
             }
 
             bind(wdg, id);
+
+            if(type.contains("ui/music")) {
+                Glob.songPlayerThread.widg = wdg;
+            }
 
             // drop everything except water containers if in area mining mode
             if (Config.dropore && gui != null && gui.map != null && gui.map.areamine != null && wdg instanceof GItem) {
@@ -275,6 +281,8 @@ public class UI {
     }
 
     public Grab grabkeys(Widget wdg) {
+        if(wdg.toString().contains("haven.res.ui.music.MusicWnd") && !SongPlayerThread.grab)
+            return null;
         if (wdg == null) throw (new NullPointerException());
         Grab g = new Grab(wdg) {
             public void remove() {
@@ -296,6 +304,12 @@ public class UI {
     }
 
     public void destroy(Widget wdg) {
+
+        if(wdg.toString().contains("haven.res.ui.music.MusicWnd"))
+        {
+            Glob.songPlayerThread.widg = null;
+        }
+
         for (Iterator<Grab> i = mousegrab.iterator(); i.hasNext(); ) {
             Grab g = i.next();
             if (g.wdg.hasparent(wdg))
@@ -320,6 +334,12 @@ public class UI {
     }
 
     public void wdgmsg(Widget sender, String msg, Object... args) {
+        System.out.println();
+        System.out.print("Wdgmsg intercept: Sender = '" + sender.toString() + "', Message = '" + msg + "', Arguments = '");
+        for (Object arg : args) {
+            System.out.print(arg + ",");
+        }
+        System.out.print("'");
         int id;
         synchronized (this) {
             if (msg.endsWith("-identical"))
@@ -333,6 +353,14 @@ public class UI {
     }
 
     public void uimsg(int id, String msg, Object... args) {
+        if(!msg.equals("glut")) {
+            System.out.println();
+            System.out.print("UImsg intercept: id = '" + id + "', Message = '" + msg + "', Arguments = '");
+            for (Object arg : args) {
+                System.out.print(arg + ",");
+            }
+            System.out.print("'");
+        }
         synchronized (this) {
             Widget wdg = widgets.get(id);
             if (wdg != null)

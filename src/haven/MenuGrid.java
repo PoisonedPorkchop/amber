@@ -28,11 +28,13 @@ package haven;
 
 import haven.Resource.AButton;
 import haven.automation.*;
+import haven.music.SongPlayerThread;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.font.TextAttribute;
 import java.awt.image.BufferedImage;
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.List;
 
@@ -40,7 +42,7 @@ public class MenuGrid extends Widget {
     public final static Coord bgsz = Inventory.invsq.sz().add(-1, -1);
     public final static Pagina next = new Pagina(null, Resource.local().loadwait("gfx/hud/sc-next").indir());
     public final static Pagina bk = new Pagina(null, Resource.local().loadwait("gfx/hud/sc-back").indir());
-    public final static RichText.Foundry ttfnd = new RichText.Foundry(TextAttribute.FAMILY, Text.cfg.font.get("sans"), TextAttribute.SIZE, Text.cfg.tooltipCap); //aa(true)
+    public final static RichText.Foundry ttfnd = new RichText.Foundry(TextAttribute.FAMILY, "SansSerif", TextAttribute.SIZE, Config.fontsizeglobal);
     public final Set<Pagina> paginae = new HashSet<Pagina>();
     private static Coord gsz = new Coord(4, 4);
     private Pagina cur, pressed, dragging, layout[][] = new Pagina[gsz.x][gsz.y];
@@ -214,7 +216,9 @@ public class MenuGrid extends Widget {
             p.add(paginafor(Resource.local().load("paginae/amber/timers")));
             p.add(paginafor(Resource.local().load("paginae/amber/livestock")));
             p.add(paginafor(Resource.local().load("paginae/amber/shoo")));
-            p.add(paginafor(Resource.local().load("paginae/amber/dream")));
+            p.add(paginafor(Resource.local().load("paginae/amber/music")));
+            p.add(paginafor(Resource.local().load("paginae/amber/silkfarmer")));
+            p.add(paginafor(Resource.local().load("paginae/amber/debug")));
         }
     }
 
@@ -429,8 +433,54 @@ public class MenuGrid extends Widget {
             gui.livestockwnd.raise();
         } else if (ad[1].equals("shoo")) {
             new Thread(new Shoo(gui), "Shoo").start();
-        } else if (ad[1].equals("dream")) {
-            new Thread(new DreamHarvester(gui), "DreamHarvester").start();
+        }
+        else if(ad[1].equals("music"))
+        {
+            gui.songplayerwnd.show(!gui.songplayerwnd.visible);
+            gui.songplayerwnd.raise();
+        }
+        else if(ad[1].equals("silkfarmer"))
+        {
+            gui.silkfarmerwnd.show(!gui.silkfarmerwnd.visible);
+            gui.silkfarmerwnd.raise();
+            /**MapView map = HavenPanel.lui.root.findchild(GameUI.class).map;
+            if(!map.isSilkFarmerRunning())
+                map.startSilkFarmer();
+            else
+                map.stopSilkFarmer();*/
+        }
+        else if(ad[1].equals("debug"))
+        {
+            /**OCache oc = HavenPanel.lui.sess.glob.oc;
+            List<Gob> cupboards = new ArrayList<Gob>();
+            synchronized (oc) {
+                for (Gob gob : oc) {
+                    try {
+                        Resource res = gob.getres();
+                        System.out.println(res.name);
+                    } catch (Exception e) {
+                    }
+                }
+            }*/
+            //HavenPanel.lui.wdgmsg(Glob.songPlayerThread.widg, );
+            //System.out.println("Class: " + Glob.songPlayerThread.widg.getClass());
+            for(Field field : Glob.songPlayerThread.widg.getClass().getDeclaredFields())
+            {
+                System.out.println("Field: " + field.getName());
+            }
+            double start = 0;
+            double latcomp = 0;
+            try {
+                start = (double) Glob.songPlayerThread.widg.getClass().getField("start").get(Glob.songPlayerThread.widg);
+                latcomp = (double) Glob.songPlayerThread.widg.getClass().getField("latcomp").get(Glob.songPlayerThread.widg);
+            } catch (NoSuchFieldException e) {
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+            double n = System.currentTimeMillis() / 1000.0 + latcomp;
+            Glob.songPlayerThread.widg.wdgmsg("play", new Object[] { 12, (float)((n - start)-1) });
+            Glob.songPlayerThread.widg.wdgmsg("play", new Object[] { 16, (float)(n - start) });
         }
     }
 

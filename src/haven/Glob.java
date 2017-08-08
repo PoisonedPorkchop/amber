@@ -26,6 +26,9 @@
 
 package haven;
 
+import haven.bot.DreamBot;
+import haven.music.SongPlayerThread;
+
 import java.awt.*;
 import java.util.*;
 
@@ -51,12 +54,16 @@ public class Glob {
     public double skyblend = 0.0;
     private Map<Indir<Resource>, Object> wmap = new HashMap<Indir<Resource>, Object>();
     public static haven.timers.TimersThread timersThread;
+    public static SongPlayerThread songPlayerThread;
     public String servertime;
     public Tex servertimetex;
 
     static {
         timersThread = new haven.timers.TimersThread();
         timersThread.start();
+
+        songPlayerThread = new SongPlayerThread();
+        songPlayerThread.start();
     }
 
     public Glob(Session sess) {

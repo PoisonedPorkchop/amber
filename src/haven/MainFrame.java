@@ -38,7 +38,7 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
     private final ThreadGroup g;
     public final Thread mt;
     DisplayMode fsmode = null, prefs = null;
-    private static final String TITLE = "Haven and Hearth (Amber v" + Config.version + ")";
+    private static final String TITLE = "Ezkutuko Village (Client v" + Config.version + ")";
 
     static {
         try {
@@ -335,6 +335,9 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
         }
         setupres();
         MainFrame f = new MainFrame(null);
+        //Gets the required game instance of maid... But where is this made or initialized or used???
+        Maid.getInstance();
+
         if (Utils.getprefb("fullscreen", false))
             f.setfs();
         f.mt.start();
