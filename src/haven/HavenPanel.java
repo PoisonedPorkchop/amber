@@ -27,19 +27,16 @@
 package haven;
 
 import com.jogamp.opengl.util.awt.Screenshot;
-import haven.music.SongPlayerThread;
 
-import java.awt.GraphicsConfiguration;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Toolkit;
-import java.awt.image.BufferedImage;
+import javax.media.opengl.*;
+import javax.media.opengl.awt.GLCanvas;
+import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import javax.media.opengl.*;
-import javax.media.opengl.awt.*;
+import java.util.Queue;
 
 public class HavenPanel extends GLCanvas implements Runnable, Console.Directory {
     UI ui;
@@ -90,7 +87,6 @@ public class HavenPanel extends GLCanvas implements Runnable, Console.Directory 
         if (Toolkit.getDefaultToolkit().getMaximumCursorColors() >= 256 || Config.hwcursor)
             cursmode = "awt";
         setCursor(Toolkit.getDefaultToolkit().createCustomCursor(TexI.mkbuf(new Coord(1, 1)), new java.awt.Point(), ""));
-        SongPlayerThread.comp = this;
     }
 
     public HavenPanel(int w, int h) {
