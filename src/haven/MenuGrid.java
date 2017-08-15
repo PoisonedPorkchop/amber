@@ -432,21 +432,6 @@ public class MenuGrid extends Widget {
         } else if (ad[1].equals("shoo")) {
             new Thread(new Shoo(gui), "Shoo").start();
         }
-        else if(ad[1].equals("music"))
-        {
-            gui.songplayerwnd.show(!gui.songplayerwnd.visible);
-            gui.songplayerwnd.raise();
-        }
-        else if(ad[1].equals("silkfarmer"))
-        {
-            gui.silkfarmerwnd.show(!gui.silkfarmerwnd.visible);
-            gui.silkfarmerwnd.raise();
-            /**MapView map = HavenPanel.lui.root.findchild(GameUI.class).map;
-            if(!map.isSilkFarmerRunning())
-                map.startSilkFarmer();
-            else
-                map.stopSilkFarmer();*/
-        }
         else if(ad[1].equals("debug"))
         {
             /**MCache oc = HavenPanel.lui.sess.glob.map;

@@ -28,9 +28,7 @@ package haven;
 
 import haven.automation.ErrorSysMsgCallback;
 import haven.automation.PickForageable;
-import haven.bot.SilkFarmerWnd;
 import haven.livestock.LivestockManager;
-import haven.music.SongPlayerWnd;
 import haven.resutil.FoodInfo;
 
 import java.awt.*;
@@ -79,8 +77,6 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     public MinimapWnd minimapWnd;
     public LocalMiniMap mmap;
     public haven.timers.TimersWnd timerswnd;
-    public SongPlayerWnd songplayerwnd;
-    public SilkFarmerWnd silkfarmerwnd;
     public QuickSlotsWdg quickslots;
     public StatusWdg statuswindow;
     public AlignPanel questpanel;
@@ -192,14 +188,6 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         timerswnd = new haven.timers.TimersWnd(this);
         timerswnd.hide();
         add(timerswnd, new Coord(HavenPanel.w / 2 - timerswnd.sz.x / 2, 100));
-
-        songplayerwnd = new SongPlayerWnd(this);
-        songplayerwnd.hide();
-        add(songplayerwnd, new Coord(HavenPanel.w / 2 - songplayerwnd.sz.x / 2, 100));
-
-        silkfarmerwnd = new SilkFarmerWnd(this);
-        silkfarmerwnd.hide();
-        add(silkfarmerwnd, new Coord(HavenPanel.w / 2 - silkfarmerwnd.sz.x / 2, 100));
 
         livestockwnd = new LivestockManager();
         livestockwnd.hide();
@@ -609,7 +597,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         Coord mwsz = Utils.getprefc("mmapwndsz", new Coord(290, 310));
         minimapWnd = new MinimapWnd(mwsz, map);
         add(minimapWnd, Utils.getprefc("mmapc", new Coord(10, 100)));
-        mmap = (LocalMiniMap)minimapWnd.mmap;
+        mmap = minimapWnd.mmap;
         return minimapWnd;
     }
 
@@ -1207,7 +1195,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 
                 public void draw(GOut g) {
                     super.draw(g);
-                    Color urg = chat.urgcols[chat.urgency];
+                    Color urg = ChatUI.urgcols[chat.urgency];
                     if (urg != null) {
                         GOut g2 = g.reclipl(new Coord(-2, -2), g.sz.add(4, 4));
                         g2.chcolor(urg.getRed(), urg.getGreen(), urg.getBlue(), 128);

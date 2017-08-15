@@ -26,13 +26,14 @@
 
 package haven;
 
-import haven.livestock.LivestockManager;
-import haven.music.SongPlayerThread;
+import haven.mod.ModAPI;
+import haven.mod.event.UIMessageEvent;
+import haven.mod.event.widget.*;
 
-import java.util.*;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
-import java.awt.event.InputEvent;
+import java.util.*;
 
 public class UI {
     public RootWidget root;
@@ -56,15 +57,15 @@ public class UI {
     }
 
     public interface Receiver {
-        public void rcvmsg(int widget, String msg, Object... args);
+        void rcvmsg(int widget, String msg, Object... args);
     }
 
     public interface Runner {
-        public Session run(UI ui) throws InterruptedException;
+        Session run(UI ui) throws InterruptedException;
     }
 
     public interface AfterDraw {
-        public void draw(GOut g);
+        void draw(GOut g);
     }
 
     private class WidgetConsole extends Console {
@@ -147,6 +148,13 @@ public class UI {
 
     public void newwidget(int id, String type, int parent, Object[] pargs, Object... cargs) throws InterruptedException {
 
+        //WidgetPreCreateEvent
+        WidgetPreCreateEvent widgetPreCreateEvent = new WidgetPreCreateEvent(id, type, parent, pargs, cargs);
+        ModAPI.callEvent(widgetPreCreateEvent);
+        if(widgetPreCreateEvent.getCancelled())
+            return;
+        //WidgetPreCreateEvent
+
         if (Config.quickbelt && type.equals("wnd") && cargs[1].equals("Belt")) {
             type = "wnd-belt";
             pargs[1] = Utils.getprefc("Belt_c", new Coord(550, HavenPanel.h - 160));
@@ -172,9 +180,12 @@ public class UI {
 
             bind(wdg, id);
 
-            if(type.contains("ui/music")) {
-                Glob.songPlayerThread.widg = wdg;
-            }
+            //WidgetPostCreateEvent
+            WidgetPostCreateEvent widgetPostCreateEvent = new WidgetPostCreateEvent(id, type, parent, pargs, cargs);
+            ModAPI.callEvent(widgetPostCreateEvent);
+            if(widgetPostCreateEvent.getCancelled())
+                return;
+            //WidgetPostCreateEvent
 
             // drop everything except water containers if in area mining mode
             if (Config.dropore && gui != null && gui.map != null && gui.map.areamine != null && wdg instanceof GItem) {
@@ -281,8 +292,13 @@ public class UI {
     }
 
     public Grab grabkeys(Widget wdg) {
-        if(wdg.toString().contains("haven.res.ui.music.MusicWnd") && !SongPlayerThread.grab)
+        //WidgetGrabKeysEvent
+        WidgetGrabKeysEvent widgetGrabKeysEvent = new WidgetGrabKeysEvent(wdg);
+        ModAPI.callEvent(widgetGrabKeysEvent);
+        if(widgetGrabKeysEvent.getCancelled())
             return null;
+        //WidgetGrabKeysEvent
+
         if (wdg == null) throw (new NullPointerException());
         Grab g = new Grab(wdg) {
             public void remove() {
@@ -304,11 +320,12 @@ public class UI {
     }
 
     public void destroy(Widget wdg) {
-
-        if(wdg.toString().contains("haven.res.ui.music.MusicWnd"))
-        {
-            Glob.songPlayerThread.widg = null;
-        }
+        //WidgetDestroyEvent
+        WidgetDestroyEvent widgetDestroyEvent = new WidgetDestroyEvent(wdg);
+        ModAPI.callEvent(widgetDestroyEvent);
+        if(widgetDestroyEvent.getCancelled())
+            return;
+        //WidgetDestroyEvent
 
         for (Iterator<Grab> i = mousegrab.iterator(); i.hasNext(); ) {
             Grab g = i.next();
@@ -334,12 +351,13 @@ public class UI {
     }
 
     public void wdgmsg(Widget sender, String msg, Object... args) {
-        System.out.println();
-        System.out.print("Wdgmsg intercept: Sender = '" + sender.toString() + "', Message = '" + msg + "', Arguments = '");
-        for (Object arg : args) {
-            System.out.print(arg + ",");
-        }
-        System.out.print("'");
+        //WidgetMessageEventHandling
+        WidgetMessageEvent widgetMessageEvent = new WidgetMessageEvent(sender, msg, args);
+        ModAPI.callEvent(widgetMessageEvent);
+        if(widgetMessageEvent.getCancelled())
+            return;
+        //WidgetMessageEventHandling
+
         int id;
         synchronized (this) {
             if (msg.endsWith("-identical"))
@@ -353,14 +371,13 @@ public class UI {
     }
 
     public void uimsg(int id, String msg, Object... args) {
-        if(!msg.equals("glut")) {
-            System.out.println();
-            System.out.print("UImsg intercept: id = '" + id + "', Message = '" + msg + "', Arguments = '");
-            for (Object arg : args) {
-                System.out.print(arg + ",");
-            }
-            System.out.print("'");
-        }
+        //UIMessageEventHandling
+        UIMessageEvent uiMessageEvent = new UIMessageEvent(id,msg,args);
+        ModAPI.callEvent(uiMessageEvent);
+        if(uiMessageEvent.getCancelled())
+            return;
+        //UIMessageEventHandling
+
         synchronized (this) {
             Widget wdg = widgets.get(id);
             if (wdg != null)
