@@ -26,11 +26,21 @@
 
 package haven;
 
+import haven.mod.HavenMod;
+import haven.mod.ModAPI;
+import haven.mod.event.UIMessageEvent;
+import haven.mod.event.widget.*;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.*;
-import java.lang.reflect.*;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.zip.ZipEntry;
 
 
 public class MainFrame extends java.awt.Frame implements Runnable, Console.Directory {
@@ -335,6 +345,10 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
         }
         setupres();
         MainFrame f = new MainFrame(null);
+
+        loadEvents();
+        loadMods();
+
         //Gets the required game instance of maid... But where is this made or initialized or used???
         Maid.getInstance();
 
@@ -393,6 +407,110 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
             }
         } catch (IOException e) {
             throw (new RuntimeException(e));
+        }
+    }
+
+    private static void loadEvents() {
+        ModAPI.registerEvent(WidgetMessageEvent.class);
+        ModAPI.registerEvent(UIMessageEvent.class);
+        ModAPI.registerEvent(WidgetPreCreateEvent.class);
+        ModAPI.registerEvent(WidgetPostCreateEvent.class);
+        ModAPI.registerEvent(WidgetDestroyEvent.class);
+        ModAPI.registerEvent(WidgetCreateEvent.class);
+    }
+
+    private static void loadMods() {
+        try {
+            File originator = new File(MainFrame.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+            File parent = originator.getParentFile();
+            File mods = new File(parent, "mods");
+            mods.mkdirs();
+            for(File file : mods.listFiles())
+                if(file.isFile())
+                    if(file.getName().contains(".")) {
+                        String extension = file.getName().substring(file.getName().lastIndexOf(".") + 1);
+                        if(extension.contains("jar"))
+                        {
+                            JarFile jar = new JarFile(file);
+                            ZipEntry infoFile = jar.getEntry("info.txt");
+                            if(infoFile != null)
+                            {
+                                Enumeration<? extends JarEntry> entries = jar.entries();
+                                String[] lines;
+                                InputStream infoFileStream = jar.getInputStream(infoFile);
+                                Scanner s = new Scanner(infoFileStream).useDelimiter("\\A");
+                                String result = s.hasNext() ? s.next() : "";
+                                lines = result.split("\n");
+                                String mainclass = null;
+
+                                for(String string : lines)
+                                {
+                                    if(string.startsWith("main="))
+                                    {
+                                        mainclass = string.split("=")[1];
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        continue;
+                                    }
+                                }
+
+                                if(mainclass != null)
+                                {
+                                    ArrayList<JarEntry> entryList = new ArrayList<>();
+                                    while(entries.hasMoreElements())
+                                    {
+                                        entryList.add(entries.nextElement());
+                                    }
+                                    JarEntry main = null;
+                                    for(JarEntry entry : entryList)
+                                    {
+                                        if(mainclass.equals(entry.getName()))
+                                        {
+                                            main = entry;
+                                            break;
+                                        }
+                                    }
+                                    if(main != null)
+                                    {
+                                        ClassLoader classLoader = URLClassLoader.newInstance(
+                                                new URL[] {new URL("jar:" + file.toURI().toURL() + "!/")},
+                                                MainFrame.class.getClassLoader()
+                                        );
+
+                                        for(JarEntry entry : entryList) {
+                                            String entryExtension = file.getName().substring(file.getName().lastIndexOf(".") + 1);
+                                            if (entryExtension.contains("class"))
+                                            {
+                                                Class.forName(entry.getName().replaceAll("/", "."), true, classLoader);
+                                            }
+                                        }
+                                        Class<? extends HavenMod> modClass = (Class<? extends HavenMod>) Class.forName(mainclass.replaceAll("/", ".").replaceAll(".class",""), false, classLoader);
+                                        Class.forName(mainclass.replaceAll(".class","").replaceAll("/", "."), false, classLoader);
+                                        HavenMod havenMod = modClass.newInstance();
+                                        havenMod.run();
+                                        ModAPI.registerMod(havenMod,classLoader);
+                                    }
+                                    else
+                                    {
+                                        System.err.println("Main class could not be resolved.");
+                                        System.err.println("Expected: '" + mainclass + "'");
+                                    }
+                                }
+                            }
+                        }
+                    }
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
         }
     }
 }
