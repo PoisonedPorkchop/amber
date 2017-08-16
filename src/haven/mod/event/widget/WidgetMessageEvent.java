@@ -2,7 +2,7 @@ package haven.mod.event.widget;
 
 import haven.Widget;
 import haven.mod.event.Event;
-import haven.mod.event.RunState;
+import haven.mod.RunState;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -32,7 +32,8 @@ import haven.mod.event.UIMessageEvent;
 import haven.mod.event.widget.*;
 
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -410,9 +411,12 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
         }
     }
 
+    /**
+     * Loads all
+     */
     private static void loadEvents() {
-        ModAPI.registerEvent(WidgetMessageEvent.class);
         ModAPI.registerEvent(UIMessageEvent.class);
+        ModAPI.registerEvent(WidgetMessageEvent.class);
         ModAPI.registerEvent(WidgetPreCreateEvent.class);
         ModAPI.registerEvent(WidgetPostCreateEvent.class);
         ModAPI.registerEvent(WidgetDestroyEvent.class);
@@ -489,7 +493,7 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
                                         Class<? extends HavenMod> modClass = (Class<? extends HavenMod>) Class.forName(mainclass.replaceAll("/", ".").replaceAll(".class",""), false, classLoader);
                                         Class.forName(mainclass.replaceAll(".class","").replaceAll("/", "."), false, classLoader);
                                         HavenMod havenMod = modClass.newInstance();
-                                        havenMod.run();
+                                        havenMod.start();
                                         ModAPI.registerMod(havenMod,classLoader);
                                     }
                                     else

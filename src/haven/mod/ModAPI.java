@@ -1,8 +1,8 @@
 package haven.mod;
 
+import haven.*;
 import haven.mod.event.Event;
 import haven.mod.event.EventHandler;
-import haven.mod.event.RunState;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -12,6 +12,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import static haven.OCache.posres;
+
+/**
+ * Framework and API for creating and using mods.
+ * @author PoisonedPorkchop
+ */
 public class ModAPI {
 
     protected static HashMap<Class<? extends Event>,ArrayList<Method>> eventhandlers;
@@ -24,17 +30,33 @@ public class ModAPI {
         mods = new HashMap<>();
     }
 
+    /**
+     * Gets current RunState.
+     * //TODO Currently unoperational.
+     * @return Current RunState
+     */
     public static RunState getRunState()
     {
         return runState;
     }
 
+    /**
+     * Sets current RunState. More on this in the future.
+     * //TODO Add support for RunStates, so that mods can know when they are in Login Screen, In Game, etc. so as to reduce the amount of error handling they must do.
+     * //TODO This will be very important, as trying to access Game Objects in the Login Screen will error...
+     * @param state RunState to set the system to.
+     */
     public static void setRunState(RunState state)
     {
         if(state != null)
             runState = state;
     }
 
+    /**
+     * Register a new Event. Probably should not be called unless you are implementing your own API, and in such a case
+     * you can add your own event so that listeners can be created.
+     * @param clazz
+     */
     public static void registerEvent(Class<? extends Event> clazz)
     {
         if(!eventhandlers.containsKey(clazz))
@@ -44,6 +66,10 @@ public class ModAPI {
         }
     }
 
+    /**
+     * Registers all listeners (Event Handlers) in a given class.
+     * @param clazz Class to find and register Event Handler methods in.
+     */
     public static void registerListeners(Class clazz)
     {
         for(Method method : clazz.getDeclaredMethods())
@@ -74,6 +100,13 @@ public class ModAPI {
         }
     }
 
+    /**
+     * Call an event, activating all current event handlers.
+     * Probably should not be called, as the events are primarily intended to be called via game code.
+     * However if you want other mods to react as if there were a real event happening, or you have registered a custom
+     * event, then this function could be useful
+     * @param event
+     */
     public static void callEvent(Event event)
     {
         if(eventhandlers.containsKey(event.getClass()))
@@ -95,12 +128,24 @@ public class ModAPI {
         }
     }
 
+    /**
+     * Probably should not be called unless you know what you are doing.
+     * Mods are generally supposed to be loaded at the beginning of the game, and are loaded through the mods folder
+     * in the game's directory.
+     * However this is left here to provide options for dynamic mod loading if one should wish.
+     * @param mod Mod to register.
+     * @param loader ClassLoader used to load mod.
+     */
     public static void registerMod(HavenMod mod, ClassLoader loader)
     {
         if(!mods.containsKey(mod))
            mods.put(mod,loader);
     }
 
+    /**
+     * Gets all currently loaded mods.
+     * @return All loaded mods.
+     */
     public static ArrayList<HavenMod> getMods()
     {
         ArrayList<HavenMod> temp = new ArrayList<>();
@@ -108,4 +153,79 @@ public class ModAPI {
             temp.add(entry.getKey());
         return temp;
     }
+
+    /**
+     * Class that contains convenience methods for carrying out autonomous actions in Haven.
+     */
+    public static class ModAction {
+
+        /**
+         * Move to a location in the world.
+         * @param location Location to move to.
+         */
+        public static void moveTo(Coord location)
+        {
+            HavenPanel.lui.wdgmsg(getGUI().map,"click", Coord.z, location, 1, 0);
+        }
+
+        /**
+         * Gets all map objects. Important for finding targets.
+         * @return List of all current Game Objects. Be careful not to reference these when they have unloaded.
+         */
+        public static ArrayList<Gob> getMapObjects()
+        {
+            ArrayList<Gob> gobs = new ArrayList<>();
+            for(Gob gob : HavenPanel.lui.root.findchild(GameUI.class).map.glob.oc)
+                gobs.add(gob);
+            return gobs;
+        }
+
+        /**
+         * Right click an object. Can be used to interact with objects such as cupboards, dropped items, plants etc.
+         * @param gob Game object to right click.
+         */
+        public static void rightClick(Gob gob)
+        {
+            getGUI().map.wdgmsg("click", gob.sc, getLocationOfGob(gob), 3, 0, 0, (int) gob.id, getLocationOfGob(gob), 0, -1);
+        }
+
+        /**
+         * Right click a location in the world. Primarily for placing carried objects.
+         * @param location Location to be right clicked.
+         */
+        public static void rightClick(Coord location)
+        {
+            getGUI().map.wdgmsg("click", Coord.z, location, 3, 0);
+        }
+
+        /**
+         * Picks up an object.
+         * @param gob Game Object to be picked up.
+         */
+        public static void pickUpObject(Gob gob)
+        {
+            getGUI().menu.wdgmsg("act", "carry");
+            getGUI().map.wdgmsg("click", Coord.z, getLocationOfGob(gob), 1, 0, 0, (int) gob.id, getLocationOfGob(gob), 0, -1);
+        }
+
+        /**
+         * Gets the current world location of a Game Object.
+         * @param gob Game Object to get the location of.
+         * @return Coord that is the location of the game object in world terms.
+         */
+        public static Coord getLocationOfGob(Gob gob)
+        {
+            return gob.rc.floor(posres);
+        }
+
+        /**
+         * Gets the gui. Be careful, as it might not be active.
+         * @return Current GameUI
+         */
+        public static GameUI getGUI()
+        {
+            return HavenPanel.lui.root.findchild(GameUI.class);
+        }
+    }
+
 }

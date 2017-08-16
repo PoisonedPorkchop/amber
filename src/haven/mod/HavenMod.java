@@ -1,6 +1,10 @@
 package haven.mod;
 
+/**
+ * Haven Mod
+ * @author PoisonedPorkchop
+ */
 public interface HavenMod {
-    void run();
+    void start();
     void exit();
 }

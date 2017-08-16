@@ -1,4 +1,4 @@
-package haven.mod.event;
+package haven.mod;
 
 public enum RunState {
     NONE,
