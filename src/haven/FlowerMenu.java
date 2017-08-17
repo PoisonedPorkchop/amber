@@ -26,7 +26,13 @@
 
 package haven;
 
-import java.awt.Color;
+import haven.mod.ModAPI;
+import haven.mod.event.flower.FlowerMenuCancelEvent;
+import haven.mod.event.flower.FlowerMenuChooseEvent;
+import haven.mod.event.flower.FlowerMenuChosenEvent;
+import haven.mod.event.flower.FlowerMenuCreateEvent;
+
+import java.awt.*;
 
 import static java.lang.Math.PI;
 
@@ -184,6 +190,11 @@ public class FlowerMenu extends Widget {
             add(opts[i] = new Petal(options[i]));
             opts[i].num = i;
         }
+
+        //FlowerMenuCreateEvent
+        FlowerMenuCreateEvent event = new FlowerMenuCreateEvent(this, options);
+        ModAPI.callEvent(event);
+        //FlowerMenuCreateEvent
     }
 
     protected void added() {
@@ -199,7 +210,7 @@ public class FlowerMenu extends Widget {
         if (!anims.isEmpty())
             return (true);
         if (!super.mousedown(c, button))
-            choose(null);
+            choose((Petal) null);
         return (true);
     }
 
@@ -208,10 +219,20 @@ public class FlowerMenu extends Widget {
             new Cancel();
             mg.remove();
             kg.remove();
+
+            //FlowerMenuCancelEvent
+            FlowerMenuCancelEvent event = new FlowerMenuCancelEvent(this);
+            ModAPI.callEvent(event);
+            //FlowerMenuCancelEvent
         } else if (msg == "act") {
             new Chosen(opts[(Integer) args[0]]);
             mg.remove();
             kg.remove();
+
+            //FlowerMenuChosenEvent
+            FlowerMenuChosenEvent event = new FlowerMenuChosenEvent(this, opts[(Integer) args[0]]);
+            ModAPI.callEvent(event);
+            //FlowerMenuChosenEvent
         }
     }
 
@@ -235,7 +256,7 @@ public class FlowerMenu extends Widget {
             }
             return (true);
         } else if (key == 27) {
-            choose(null);
+            choose((Petal) null);
             kg.remove();
             return (true);
         }
@@ -243,6 +264,14 @@ public class FlowerMenu extends Widget {
     }
 
     public void choose(Petal option) {
+
+        //FlowerMenuChooseEvent
+        FlowerMenuChooseEvent event = new FlowerMenuChooseEvent(option);
+        ModAPI.callEvent(event);
+        if(event.getCancelled())
+            return;
+        //FlowerMenuChooseEvent
+
         if (option == null) {
             wdgmsg("cl", -1);
             lastSel = null;
@@ -251,6 +280,51 @@ public class FlowerMenu extends Widget {
             lastSel = option.name;
             MapView.pllastcc = null;
         }
+    }
+
+    /**
+     * Choose option by index.
+     * @param index Index of option. Remember, indexes start at 0.
+     * @return Whether the chosen option exists or not.
+     */
+    public boolean choose(int index)
+    {
+        if((opts.length - 1) >= index && opts.length > 0) {
+            choose(opts[index]);
+            return true;
+        }
+        else
+            return false;
+    }
+
+    /**
+     * Choose an option by name.
+     * @param option Name of the option to choose.
+     * @return Whether the chosen option exists or not.
+     */
+    public boolean choose(String option)
+    {
+        for(Petal petal : opts)
+            if(petal.name.equals(option)) {
+                choose(petal);
+                return true;
+            }
+        return false;
+    }
+
+    /**
+     * Choose an option, whose name contains the input.
+     * @param option Name, that is part of the desired option.
+     * @return Whether the chosen option exists or not.
+     */
+    public boolean chooseContains(String option)
+    {
+        for(Petal petal : opts)
+            if(petal.name.contains(option)) {
+                choose(petal);
+                return true;
+            }
+        return false;
     }
 
     public static void setNextSelection(String name) {

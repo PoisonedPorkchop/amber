@@ -34,19 +34,17 @@ public abstract class WidgetCreateEvent extends Event {
         this.parent = parent;
     }
 
-    public Object[] getPargs() {
+    public Object[] getParentArgs() {
         return pargs;
     }
 
-    public void setPargs(Object[] pargs) {
+    public void setParentArgs(Object[] pargs) {
         this.pargs = pargs;
     }
 
-    public Object[] getCargs() {
-        return cargs;
-    }
+    public Object[] getChildArgs() { return cargs; }
 
-    public void setCargs(Object[] cargs) {
+    public void setChildArgs(Object[] cargs) {
         this.cargs = cargs;
     }
 }

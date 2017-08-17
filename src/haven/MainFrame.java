@@ -28,6 +28,7 @@ package haven;
 
 import haven.mod.HavenMod;
 import haven.mod.ModAPI;
+import haven.mod.event.CustomMenuButtonPressEvent;
 import haven.mod.event.UIMessageEvent;
 import haven.mod.event.widget.*;
 

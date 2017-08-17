@@ -1,4 +1,4 @@
-package haven.mod.event.widget;
+package haven.mod.event;
 
 import haven.mod.event.Event;
 

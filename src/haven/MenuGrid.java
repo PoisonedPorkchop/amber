@@ -29,7 +29,7 @@ package haven;
 import haven.Resource.AButton;
 import haven.automation.*;
 import haven.mod.ModAPI;
-import haven.mod.event.widget.CustomMenuButtonPressEvent;
+import haven.mod.event.CustomMenuButtonPressEvent;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
