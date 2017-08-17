@@ -35,4 +35,12 @@ public class FlowerMenuCreateEvent extends Event{
     {
         return false;
     }
+
+    public FlowerMenu getMenu() {
+        return menu;
+    }
+
+    public void setMenu(FlowerMenu menu) {
+        this.menu = menu;
+    }
 }
