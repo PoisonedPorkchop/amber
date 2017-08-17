@@ -155,6 +155,33 @@ public class ModAPI {
     }
 
     /**
+     * Create a new widget, recommended to start as a frame.
+     * @param widget Widget to add.
+     * @param location Location, on screen, to add the widget.
+     */
+    public static void registerCustomWidget(Widget widget, Coord location)
+    {
+        addChildWidget(HavenPanel.lui.root, widget, location);
+    }
+
+    /**
+     * Add a widget as a child to an existing widget.
+     * @param parent Already registered parent widget.
+     * @param child Widget to add.
+     * @param location Location, on screen, to add the widget.
+     */
+    public static void addChildWidget(Widget parent, Widget child, Coord location)
+    {
+        synchronized (HavenPanel.lui) {
+            parent.add(child, location);
+            int id = 10000;
+            while (HavenPanel.lui.widgets.containsKey(id))
+                id++;
+            HavenPanel.lui.bind(child, id);
+        }
+    }
+
+    /**
      * Class that contains convenience methods for carrying out autonomous actions in Haven.
      */
     public static class ModAction {

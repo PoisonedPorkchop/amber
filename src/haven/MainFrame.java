@@ -454,6 +454,7 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
 
                                 for(String string : lines)
                                 {
+                                    string = string.replaceAll("\\r|\\n", "");
                                     if(string.startsWith("main="))
                                         mainclass = string.split("=")[1];
                                     else if(string.startsWith("name="))
@@ -497,12 +498,16 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
                                         havenMod.setModName(name);
                                         havenMod.start();
                                         ModAPI.registerMod(havenMod,classLoader);
+                                        System.out.println("Loaded mod: " + name);
                                     }
                                     else
                                     {
-                                        System.err.println("Main class could not be resolved.");
-                                        System.err.println("Expected: '" + mainclass + "'");
+                                        System.out.println(("Expected: '" + mainclass + "'"));
                                     }
+                                }
+                                else
+                                {
+                                    System.out.println("Information could not be resolved from info.txt");
                                 }
                             }
                         }
