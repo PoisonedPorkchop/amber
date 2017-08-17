@@ -77,26 +77,19 @@ public class ModAPI {
             boolean eventhandlerpresent = false;
 
             for (Annotation annotation : method.getDeclaredAnnotations())
-            {
                 if(annotation.annotationType().equals(EventHandler.class))
-                {
                     eventhandlerpresent = true;
-                }
-            }
+
             if(eventhandlerpresent && method.getParameterCount() == 1 && method.getReturnType().equals(Void.TYPE) && Modifier.isStatic(method.getModifiers()))
-                for(Class clazz2 : method.getParameterTypes()) {
-                    if (Event.class.isAssignableFrom(clazz2)) {
-                        if (eventhandlers.containsKey(clazz2)) {
-                            if (!eventhandlers.get(clazz2).contains(method)) {
+                for(Class clazz2 : method.getParameterTypes())
+                    if (Event.class.isAssignableFrom(clazz2))
+                        if (eventhandlers.containsKey(clazz2))
+                            if (!eventhandlers.get(clazz2).contains(method))
                                 eventhandlers.get(clazz2).add(method);
-                            } else {
+                            else
                                 System.err.println("EventHandler already registered!");
-                            }
-                        } else {
+                        else
                             System.err.println("EventHandler registered to unregistered Event!");
-                        }
-                    }
-                }
         }
     }
 
@@ -205,6 +198,15 @@ public class ModAPI {
             for(Gob gob : HavenPanel.lui.root.findchild(GameUI.class).map.glob.oc)
                 gobs.add(gob);
             return gobs;
+        }
+
+        /**
+         * Get the current player.
+         * @return The player's Game Object.
+         */
+        public static Gob getPlayer()
+        {
+            return getGUI().map.player();
         }
 
         /**
