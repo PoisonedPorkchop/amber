@@ -30,6 +30,10 @@ import haven.mod.HavenMod;
 import haven.mod.ModAPI;
 import haven.mod.event.CustomMenuButtonPressEvent;
 import haven.mod.event.UIMessageEvent;
+import haven.mod.event.flower.FlowerMenuCancelEvent;
+import haven.mod.event.flower.FlowerMenuChooseEvent;
+import haven.mod.event.flower.FlowerMenuChosenEvent;
+import haven.mod.event.flower.FlowerMenuCreateEvent;
 import haven.mod.event.widget.*;
 
 import java.awt.*;
@@ -423,6 +427,10 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
         ModAPI.registerEvent(WidgetDestroyEvent.class);
         ModAPI.registerEvent(WidgetGrabKeysEvent.class);
         ModAPI.registerEvent(CustomMenuButtonPressEvent.class);
+        ModAPI.registerEvent(FlowerMenuCancelEvent.class);
+        ModAPI.registerEvent(FlowerMenuChooseEvent.class);
+        ModAPI.registerEvent(FlowerMenuChosenEvent.class);
+        ModAPI.registerEvent(FlowerMenuCreateEvent.class);
     }
 
     /**
