@@ -43,6 +43,7 @@ public class FlowerMenu extends Widget {
     public static final Tex pbg = Window.bg;
     public static final int ph = 30;
     public Petal[] opts;
+    private FlowerMenu self;
     private UI.Grab mg, kg;
     private static String nextAutoSel;
     private static long nextAutoSelTimeout;
@@ -105,8 +106,37 @@ public class FlowerMenu extends Widget {
     }
 
     public class Opening extends NormAnim {
+
+        private FlowerMenu menu;
+
+        private double a = 0.0;
+        private final double s = 1.0 / 0.0;
+
         Opening() {
             super(0);
+        }
+
+        @Override
+        public boolean tick(double dt)
+        {
+            a += dt;
+            double na = a * s;
+            if (na >= 1.0) {
+                ntick(1.0);
+
+                //FlowerMenuCreateEvent
+                String[] options = new String[opts.length];
+                for(int x = 0; x < opts.length; x++)
+                    options[x] = opts[x].name;
+                FlowerMenuCreateEvent event = new FlowerMenuCreateEvent(self, options);
+                ModAPI.callEvent(event);
+                //FlowerMenuCreateEvent
+
+                return (true);
+            } else {
+                ntick(na);
+                return (false);
+            }
         }
 
         public void ntick(double s) {
@@ -185,16 +215,12 @@ public class FlowerMenu extends Widget {
 
     public FlowerMenu(String... options) {
         super(Coord.z);
+        this.self = this;
         opts = new Petal[options.length];
         for (int i = 0; i < options.length; i++) {
             add(opts[i] = new Petal(options[i]));
             opts[i].num = i;
         }
-
-        //FlowerMenuCreateEvent
-        FlowerMenuCreateEvent event = new FlowerMenuCreateEvent(this, options);
-        ModAPI.callEvent(event);
-        //FlowerMenuCreateEvent
     }
 
     protected void added() {
@@ -203,6 +229,7 @@ public class FlowerMenu extends Widget {
         mg = ui.grabmouse(this);
         kg = ui.grabkeys(this);
         organize(opts);
+
         new Opening();
     }
 
