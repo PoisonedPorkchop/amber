@@ -29,6 +29,7 @@ package haven;
 import haven.mod.HavenMod;
 import haven.mod.ModAPI;
 import haven.mod.event.CustomMenuButtonPressEvent;
+import haven.mod.event.InventoryCreateEvent;
 import haven.mod.event.RunStateChangeEvent;
 import haven.mod.event.UIMessageEvent;
 import haven.mod.event.flower.FlowerMenuCancelEvent;
@@ -433,6 +434,7 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
         ModAPI.registerEvent(FlowerMenuChosenEvent.class);
         ModAPI.registerEvent(FlowerMenuCreateEvent.class);
         ModAPI.registerEvent(RunStateChangeEvent.class);
+        ModAPI.registerEvent(InventoryCreateEvent.class);
     }
 
     /**

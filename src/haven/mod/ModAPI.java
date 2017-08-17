@@ -265,8 +265,6 @@ public class ModAPI {
             item.wdgmsg("transfer", new Coord(0,0));
         }
 
-
-
         /**
          * Gets the current world location of a Game Object.
          * @param gob Game Object to get the location of.
