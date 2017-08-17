@@ -331,4 +331,17 @@ public class FlowerMenu extends Widget {
         nextAutoSel = name;
         nextAutoSelTimeout = System.currentTimeMillis();
     }
+
+    /**
+     * Test whether or not the Flower Menu contains the option.
+     * @param option The option, whose existence in the Flower Menu is in question.
+     * @return Whether the option exists.
+     */
+    public boolean hasOption(String option)
+    {
+        for(Petal opt : opts)
+            if(opt.name.equals(option))
+                return true;
+        return false;
+    }
 }
