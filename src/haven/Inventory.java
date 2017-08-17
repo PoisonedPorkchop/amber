@@ -61,6 +61,7 @@ public class Inventory extends Widget implements DTarget {
 
     public Inventory(Coord sz) {
         super(invsq.sz().add(new Coord(-1, -1)).mul(sz).add(new Coord(1, 1)));
+        System.out.println("Inventory of: " + this.getClass());
         isz = sz;
     }
 
@@ -97,6 +98,7 @@ public class Inventory extends Widget implements DTarget {
     public boolean drop(Coord cc, Coord ul) {
         Coord dc = dropul ? ul.add(sqsz.div(2)).div(sqsz) : cc.div(sqsz);
         wdgmsg("drop", dc);
+        System.out.println("Drop!");
         return(true);
     }
 

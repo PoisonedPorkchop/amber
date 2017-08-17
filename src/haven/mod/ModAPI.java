@@ -10,6 +10,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static haven.OCache.posres;
@@ -32,7 +33,6 @@ public class ModAPI {
 
     /**
      * Gets current RunState.
-     * //TODO Currently unoperational.
      * @return Current RunState
      */
     public static RunState getRunState()
@@ -42,8 +42,6 @@ public class ModAPI {
 
     /**
      * Sets current RunState. More on this in the future.
-     * //TODO Add support for RunStates, so that mods can know when they are in Login Screen, In Game, etc. so as to reduce the amount of error handling they must do.
-     * //TODO This will be very important, as trying to access Game Objects in the Login Screen will error...
      * @param state RunState to set the system to.
      */
     public static void setRunState(RunState state)
@@ -236,6 +234,38 @@ public class ModAPI {
             getGUI().menu.wdgmsg("act", "carry");
             getGUI().map.wdgmsg("click", Coord.z, getLocationOfGob(gob), 1, 0, 0, (int) gob.id, getLocationOfGob(gob), 0, -1);
         }
+
+        public static int getFreeSpaceInInventory()
+        {
+            return getGUI().maininv.getFreeSpace();
+        }
+
+        public static WItem getItem(String itemName)
+        {
+            return getGUI().maininv.getItemPartial(itemName);
+        }
+
+        public static List<WItem> getItems(String itemName)
+        {
+            return getGUI().maininv.getItemsPartial(itemName);
+        }
+
+        public static void dropItem(GItem item)
+        {
+            item.wdgmsg("drop", new Coord(0,0));
+        }
+
+        public static void dropItemInHand(boolean shift)
+        {
+            getGUI().map.wdgmsg("drop", new Coord(0,0), getLocationOfGob(getPlayer()), 0);
+        }
+
+        public static void transferItem(GItem item)
+        {
+            item.wdgmsg("transfer", new Coord(0,0));
+        }
+
+
 
         /**
          * Gets the current world location of a Game Object.

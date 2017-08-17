@@ -26,9 +26,15 @@
 
 package haven;
 
-import java.net.*;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
+import haven.mod.ModAPI;
+import haven.mod.RunState;
+import haven.mod.event.RunStateChangeEvent;
+
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
+import java.util.LinkedList;
+import java.util.Queue;
 
 public class Bootstrap implements UI.Receiver, UI.Runner {
     Session sess;
@@ -71,6 +77,10 @@ public class Bootstrap implements UI.Receiver, UI.Runner {
     public Session run(UI ui) throws InterruptedException {
         ui.setreceiver(this);
         ui.bind(ui.root.add(new LoginScreen()), 1);
+
+        RunStateChangeEvent event = new RunStateChangeEvent(RunState.LOGIN);
+        ModAPI.callEvent(event);
+
         String loginname = getpref("loginname", "");
         boolean savepw = false;
         byte[] token = null;
