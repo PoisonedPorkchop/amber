@@ -5,16 +5,26 @@ import haven.mod.RunState;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public interface Event {
-    default boolean isCancellable()
+public abstract class Event {
+
+    private boolean cancelled;
+
+    public boolean isCancellable()
     {
-        return false;
+        return true;
     }
 
-    void setCancelled(boolean cancel);
-    boolean getCancelled();
+    public void setCancelled(boolean cancel)
+    {
+        this.cancelled = cancel;
+    }
 
-    default ArrayList<RunState> runtype() {
+    public boolean getCancelled()
+    {
+        return cancelled;
+    }
+
+    public ArrayList<RunState> runtype() {
         return (ArrayList<RunState>) Arrays.asList(RunState.UNKNOWN);
     }
 }

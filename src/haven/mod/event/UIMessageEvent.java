@@ -5,33 +5,16 @@ import haven.mod.RunState;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class UIMessageEvent implements Event {
+public class UIMessageEvent extends Event {
 
-    private boolean cancelled;
     private int id;
     private String msg;
     private Object[] args;
 
     public UIMessageEvent(int id, String message, Object... arguments){
-        cancelled = false;
         this.id = id;
         this.msg = message;
         this.args = arguments;
-    }
-
-    @Override
-    public boolean isCancellable() {
-        return true;
-    }
-
-    @Override
-    public void setCancelled(boolean cancel) {
-        cancelled = cancel;
-    }
-
-    @Override public boolean getCancelled()
-    {
-        return cancelled;
     }
 
     @Override

@@ -2,29 +2,13 @@ package haven.mod.event.widget;
 
 import haven.mod.event.Event;
 
-public class WidgetCreateEvent implements Event {
+public abstract class WidgetCreateEvent extends Event {
 
-    boolean cancelled;
     protected int id;
     protected String type;
     protected int parent;
     protected Object[] pargs;
     protected Object[] cargs;
-
-    @Override
-    public boolean isCancellable() {
-        return true;
-    }
-
-    @Override
-    public void setCancelled(boolean cancel) {
-        cancelled = cancel;
-    }
-
-    @Override
-    public boolean getCancelled() {
-        return cancelled;
-    }
 
     public int getId() {
         return id;

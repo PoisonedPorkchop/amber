@@ -412,7 +412,7 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
     }
 
     /**
-     * Loads all
+     * Loads all events
      */
     private static void loadEvents() {
         ModAPI.registerEvent(UIMessageEvent.class);
@@ -420,9 +420,13 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
         ModAPI.registerEvent(WidgetPreCreateEvent.class);
         ModAPI.registerEvent(WidgetPostCreateEvent.class);
         ModAPI.registerEvent(WidgetDestroyEvent.class);
-        ModAPI.registerEvent(WidgetCreateEvent.class);
+        ModAPI.registerEvent(WidgetGrabKeysEvent.class);
+        ModAPI.registerEvent(CustomMenuButtonPressEvent.class);
     }
 
+    /**
+     * Loads all mods in the mods folder.
+     */
     private static void loadMods() {
         try {
             File originator = new File(MainFrame.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
@@ -446,21 +450,17 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
                                 String result = s.hasNext() ? s.next() : "";
                                 lines = result.split("\n");
                                 String mainclass = null;
+                                String name = null;
 
                                 for(String string : lines)
                                 {
                                     if(string.startsWith("main="))
-                                    {
                                         mainclass = string.split("=")[1];
-                                        break;
-                                    }
-                                    else
-                                    {
-                                        continue;
-                                    }
+                                    else if(string.startsWith("name="))
+                                        name = string.split("=")[1];
                                 }
 
-                                if(mainclass != null)
+                                if(mainclass != null && name != null)
                                 {
                                     ArrayList<JarEntry> entryList = new ArrayList<>();
                                     while(entries.hasMoreElements())
@@ -493,6 +493,8 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
                                         Class<? extends HavenMod> modClass = (Class<? extends HavenMod>) Class.forName(mainclass.replaceAll("/", ".").replaceAll(".class",""), false, classLoader);
                                         Class.forName(mainclass.replaceAll(".class","").replaceAll("/", "."), false, classLoader);
                                         HavenMod havenMod = modClass.newInstance();
+                                        havenMod.setJar(jar);
+                                        havenMod.setModName(name);
                                         havenMod.start();
                                         ModAPI.registerMod(havenMod,classLoader);
                                     }

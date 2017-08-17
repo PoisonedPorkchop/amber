@@ -3,29 +3,13 @@ package haven.mod.event.widget;
 import haven.Widget;
 import haven.mod.event.Event;
 
-public class WidgetGrabKeysEvent implements Event {
+public class WidgetGrabKeysEvent extends Event {
 
-    boolean cancelled;
     protected Widget widget;
 
     public WidgetGrabKeysEvent(Widget widget)
     {
         this.widget = widget;
-    }
-
-    @Override
-    public boolean isCancellable() {
-        return true;
-    }
-
-    @Override
-    public void setCancelled(boolean cancel) {
-        cancelled = cancel;
-    }
-
-    @Override
-    public boolean getCancelled() {
-        return cancelled;
     }
 
     public Widget getWidget() {

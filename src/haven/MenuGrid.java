@@ -28,6 +28,8 @@ package haven;
 
 import haven.Resource.AButton;
 import haven.automation.*;
+import haven.mod.ModAPI;
+import haven.mod.event.widget.CustomMenuButtonPressEvent;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -400,6 +402,14 @@ public class MenuGrid extends Widget {
         GameUI gui = gameui();
         if (gui == null)
             return;
+
+        //CustomMenuButtonPressEvent
+        CustomMenuButtonPressEvent event = new CustomMenuButtonPressEvent(ad);
+        ModAPI.callEvent(event);
+        if(event.getCancelled())
+            return;
+        //CustomMenuButtonPressEvent
+
         if (ad[1].equals("coal")) {
             Thread t = new Thread(new AddCoalToSmelter(gui, Integer.parseInt(ad[2])), "AddCoalToSmelter");
             t.start();

@@ -26,18 +26,22 @@
 
 package haven;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.annotation.*;
+import java.net.*;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CodingErrorAction;
 import java.util.*;
-import java.net.*;
-import java.io.*;
-import javax.imageio.*;
-import java.awt.Graphics;
-import java.awt.image.BufferedImage;
+import java.util.List;
 
 public class Resource implements Serializable {
     private static ResCache prscache;
@@ -642,6 +646,7 @@ public class Resource implements Serializable {
             synchronized (Resource.class) {
                 if (_local == null) {
                     Pool local = new Pool(new FileSource(new File("res")));
+                    System.out.println("Res loaded from: " + new File("res").getAbsolutePath());
                     local.add(new JarSource());
                     _local = local;
                 }

@@ -7,33 +7,16 @@ import haven.mod.RunState;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class WidgetMessageEvent implements Event {
+public class WidgetMessageEvent extends Event {
 
-    private boolean cancelled;
     private Widget sender;
     private String msg;
     private Object[] args;
 
     public WidgetMessageEvent(Widget sender, String message, Object... arguments){
-        cancelled = false;
         this.sender = sender;
         this.msg = message;
         this.args = arguments;
-    }
-
-    @Override
-    public boolean isCancellable() {
-        return true;
-    }
-
-    @Override
-    public void setCancelled(boolean cancel) {
-        cancelled = cancel;
-    }
-
-    @Override public boolean getCancelled()
-    {
-        return cancelled;
     }
 
     @Override
