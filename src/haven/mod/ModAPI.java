@@ -8,10 +8,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static haven.OCache.posres;
 
@@ -193,9 +190,65 @@ public class ModAPI {
         public static ArrayList<Gob> getMapObjects()
         {
             ArrayList<Gob> gobs = new ArrayList<>();
-            for(Gob gob : HavenPanel.lui.root.findchild(GameUI.class).map.glob.oc)
+            for(Gob gob : getGUI().map.glob.oc)
                 gobs.add(gob);
             return gobs;
+        }
+
+        public static Map<Coord, MCache.Grid> getGrids()
+        {
+            return getGUI().map.glob.map.getGrids();
+        }
+
+        public static MCache.Grid getCurrentGrid()
+        {
+            ArrayList<Coord> coords = new ArrayList<>();
+            for(Map.Entry<Coord, MCache.Grid> entry : getGrids().entrySet())
+                coords.add(entry.getKey());
+            int lowX = coords.get(0).x;
+            int lowY = coords.get(0).y;
+            int highX = coords.get(0).x;
+            int highY = coords.get(0).y;
+
+            for(Coord coord : coords) {
+                lowX = Math.min(lowX, coord.x);
+                highX = Math.max(highX, coord.x);
+                lowY = Math.min(lowY, coord.y);
+                highY = Math.max(highY, coord.y);
+            }
+
+            for(Map.Entry<Coord, MCache.Grid> entry : getGrids().entrySet())
+                if(entry.getKey().x == ((lowX + highX)/2) && entry.getKey().y == ((lowY + highY)/2))
+                    return entry.getValue();
+            return null;
+        }
+
+        public static String identifyTile(int id)
+        {
+            return getGUI().map.glob.map.tileset(id).getres().name;
+        }
+
+        public static Coord getLocationOfTile(Coord tile, Coord offset)
+        {
+            System.out.println("Player start: " + getLocationOfGob(getPlayer()));
+            int playerx = getLocationOfGob(getPlayer()).x + 24000;
+            int playery = getLocationOfGob(getPlayer()).y + 24000;
+
+            System.out.println("newplayerx: " + playerx + " newplayery: " + playery);
+
+            int modx = 100000 + (playerx % 100000);
+            int mody = 100000 + (playery % 100000);
+
+            int startx = (playerx - modx) - 24000;
+            int starty = (playery - mody) - 24000;
+
+            startx += ((tile.x * 1000)+500);
+            starty += ((tile.y * 1000)+500);
+
+            startx += (offset.x * 100000);
+            starty += (offset.y * 100000);
+
+            return new Coord(startx,starty);
         }
 
         /**

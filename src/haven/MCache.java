@@ -488,6 +488,11 @@ public class MCache {
         }
     }
 
+    public Map<Coord, Grid> getGrids()
+    {
+        return grids;
+    }
+
     public void mapdata2(Message msg) {
         Coord c = msg.coord();
         synchronized (grids) {
@@ -576,6 +581,13 @@ public class MCache {
                 csets[i] = new SoftReference<Tileset>(cset);
             }
             return (cset);
+        }
+    }
+
+    public int tilesetSize()
+    {
+        synchronized (csets) {
+            return csets.length;
         }
     }
 
