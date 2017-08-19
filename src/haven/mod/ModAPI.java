@@ -3,6 +3,7 @@ package haven.mod;
 import haven.*;
 import haven.mod.event.Event;
 import haven.mod.event.EventHandler;
+import haven.pathfinder.Pathfinder;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -269,6 +270,16 @@ public class ModAPI {
             getGUI().map.wdgmsg("click", gob.sc, getLocationOfGob(gob), 3, 0, 0, (int) gob.id, getLocationOfGob(gob), 0, -1);
         }
 
+        public static Pathfinder pathfindTo(Coord location)
+        {
+            return getGUI().map.pfLeftClick(location, null);
+        }
+
+        public static Pathfinder pathfindInteract(Gob gob)
+        {
+            return getGUI().map.pfRightClick(gob,-1,3,0, null);
+        }
+
         /**
          * Right click a location in the world. Primarily for placing carried objects.
          * @param location Location to be right clicked.
@@ -290,17 +301,35 @@ public class ModAPI {
 
         public static int getFreeSpaceInInventory()
         {
-            return getGUI().maininv.getFreeSpace();
+            return getFreeSpaceInInventory(getMainInventory());
+        }
+
+        public static int getFreeSpaceInInventory(Inventory inv) {
+            return inv.getFreeSpace();
+        }
+
+        public static Inventory getMainInventory()
+        {
+            return getGUI().maininv;
         }
 
         public static WItem getItem(String itemName)
         {
-            return getGUI().maininv.getItemPartial(itemName);
+            return getItem(itemName, getMainInventory());
+        }
+
+        public static WItem getItem(String itemName, Inventory inv) {
+            return inv.getItemPartial(itemName);
         }
 
         public static List<WItem> getItems(String itemName)
         {
-            return getGUI().maininv.getItemsPartial(itemName);
+            return getItems(itemName, getGUI().maininv);
+        }
+
+        public static List<WItem> getItems(String itemName, Inventory inv)
+        {
+            return inv.getItemsPartial(itemName);
         }
 
         public static void dropItem(GItem item)

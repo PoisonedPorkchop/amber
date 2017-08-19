@@ -1796,10 +1796,10 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         this.areaselcb = null;
     }
 
-    public void pfLeftClick(Coord mc, String action) {
+    public Pathfinder pfLeftClick(Coord mc, String action) {
         Gob player = player();
         if (player == null)
-            return;
+            return null;
         synchronized (Pathfinder.class) {
             if (pf != null) {
                 pf.terminate = true;
@@ -1813,19 +1813,20 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             int gcx = haven.pathfinder.Map.origin - (src.x - mc.x);
             int gcy = haven.pathfinder.Map.origin - (src.y - mc.y);
             if (gcx < 0 || gcx >= haven.pathfinder.Map.sz || gcy < 0 || gcy >= haven.pathfinder.Map.sz)
-                return;
+                return null;
 
             pf = new Pathfinder(this, new Coord(gcx, gcy), action);
             pf.addListener(this);
             pfthread = new Thread(pf, "Pathfinder");
             pfthread.start();
+            return pf;
         }
     }
 
-    public void pfRightClick(Gob gob, int meshid, int clickb, int modflags, String action) {
+    public Pathfinder pfRightClick(Gob gob, int meshid, int clickb, int modflags, String action) {
         Gob player = player();
         if (player == null)
-            return;
+            return null;
         synchronized (Pathfinder.class) {
             if (pf != null) {
                 pf.terminate = true;
@@ -1839,12 +1840,13 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             int gcx = haven.pathfinder.Map.origin - (src.x - gob.rc.floor().x);
             int gcy = haven.pathfinder.Map.origin - (src.y - gob.rc.floor().y);
             if (gcx < 0 || gcx >= haven.pathfinder.Map.sz || gcy < 0 || gcy >= haven.pathfinder.Map.sz)
-                return;
+                return null;
 
             pf = new Pathfinder(this, new Coord(gcx, gcy), gob, meshid, clickb, modflags, action);
             pf.addListener(this);
             pfthread = new Thread(pf, "Pathfinder");
             pfthread.start();
+            return pf;
         }
     }
 
