@@ -3,6 +3,7 @@ package haven.mod;
 import haven.*;
 import haven.mod.event.Event;
 import haven.mod.event.EventHandler;
+import haven.pathfinder.PFListener;
 import haven.pathfinder.Pathfinder;
 
 import java.lang.annotation.Annotation;
@@ -280,6 +281,42 @@ public class ModAPI {
             return getGUI().map.pfRightClick(gob,-1,3,0, null);
         }
 
+        public static void waitForPathfinding(Pathfinder pathfinder, long milliseconds)
+        {
+            final boolean[] waiting = {true};
+            pathfinder.addListener(new PFListener() {
+                @Override
+                public void pfDone(Pathfinder pathfinder) {
+                    waiting[0] = false;
+                }
+            });
+            long currentTime = System.currentTimeMillis();
+            while (waiting[0])
+                try {
+                    Thread.sleep(milliseconds);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+        }
+
+        public static void waitForPathfinding(Pathfinder pathfinder, long milliseconds, long timeout)
+        {
+            final boolean[] waiting = {true};
+            pathfinder.addListener(new PFListener() {
+                @Override
+                public void pfDone(Pathfinder pathfinder) {
+                    waiting[0] = false;
+                }
+            });
+            long currentTime = System.currentTimeMillis();
+            while (waiting[0] && (currentTime - System.currentTimeMillis()) < timeout)
+                try {
+                    Thread.sleep(milliseconds);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+        }
+
         /**
          * Right click a location in the world. Primarily for placing carried objects.
          * @param location Location to be right clicked.
@@ -320,6 +357,11 @@ public class ModAPI {
 
         public static WItem getItem(String itemName, Inventory inv) {
             return inv.getItemPartial(itemName);
+        }
+
+        public static List<WItem> getAllItems(Inventory inv)
+        {
+            return inv.getAllItems();
         }
 
         public static List<WItem> getItems(String itemName)
