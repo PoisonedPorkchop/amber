@@ -7,18 +7,12 @@ public class Mod {
 
     public Mod()
     {
-
     }
 
     public ModAPI init()
     {
         if(modAPI == null || modAPI.equals(null)) {
-            debug("Creating a new API.");
             modAPI = new ModAPI();
-        }
-        else
-        {
-            debug("API exists!");
         }
         return modAPI;
     }

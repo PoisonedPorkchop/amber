@@ -138,8 +138,7 @@ public class ModAction {
             }
     }
 
-    public void waitForPathfinding(Pathfinder pathfinder, long milliseconds, long timeout)
-    {
+    public void waitForPathfinding(Pathfinder pathfinder, long milliseconds, long timeout) throws InterruptedException {
         final boolean[] waiting = {true};
         pathfinder.addListener(new PFListener() {
             @Override
@@ -149,11 +148,7 @@ public class ModAction {
         });
         long currentTime = System.currentTimeMillis();
         while (waiting[0] && (currentTime - System.currentTimeMillis()) < timeout)
-            try {
-                Thread.sleep(milliseconds);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            Thread.sleep(milliseconds);
     }
 
     /**
