@@ -28,6 +28,7 @@ package haven;
 
 import haven.Resource.AButton;
 import haven.automation.*;
+import haven.mod.Mod;
 import haven.mod.ModAPI;
 import haven.mod.event.CustomMenuButtonPressEvent;
 
@@ -405,7 +406,7 @@ public class MenuGrid extends Widget {
 
         //CustomMenuButtonPressEvent
         CustomMenuButtonPressEvent event = new CustomMenuButtonPressEvent(ad);
-        ModAPI.callEvent(event);
+        new Mod().getAPI().callEvent(event);
         if(event.getCancelled())
             return;
         //CustomMenuButtonPressEvent

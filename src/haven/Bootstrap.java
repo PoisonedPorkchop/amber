@@ -26,6 +26,7 @@
 
 package haven;
 
+import haven.mod.Mod;
 import haven.mod.ModAPI;
 import haven.mod.RunState;
 import haven.mod.event.RunStateChangeEvent;
@@ -79,7 +80,7 @@ public class Bootstrap implements UI.Receiver, UI.Runner {
         ui.bind(ui.root.add(new LoginScreen()), 1);
 
         RunStateChangeEvent event = new RunStateChangeEvent(RunState.LOGIN);
-        ModAPI.callEvent(event);
+        new Mod().getAPI().callEvent(event);
 
         String loginname = getpref("loginname", "");
         boolean savepw = false;

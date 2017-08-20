@@ -1,16 +1,29 @@
 package haven.mod;
 
 import haven.*;
-import haven.mod.event.Event;
-import haven.mod.event.EventHandler;
+import haven.mod.event.*;
+import haven.mod.event.flower.FlowerMenuCancelEvent;
+import haven.mod.event.flower.FlowerMenuChooseEvent;
+import haven.mod.event.flower.FlowerMenuChosenEvent;
+import haven.mod.event.flower.FlowerMenuCreateEvent;
+import haven.mod.event.widget.*;
 import haven.pathfinder.PFListener;
 import haven.pathfinder.Pathfinder;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.*;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.zip.ZipEntry;
 
 import static haven.OCache.posres;
 
@@ -20,21 +33,151 @@ import static haven.OCache.posres;
  */
 public class ModAPI {
 
-    protected static HashMap<Class<? extends Event>,ArrayList<Method>> eventhandlers;
-    private static HashMap<HavenMod,ClassLoader> mods;
-    private static RunState runState;
-
-    static {
+    public ModAPI()
+    {
         eventhandlers = new HashMap<>();
         runState = RunState.NONE;
         mods = new HashMap<>();
+
     }
+
+    public void create()
+    {
+        loadEvents();
+        loadMods(this);
+    }
+
+    /**
+     * Loads all events
+     */
+    private void loadEvents() {
+        registerEvent(UIMessageEvent.class);
+        registerEvent(WidgetMessageEvent.class);
+        registerEvent(WidgetPreCreateEvent.class);
+        registerEvent(WidgetPostCreateEvent.class);
+        registerEvent(WidgetDestroyEvent.class);
+        registerEvent(WidgetGrabKeysEvent.class);
+        registerEvent(CustomMenuButtonPressEvent.class);
+        registerEvent(FlowerMenuCancelEvent.class);
+        registerEvent(FlowerMenuChooseEvent.class);
+        registerEvent(FlowerMenuChosenEvent.class);
+        registerEvent(FlowerMenuCreateEvent.class);
+        registerEvent(RunStateChangeEvent.class);
+        registerEvent(InventoryCreateEvent.class);
+    }
+
+    /**
+     * Loads all mods in the mods folder.
+     */
+    private void loadMods(ModAPI mod) {
+        try {
+            File originator = new File(MainFrame.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+            File parent = originator.getParentFile();
+            File mods = new File(parent, "mods");
+            if (!mods.exists()) {
+                mods.mkdir();
+            }
+            for(File file : mods.listFiles())
+                if(file.isFile())
+                    if(file.getName().contains(".")) {
+                        String extension = file.getName().substring(file.getName().lastIndexOf(".") + 1);
+                        if(extension.contains("jar"))
+                        {
+                            JarFile jar = new JarFile(file);
+                            ZipEntry infoFile = jar.getEntry("info.txt");
+                            if(infoFile != null)
+                            {
+                                Enumeration<? extends JarEntry> entries = jar.entries();
+                                String[] lines;
+                                InputStream infoFileStream = jar.getInputStream(infoFile);
+                                Scanner s = new Scanner(infoFileStream).useDelimiter("\\A");
+                                String result = s.hasNext() ? s.next() : "";
+                                lines = result.split("\n");
+                                String mainclass = null;
+                                String name = null;
+
+                                for(String string : lines)
+                                {
+                                    string = string.replaceAll("\\r|\\n", "");
+                                    if(string.startsWith("main="))
+                                        mainclass = string.split("=")[1];
+                                    else if(string.startsWith("name="))
+                                        name = string.split("=")[1];
+                                }
+
+                                if(mainclass != null && name != null)
+                                {
+                                    ArrayList<JarEntry> entryList = new ArrayList<>();
+                                    while(entries.hasMoreElements())
+                                    {
+                                        entryList.add(entries.nextElement());
+                                    }
+                                    JarEntry main = null;
+                                    for(JarEntry entry : entryList)
+                                    {
+                                        if(mainclass.equals(entry.getName()))
+                                        {
+                                            main = entry;
+                                            break;
+                                        }
+                                    }
+                                    if(main != null)
+                                    {
+                                        ClassLoader classLoader = URLClassLoader.newInstance(
+                                                new URL[] {new URL("jar:" + file.toURI().toURL() + "!/")},
+                                                MainFrame.class.getClassLoader()
+                                        );
+
+                                        for(JarEntry entry : entryList) {
+                                            String entryExtension = file.getName().substring(file.getName().lastIndexOf(".") + 1);
+                                            if (entryExtension.contains("class"))
+                                            {
+                                                Class.forName(entry.getName().replaceAll("/", "."), true, classLoader);
+                                            }
+                                        }
+                                        Class<? extends HavenMod> modClass = (Class<? extends HavenMod>) Class.forName(mainclass.replaceAll("/", ".").replaceAll(".class",""), false, classLoader);
+                                        Class.forName(mainclass.replaceAll(".class","").replaceAll("/", "."), false, classLoader);
+                                        HavenMod havenMod = modClass.newInstance();
+                                        havenMod.setJar(jar);
+                                        havenMod.setModName(name);
+                                        havenMod.start();
+                                        mod.registerMod(havenMod,classLoader);
+                                        System.out.println("Loaded mod: " + name);
+                                    }
+                                    else
+                                    {
+                                        Mod.debug(("Expected: '" + mainclass + "'"));
+                                    }
+                                }
+                                else
+                                {
+                                    Mod.debug("Information could not be resolved from info.txt");
+                                }
+                            }
+                        }
+                    }
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        }
+    }
+
+    protected HashMap<Class<? extends Event>,ArrayList<Method>> eventhandlers;
+    private HashMap<HavenMod,ClassLoader> mods;
+    private RunState runState;
 
     /**
      * Gets current RunState.
      * @return Current RunState
      */
-    public static RunState getRunState()
+    public RunState getRunState()
     {
         return runState;
     }
@@ -43,7 +186,7 @@ public class ModAPI {
      * Sets current RunState. More on this in the future.
      * @param state RunState to set the system to.
      */
-    public static void setRunState(RunState state)
+    public void setRunState(RunState state)
     {
         if(state != null)
             runState = state;
@@ -54,11 +197,11 @@ public class ModAPI {
      * you can add your own event so that listeners can be created.
      * @param clazz
      */
-    public static void registerEvent(Class<? extends Event> clazz)
+    public void registerEvent(Class<? extends Event> clazz)
     {
         if(!eventhandlers.containsKey(clazz))
         {
-            System.out.println("Registered event " + clazz.getSimpleName() + "!");
+            Mod.debug("Registered event " + clazz.getSimpleName() + "!");
             eventhandlers.put(clazz, new ArrayList<>());
         }
     }
@@ -67,7 +210,7 @@ public class ModAPI {
      * Registers all listeners (Event Handlers) in a given class.
      * @param clazz Class to find and register Event Handler methods in.
      */
-    public static void registerListeners(Class clazz)
+    public void registerListeners(Class clazz)
     {
         for(Method method : clazz.getDeclaredMethods())
         {
@@ -97,7 +240,7 @@ public class ModAPI {
      * event, then this function could be useful
      * @param event
      */
-    public static void callEvent(Event event)
+    public void callEvent(Event event)
     {
         if(eventhandlers.containsKey(event.getClass()))
         {
@@ -126,7 +269,7 @@ public class ModAPI {
      * @param mod Mod to register.
      * @param loader ClassLoader used to load mod.
      */
-    public static void registerMod(HavenMod mod, ClassLoader loader)
+    public void registerMod(HavenMod mod, ClassLoader loader)
     {
         if(!mods.containsKey(mod))
            mods.put(mod,loader);
@@ -136,7 +279,7 @@ public class ModAPI {
      * Gets all currently loaded mods.
      * @return All loaded mods.
      */
-    public static ArrayList<HavenMod> getMods()
+    public ArrayList<HavenMod> getMods()
     {
         ArrayList<HavenMod> temp = new ArrayList<>();
         for(Map.Entry<HavenMod, ClassLoader> entry : mods.entrySet())
@@ -149,7 +292,7 @@ public class ModAPI {
      * @param widget Widget to add.
      * @param location Location, on screen, to add the widget.
      */
-    public static void registerCustomWidget(Widget widget, Coord location)
+    public void registerCustomWidget(Widget widget, Coord location)
     {
         addChildWidget(HavenPanel.lui.root, widget, location);
     }
@@ -160,7 +303,7 @@ public class ModAPI {
      * @param child Widget to add.
      * @param location Location, on screen, to add the widget.
      */
-    public static void addChildWidget(Widget parent, Widget child, Coord location)
+    public void addChildWidget(Widget parent, Widget child, Coord location)
     {
         synchronized (HavenPanel.lui) {
             parent.add(child, location);
@@ -171,243 +314,6 @@ public class ModAPI {
         }
     }
 
-    /**
-     * Class that contains convenience methods for carrying out autonomous actions in Haven.
-     */
-    public static class ModAction {
 
-        /**
-         * Move to a location in the world.
-         * @param location Location to move to.
-         */
-        public static void moveTo(Coord location)
-        {
-            HavenPanel.lui.wdgmsg(getGUI().map,"click", Coord.z, location, 1, 0);
-        }
-
-        /**
-         * Gets all map objects. Important for finding targets.
-         * @return List of all current Game Objects. Be careful not to reference these when they have unloaded.
-         */
-        public static ArrayList<Gob> getMapObjects()
-        {
-            ArrayList<Gob> gobs = new ArrayList<>();
-            for(Gob gob : getGUI().map.glob.oc)
-                gobs.add(gob);
-            return gobs;
-        }
-
-        public static Map<Coord, MCache.Grid> getGrids()
-        {
-            return getGUI().map.glob.map.getGrids();
-        }
-
-        public static MCache.Grid getCurrentGrid()
-        {
-            ArrayList<Coord> coords = new ArrayList<>();
-            for(Map.Entry<Coord, MCache.Grid> entry : getGrids().entrySet())
-                coords.add(entry.getKey());
-            int lowX = coords.get(0).x;
-            int lowY = coords.get(0).y;
-            int highX = coords.get(0).x;
-            int highY = coords.get(0).y;
-
-            for(Coord coord : coords) {
-                lowX = Math.min(lowX, coord.x);
-                highX = Math.max(highX, coord.x);
-                lowY = Math.min(lowY, coord.y);
-                highY = Math.max(highY, coord.y);
-            }
-
-            for(Map.Entry<Coord, MCache.Grid> entry : getGrids().entrySet())
-                if(entry.getKey().x == ((lowX + highX)/2) && entry.getKey().y == ((lowY + highY)/2))
-                    return entry.getValue();
-            return null;
-        }
-
-        public static String identifyTile(int id)
-        {
-            return getGUI().map.glob.map.tileset(id).getres().name;
-        }
-
-        public static Coord getLocationOfTile(Coord tile, Coord offset)
-        {
-            System.out.println("Player start: " + getLocationOfGob(getPlayer()));
-            int playerx = getLocationOfGob(getPlayer()).x + 24000;
-            int playery = getLocationOfGob(getPlayer()).y + 24000;
-
-            System.out.println("newplayerx: " + playerx + " newplayery: " + playery);
-
-            int modx = 100000 + (playerx % 100000);
-            int mody = 100000 + (playery % 100000);
-
-            int startx = (playerx - modx) - 24000;
-            int starty = (playery - mody) - 24000;
-
-            startx += ((tile.x * 1000)+500);
-            starty += ((tile.y * 1000)+500);
-
-            startx += (offset.x * 100000);
-            starty += (offset.y * 100000);
-
-            return new Coord(startx,starty);
-        }
-
-        /**
-         * Get the current player.
-         * @return The player's Game Object.
-         */
-        public static Gob getPlayer()
-        {
-            return getGUI().map.player();
-        }
-
-        /**
-         * Right click an object. Can be used to interact with objects such as cupboards, dropped items, plants etc.
-         * @param gob Game object to right click.
-         */
-        public static void rightClick(Gob gob)
-        {
-            getGUI().map.wdgmsg("click", gob.sc, getLocationOfGob(gob), 3, 0, 0, (int) gob.id, getLocationOfGob(gob), 0, -1);
-        }
-
-        public static Pathfinder pathfindTo(Coord location)
-        {
-            return getGUI().map.pfLeftClick(location, null);
-        }
-
-        public static Pathfinder pathfindInteract(Gob gob)
-        {
-            return getGUI().map.pfRightClick(gob,-1,3,0, null);
-        }
-
-        public static void waitForPathfinding(Pathfinder pathfinder, long milliseconds)
-        {
-            final boolean[] waiting = {true};
-            pathfinder.addListener(new PFListener() {
-                @Override
-                public void pfDone(Pathfinder pathfinder) {
-                    waiting[0] = false;
-                }
-            });
-            long currentTime = System.currentTimeMillis();
-            while (waiting[0])
-                try {
-                    Thread.sleep(milliseconds);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-        }
-
-        public static void waitForPathfinding(Pathfinder pathfinder, long milliseconds, long timeout)
-        {
-            final boolean[] waiting = {true};
-            pathfinder.addListener(new PFListener() {
-                @Override
-                public void pfDone(Pathfinder pathfinder) {
-                    waiting[0] = false;
-                }
-            });
-            long currentTime = System.currentTimeMillis();
-            while (waiting[0] && (currentTime - System.currentTimeMillis()) < timeout)
-                try {
-                    Thread.sleep(milliseconds);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-        }
-
-        /**
-         * Right click a location in the world. Primarily for placing carried objects.
-         * @param location Location to be right clicked.
-         */
-        public static void rightClick(Coord location)
-        {
-            getGUI().map.wdgmsg("click", Coord.z, location, 3, 0);
-        }
-
-        /**
-         * Picks up an object.
-         * @param gob Game Object to be picked up.
-         */
-        public static void pickUpObject(Gob gob)
-        {
-            getGUI().menu.wdgmsg("act", "carry");
-            getGUI().map.wdgmsg("click", Coord.z, getLocationOfGob(gob), 1, 0, 0, (int) gob.id, getLocationOfGob(gob), 0, -1);
-        }
-
-        public static int getFreeSpaceInInventory()
-        {
-            return getFreeSpaceInInventory(getMainInventory());
-        }
-
-        public static int getFreeSpaceInInventory(Inventory inv) {
-            return inv.getFreeSpace();
-        }
-
-        public static Inventory getMainInventory()
-        {
-            return getGUI().maininv;
-        }
-
-        public static WItem getItem(String itemName)
-        {
-            return getItem(itemName, getMainInventory());
-        }
-
-        public static WItem getItem(String itemName, Inventory inv) {
-            return inv.getItemPartial(itemName);
-        }
-
-        public static List<WItem> getAllItems(Inventory inv)
-        {
-            return inv.getAllItems();
-        }
-
-        public static List<WItem> getItems(String itemName)
-        {
-            return getItems(itemName, getGUI().maininv);
-        }
-
-        public static List<WItem> getItems(String itemName, Inventory inv)
-        {
-            return inv.getItemsPartial(itemName);
-        }
-
-        public static void dropItem(GItem item)
-        {
-            item.wdgmsg("drop", new Coord(0,0));
-        }
-
-        public static void dropItemInHand(boolean shift)
-        {
-            getGUI().map.wdgmsg("drop", new Coord(0,0), getLocationOfGob(getPlayer()), 0);
-        }
-
-        public static void transferItem(GItem item)
-        {
-            item.wdgmsg("transfer", new Coord(0,0));
-        }
-
-        /**
-         * Gets the current world location of a Game Object.
-         * @param gob Game Object to get the location of.
-         * @return Coord that is the location of the game object in world terms.
-         */
-        public static Coord getLocationOfGob(Gob gob)
-        {
-            return gob.rc.floor(posres);
-        }
-
-        /**
-         * Gets the gui. Be careful, as it might not be active.
-         * @return Current GameUI
-         */
-        public static GameUI getGUI()
-        {
-            return HavenPanel.lui.root.findchild(GameUI.class);
-        }
-
-    }
 
 }

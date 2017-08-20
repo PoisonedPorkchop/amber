@@ -26,7 +26,7 @@
 
 package haven;
 
-import haven.mod.ModAPI;
+import haven.mod.Mod;
 import haven.mod.event.InventoryCreateEvent;
 import haven.res.ui.tt.q.qbuff.QBuff;
 
@@ -66,7 +66,7 @@ public class Inventory extends Widget implements DTarget {
         isz = sz;
 
         InventoryCreateEvent event = new InventoryCreateEvent(this);
-        ModAPI.callEvent(event);
+        new Mod().getAPI().callEvent(event);
     }
 
     public boolean mousewheel(Coord c, int amount) {

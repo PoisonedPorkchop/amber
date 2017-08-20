@@ -26,7 +26,7 @@
 
 package haven;
 
-import haven.mod.ModAPI;
+import haven.mod.Mod;
 import haven.mod.event.flower.FlowerMenuCancelEvent;
 import haven.mod.event.flower.FlowerMenuChooseEvent;
 import haven.mod.event.flower.FlowerMenuChosenEvent;
@@ -129,7 +129,7 @@ public class FlowerMenu extends Widget {
                 for(int x = 0; x < opts.length; x++)
                     options[x] = opts[x].name;
                 FlowerMenuCreateEvent event = new FlowerMenuCreateEvent(self, options);
-                ModAPI.callEvent(event);
+                new Mod().getAPI().callEvent(event);
                 //FlowerMenuCreateEvent
 
                 return (true);
@@ -249,7 +249,7 @@ public class FlowerMenu extends Widget {
 
             //FlowerMenuCancelEvent
             FlowerMenuCancelEvent event = new FlowerMenuCancelEvent(this);
-            ModAPI.callEvent(event);
+            new Mod().getAPI().callEvent(event);
             //FlowerMenuCancelEvent
         } else if (msg == "act") {
             new Chosen(opts[(Integer) args[0]]);
@@ -258,7 +258,7 @@ public class FlowerMenu extends Widget {
 
             //FlowerMenuChosenEvent
             FlowerMenuChosenEvent event = new FlowerMenuChosenEvent(this, opts[(Integer) args[0]]);
-            ModAPI.callEvent(event);
+            new Mod().getAPI().callEvent(event);
             //FlowerMenuChosenEvent
         }
     }
@@ -294,7 +294,7 @@ public class FlowerMenu extends Widget {
 
         //FlowerMenuChooseEvent
         FlowerMenuChooseEvent event = new FlowerMenuChooseEvent(option);
-        ModAPI.callEvent(event);
+        new Mod().getAPI().callEvent(event);
         if(event.getCancelled())
             return;
         //FlowerMenuChooseEvent

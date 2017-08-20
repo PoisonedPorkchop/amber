@@ -27,6 +27,7 @@
 package haven;
 
 import haven.mod.HavenMod;
+import haven.mod.Mod;
 import haven.mod.ModAPI;
 import haven.mod.event.CustomMenuButtonPressEvent;
 import haven.mod.event.InventoryCreateEvent;
@@ -353,10 +354,8 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
         }
         setupres();
         MainFrame f = new MainFrame(null);
-
-        loadEvents();
-        loadMods();
-
+        Mod mod = new Mod();
+        mod.getAPI().create();
         //Gets the required game instance of maid... But where is this made or initialized or used???
         Maid.getInstance();
 
@@ -415,126 +414,6 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
             }
         } catch (IOException e) {
             throw (new RuntimeException(e));
-        }
-    }
-
-    /**
-     * Loads all events
-     */
-    private static void loadEvents() {
-        ModAPI.registerEvent(UIMessageEvent.class);
-        ModAPI.registerEvent(WidgetMessageEvent.class);
-        ModAPI.registerEvent(WidgetPreCreateEvent.class);
-        ModAPI.registerEvent(WidgetPostCreateEvent.class);
-        ModAPI.registerEvent(WidgetDestroyEvent.class);
-        ModAPI.registerEvent(WidgetGrabKeysEvent.class);
-        ModAPI.registerEvent(CustomMenuButtonPressEvent.class);
-        ModAPI.registerEvent(FlowerMenuCancelEvent.class);
-        ModAPI.registerEvent(FlowerMenuChooseEvent.class);
-        ModAPI.registerEvent(FlowerMenuChosenEvent.class);
-        ModAPI.registerEvent(FlowerMenuCreateEvent.class);
-        ModAPI.registerEvent(RunStateChangeEvent.class);
-        ModAPI.registerEvent(InventoryCreateEvent.class);
-    }
-
-    /**
-     * Loads all mods in the mods folder.
-     */
-    private static void loadMods() {
-        try {
-            File originator = new File(MainFrame.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
-            File parent = originator.getParentFile();
-            File mods = new File(parent, "mods");
-            mods.mkdirs();
-            for(File file : mods.listFiles())
-                if(file.isFile())
-                    if(file.getName().contains(".")) {
-                        String extension = file.getName().substring(file.getName().lastIndexOf(".") + 1);
-                        if(extension.contains("jar"))
-                        {
-                            JarFile jar = new JarFile(file);
-                            ZipEntry infoFile = jar.getEntry("info.txt");
-                            if(infoFile != null)
-                            {
-                                Enumeration<? extends JarEntry> entries = jar.entries();
-                                String[] lines;
-                                InputStream infoFileStream = jar.getInputStream(infoFile);
-                                Scanner s = new Scanner(infoFileStream).useDelimiter("\\A");
-                                String result = s.hasNext() ? s.next() : "";
-                                lines = result.split("\n");
-                                String mainclass = null;
-                                String name = null;
-
-                                for(String string : lines)
-                                {
-                                    string = string.replaceAll("\\r|\\n", "");
-                                    if(string.startsWith("main="))
-                                        mainclass = string.split("=")[1];
-                                    else if(string.startsWith("name="))
-                                        name = string.split("=")[1];
-                                }
-
-                                if(mainclass != null && name != null)
-                                {
-                                    ArrayList<JarEntry> entryList = new ArrayList<>();
-                                    while(entries.hasMoreElements())
-                                    {
-                                        entryList.add(entries.nextElement());
-                                    }
-                                    JarEntry main = null;
-                                    for(JarEntry entry : entryList)
-                                    {
-                                        if(mainclass.equals(entry.getName()))
-                                        {
-                                            main = entry;
-                                            break;
-                                        }
-                                    }
-                                    if(main != null)
-                                    {
-                                        ClassLoader classLoader = URLClassLoader.newInstance(
-                                                new URL[] {new URL("jar:" + file.toURI().toURL() + "!/")},
-                                                MainFrame.class.getClassLoader()
-                                        );
-
-                                        for(JarEntry entry : entryList) {
-                                            String entryExtension = file.getName().substring(file.getName().lastIndexOf(".") + 1);
-                                            if (entryExtension.contains("class"))
-                                            {
-                                                Class.forName(entry.getName().replaceAll("/", "."), true, classLoader);
-                                            }
-                                        }
-                                        Class<? extends HavenMod> modClass = (Class<? extends HavenMod>) Class.forName(mainclass.replaceAll("/", ".").replaceAll(".class",""), false, classLoader);
-                                        Class.forName(mainclass.replaceAll(".class","").replaceAll("/", "."), false, classLoader);
-                                        HavenMod havenMod = modClass.newInstance();
-                                        havenMod.setJar(jar);
-                                        havenMod.setModName(name);
-                                        havenMod.start();
-                                        ModAPI.registerMod(havenMod,classLoader);
-                                        System.out.println("Loaded mod: " + name);
-                                    }
-                                    else
-                                    {
-                                        System.out.println(("Expected: '" + mainclass + "'"));
-                                    }
-                                }
-                                else
-                                {
-                                    System.out.println("Information could not be resolved from info.txt");
-                                }
-                            }
-                        }
-                    }
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
         }
     }
 }

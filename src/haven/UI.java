@@ -26,6 +26,7 @@
 
 package haven;
 
+import haven.mod.Mod;
 import haven.mod.ModAPI;
 import haven.mod.event.UIMessageEvent;
 import haven.mod.event.widget.*;
@@ -150,7 +151,7 @@ public class UI {
 
         //WidgetPreCreateEvent
         WidgetPreCreateEvent widgetPreCreateEvent = new WidgetPreCreateEvent(id, type, parent, pargs, cargs);
-        ModAPI.callEvent(widgetPreCreateEvent);
+        new Mod().getAPI().callEvent(widgetPreCreateEvent);
         if(widgetPreCreateEvent.getCancelled())
             return;
         //WidgetPreCreateEvent
@@ -182,7 +183,7 @@ public class UI {
 
             //WidgetPostCreateEvent
             WidgetPostCreateEvent widgetPostCreateEvent = new WidgetPostCreateEvent(id, type, parent, pargs, cargs);
-            ModAPI.callEvent(widgetPostCreateEvent);
+            new Mod().getAPI().callEvent(widgetPostCreateEvent);
             if(widgetPostCreateEvent.getCancelled())
                 return;
             //WidgetPostCreateEvent
@@ -294,7 +295,7 @@ public class UI {
     public Grab grabkeys(Widget wdg) {
         //WidgetGrabKeysEvent
         WidgetGrabKeysEvent widgetGrabKeysEvent = new WidgetGrabKeysEvent(wdg);
-        ModAPI.callEvent(widgetGrabKeysEvent);
+        new Mod().getAPI().callEvent(widgetGrabKeysEvent);
         if(widgetGrabKeysEvent.getCancelled())
             return null;
         //WidgetGrabKeysEvent
@@ -322,7 +323,7 @@ public class UI {
     public void destroy(Widget wdg) {
         //WidgetDestroyEvent
         WidgetDestroyEvent widgetDestroyEvent = new WidgetDestroyEvent(wdg);
-        ModAPI.callEvent(widgetDestroyEvent);
+        new Mod().getAPI().callEvent(widgetDestroyEvent);
         if(widgetDestroyEvent.getCancelled())
             return;
         //WidgetDestroyEvent
@@ -353,7 +354,7 @@ public class UI {
     public void wdgmsg(Widget sender, String msg, Object... args) {
         //WidgetMessageEventHandling
         WidgetMessageEvent widgetMessageEvent = new WidgetMessageEvent(sender, msg, args);
-        ModAPI.callEvent(widgetMessageEvent);
+        new Mod().getAPI().callEvent(widgetMessageEvent);
         if(widgetMessageEvent.getCancelled())
             return;
         //WidgetMessageEventHandling
@@ -373,7 +374,7 @@ public class UI {
     public void uimsg(int id, String msg, Object... args) {
         //UIMessageEventHandling
         UIMessageEvent uiMessageEvent = new UIMessageEvent(id,msg,args);
-        ModAPI.callEvent(uiMessageEvent);
+        new Mod().getAPI().callEvent(uiMessageEvent);
         if(uiMessageEvent.getCancelled())
             return;
         //UIMessageEventHandling

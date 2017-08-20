@@ -1,5 +1,6 @@
 package haven.mod.event;
 
+import haven.mod.Mod;
 import haven.mod.ModAPI;
 import haven.mod.RunState;
 
@@ -10,7 +11,7 @@ public class RunStateChangeEvent extends Event {
     public RunStateChangeEvent(RunState state)
     {
         this.state = state;
-        ModAPI.setRunState(state);
+        new Mod().getAPI().setRunState(state);
     }
 
     @Override

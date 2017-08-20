@@ -28,6 +28,7 @@ package haven;
 
 import haven.GLProgram.VarID;
 import haven.automation.*;
+import haven.mod.Mod;
 import haven.mod.ModAPI;
 import haven.mod.RunState;
 import haven.mod.event.RunStateChangeEvent;
@@ -517,7 +518,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         markedGobs.clear();
 
         RunStateChangeEvent event = new RunStateChangeEvent(RunState.INGAME);
-        ModAPI.callEvent(event);
+        new Mod().getAPI().callEvent(event);
     }
 
     public boolean visol(int ol) {
