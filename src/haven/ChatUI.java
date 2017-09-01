@@ -716,6 +716,7 @@ public class ChatUI extends Widget {
         }
     }
 
+
     public static class MultiChat extends EntryChannel {
         public final int urgency;
         protected final String name;
