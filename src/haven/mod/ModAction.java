@@ -129,7 +129,6 @@ public class ModAction {
                 waiting[0] = false;
             }
         });
-        long currentTime = System.currentTimeMillis();
         while (waiting[0])
             try {
                 Thread.sleep(milliseconds);

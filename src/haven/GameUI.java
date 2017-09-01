@@ -29,6 +29,7 @@ package haven;
 import haven.automation.ErrorSysMsgCallback;
 import haven.automation.PickForageable;
 import haven.livestock.LivestockManager;
+import haven.mod.selector.ModSelectorWindow;
 import haven.resutil.FoodInfo;
 
 import java.awt.*;
@@ -90,6 +91,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     public CraftHistoryBelt histbelt;
     private ErrorSysMsgCallback errmsgcb;
     public LivestockManager livestockwnd;
+    public ModSelectorWindow modselectwnd;
 
     public abstract class Belt extends Widget {
         public Belt(Coord sz) {
@@ -188,6 +190,10 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         timerswnd = new haven.timers.TimersWnd(this);
         timerswnd.hide();
         add(timerswnd, new Coord(HavenPanel.w / 2 - timerswnd.sz.x / 2, 100));
+
+        modselectwnd = new ModSelectorWindow();
+        modselectwnd.hide();
+        add(modselectwnd, new Coord(HavenPanel.w / 2 - modselectwnd.sz.x / 2, 100));
 
         livestockwnd = new LivestockManager();
         livestockwnd.hide();

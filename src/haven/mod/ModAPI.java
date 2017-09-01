@@ -108,6 +108,7 @@ public class ModAPI {
                                 lines = result.split("\n");
                                 String mainclass = null;
                                 String name = null;
+                                boolean runOnStart = false;
 
                                 for(String string : lines)
                                 {
@@ -116,6 +117,8 @@ public class ModAPI {
                                         mainclass = string.split("=")[1];
                                     else if(string.startsWith("name="))
                                         name = string.split("=")[1];
+                                    else if(string.startsWith("runonstart="))
+                                        runOnStart = Boolean.parseBoolean(string.split("=")[1]);
                                 }
 
                                 if(mainclass != null && name != null)
@@ -153,7 +156,8 @@ public class ModAPI {
                                         HavenMod havenMod = modClass.newInstance();
                                         havenMod.setJar(jar);
                                         havenMod.setModName(name);
-                                        havenMod.start();
+                                        if(runOnStart)
+                                            havenMod.start();
                                         mod.registerMod(havenMod,classLoader);
                                         System.out.println("Loaded mod: " + name);
                                     }

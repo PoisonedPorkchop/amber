@@ -29,7 +29,6 @@ package haven;
 import haven.Resource.AButton;
 import haven.automation.*;
 import haven.mod.Mod;
-import haven.mod.ModAPI;
 import haven.mod.event.CustomMenuButtonPressEvent;
 
 import java.awt.*;
@@ -445,36 +444,8 @@ public class MenuGrid extends Widget {
         }
         else if(ad[1].equals("debug"))
         {
-            /**MCache oc = HavenPanel.lui.sess.glob.map;
-            synchronized (oc) {
-                for (Gob gob : oc) {
-                    try {
-                        Resource res = gob.getres();
-                        System.out.println(res.name + ": " + gob.id);
-                    } catch (Exception e) {
-                    }
-                }
-            }*/
-            //HavenPanel.lui.wdgmsg(Glob.songPlayerThread.widg, );
-            //System.out.println("Class: " + Glob.songPlayerThread.widg.getClass());
-            /**for(Field field : Glob.songPlayerThread.widg.getClass().getDeclaredFields())
-            {
-                System.out.println("Field: " + field.getName());
-            }
-            double start = 0;
-            double latcomp = 0;
-            try {
-                start = (double) Glob.songPlayerThread.widg.getClass().getField("start").get(Glob.songPlayerThread.widg);
-                latcomp = (double) Glob.songPlayerThread.widg.getClass().getField("latcomp").get(Glob.songPlayerThread.widg);
-            } catch (NoSuchFieldException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
-            double n = System.currentTimeMillis() / 1000.0 + latcomp;
-            Glob.songPlayerThread.widg.wdgmsg("play", new Object[] { 12, (float)((n - start)-1) });
-            Glob.songPlayerThread.widg.wdgmsg("play", new Object[] { 16, (float)(n - start) });
-             */
+            gui.modselectwnd.show(!gui.modselectwnd.visible);
+            gui.modselectwnd.raise();
         }
     }
 
