@@ -15,9 +15,8 @@ public class FlowerMenuChosenEvent extends Event{
     }
 
     @Override
-    public boolean isCancellable()
-    {
-        return false;
+    protected void initialization() {
+
     }
 
     public FlowerMenu getFlowerMenu() {
@@ -40,4 +39,5 @@ public class FlowerMenuChosenEvent extends Event{
     public void setPetal(FlowerMenu.Petal petal) {
         this.petal = petal;
     }
+
 }

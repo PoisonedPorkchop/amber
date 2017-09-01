@@ -14,4 +14,9 @@ public class InventoryCreateEvent extends Event {
     public Inventory getInventory() {
         return inventory;
     }
+
+    @Override
+    protected void initialization() {
+
+    }
 }

@@ -1,8 +1,6 @@
 package haven.mod.event;
 
-import haven.mod.event.Event;
-
-public class CustomMenuButtonPressEvent extends Event {
+public class CustomMenuButtonPressEvent extends CancellableEvent {
 
     private String[] command;
 
@@ -17,5 +15,10 @@ public class CustomMenuButtonPressEvent extends Event {
 
     public void setCommand(String[] command) {
         this.command = command;
+    }
+
+    @Override
+    protected void initialization() {
+
     }
 }

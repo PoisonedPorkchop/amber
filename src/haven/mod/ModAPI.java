@@ -1,14 +1,12 @@
 package haven.mod;
 
-import haven.*;
-import haven.mod.event.*;
-import haven.mod.event.flower.FlowerMenuCancelEvent;
-import haven.mod.event.flower.FlowerMenuChooseEvent;
-import haven.mod.event.flower.FlowerMenuChosenEvent;
-import haven.mod.event.flower.FlowerMenuCreateEvent;
-import haven.mod.event.widget.*;
-import haven.pathfinder.PFListener;
-import haven.pathfinder.Pathfinder;
+import haven.Coord;
+import haven.HavenPanel;
+import haven.MainFrame;
+import haven.Widget;
+import haven.mod.event.Event;
+import haven.mod.event.EventClassLoader;
+import haven.mod.event.EventHandler;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,45 +23,60 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 
-import static haven.OCache.posres;
-
 /**
  * Framework and API for creating and using mods.
  * @author PoisonedPorkchop
  */
 public class ModAPI {
 
+    protected HashMap<Class,ArrayList<Method>> eventhandlers;
+    private HashMap<HavenMod,ClassLoader> mods;
+    private RunState runState;
+    private boolean created;
+    private EventClassLoader eventLoader;
+
     public ModAPI()
     {
         eventhandlers = new HashMap<>();
         runState = RunState.NONE;
         mods = new HashMap<>();
-
+        created = false;
+        eventLoader = new EventClassLoader();
     }
 
     public void create()
     {
-        loadEvents();
-        loadMods(this);
+        if(!created) {
+            loadEvents();
+            loadMods(this);
+            created = true;
+        }
     }
 
     /**
      * Loads all events
      */
     private void loadEvents() {
-        registerEvent(UIMessageEvent.class);
-        registerEvent(WidgetMessageEvent.class);
-        registerEvent(WidgetPreCreateEvent.class);
-        registerEvent(WidgetPostCreateEvent.class);
-        registerEvent(WidgetDestroyEvent.class);
-        registerEvent(WidgetGrabKeysEvent.class);
-        registerEvent(CustomMenuButtonPressEvent.class);
-        registerEvent(FlowerMenuCancelEvent.class);
-        registerEvent(FlowerMenuChooseEvent.class);
-        registerEvent(FlowerMenuChosenEvent.class);
-        registerEvent(FlowerMenuCreateEvent.class);
-        registerEvent(RunStateChangeEvent.class);
-        registerEvent(InventoryCreateEvent.class);
+        registerEvent("haven.mod.event.UIMessageEvent");
+        registerEvent("haven.mod.event.widget.WidgetMessageEvent");
+        registerEvent("haven.mod.event.widget.WidgetPreCreateEvent");
+        registerEvent("haven.mod.event.widget.WidgetPostCreateEvent");
+        registerEvent("haven.mod.event.widget.WidgetDestroyEvent");
+        registerEvent("haven.mod.event.widget.WidgetGrabKeysEvent");
+        registerEvent("haven.mod.event.CustomMenuButtonPressEvent");
+        registerEvent("haven.mod.event.flower.FlowerMenuCancelEvent");
+        registerEvent("haven.mod.event.flower.FlowerMenuChooseEvent");
+        registerEvent("haven.mod.event.flower.FlowerMenuChosenEvent");
+        registerEvent("haven.mod.event.flower.FlowerMenuCreateEvent");
+        registerEvent("haven.mod.event.RunStateChangeEvent");
+        registerEvent("haven.mod.event.InventoryCreateEvent");
+        registerEvent("haven.mod.event.chat.ChatCreateEvent");
+        registerEvent("haven.mod.event.chat.ChannelCreateEvent");
+        registerEvent("haven.mod.event.chat.EntryChannelCreateEvent");
+        registerEvent("haven.mod.event.chat.LogCreateEvent");
+        registerEvent("haven.mod.event.chat.PartyChatCreateEvent");
+        registerEvent("haven.mod.event.chat.PrivateChatCreateEvent");
+        registerEvent("haven.mod.event.chat.SimpleChatCreateEvent");
     }
 
     /**
@@ -169,10 +182,6 @@ public class ModAPI {
         }
     }
 
-    protected HashMap<Class<? extends Event>,ArrayList<Method>> eventhandlers;
-    private HashMap<HavenMod,ClassLoader> mods;
-    private RunState runState;
-
     /**
      * Gets current RunState.
      * @return Current RunState
@@ -195,15 +204,27 @@ public class ModAPI {
     /**
      * Register a new Event. Probably should not be called unless you are implementing your own API, and in such a case
      * you can add your own event so that listeners can be created.
-     * @param clazz
+     * @param name Name of class.
      */
-    public void registerEvent(Class<? extends Event> clazz)
+    private void registerEvent(String name)
     {
-        if(!eventhandlers.containsKey(clazz))
-        {
-            Mod.debug("Registered event " + clazz.getSimpleName() + "!");
-            eventhandlers.put(clazz, new ArrayList<>());
+        Mod.debug("Registered event " + name + "!");
+        try {
+            //TODO Fix class loading to inject code.
+            Class<? extends Event> newClass = (Class<? extends Event>) Class.forName(name);
+            if(!isEventRegistered(newClass)) {
+                //Event event = newClass.newInstance();
+                //event.initialize();
+                eventhandlers.put(newClass, new ArrayList<>());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+    }
+
+    public boolean isEventRegistered(Class<? extends Event> clazz)
+    {
+        return eventhandlers.containsKey(clazz);
     }
 
     /**

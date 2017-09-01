@@ -1,13 +1,13 @@
 package haven.mod.event.widget;
 
 import haven.Widget;
-import haven.mod.event.Event;
 import haven.mod.RunState;
+import haven.mod.event.CancellableEvent;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class WidgetMessageEvent extends Event {
+public class WidgetMessageEvent extends CancellableEvent {
 
     private Widget sender;
     private String msg;
@@ -22,6 +22,11 @@ public class WidgetMessageEvent extends Event {
     @Override
     public ArrayList<RunState> runtype() {
         return (ArrayList<RunState>) Arrays.asList(RunState.ANY);
+    }
+
+    @Override
+    protected void initialization() {
+
     }
 
     public Widget getSender()
@@ -53,4 +58,5 @@ public class WidgetMessageEvent extends Event {
     {
         this.args = arguments;
     }
+
 }

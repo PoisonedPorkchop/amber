@@ -1,9 +1,9 @@
 package haven.mod.event.flower;
 
 import haven.FlowerMenu;
-import haven.mod.event.Event;
+import haven.mod.event.CancellableEvent;
 
-public class FlowerMenuChooseEvent extends Event {
+public class FlowerMenuChooseEvent extends CancellableEvent {
 
     private FlowerMenu.Petal petal;
 
@@ -17,4 +17,8 @@ public class FlowerMenuChooseEvent extends Event {
         return petal.name;
     }
 
+    @Override
+    protected void initialization() {
+
+    }
 }

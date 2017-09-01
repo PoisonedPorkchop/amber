@@ -242,4 +242,9 @@ public class ModAction {
         return HavenPanel.lui.root.findchild(GameUI.class);
     }
 
+    public void sendMessage(ChatUI.MultiChat chat, String message)
+    {
+        chat.wdgmsg("msg", message);
+    }
+
 }

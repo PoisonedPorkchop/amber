@@ -26,29 +26,32 @@
 
 package haven;
 
-import com.gtranslate.Language;
-import com.gtranslate.Translator;
+import haven.mod.Mod;
+import haven.mod.event.chat.*;
+import org.json.JSONArray;
 
-import java.io.*;
-import java.nio.charset.Charset;
-import java.util.*;
-import java.awt.Color;
-import java.awt.Font;
+import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.ClipboardOwner;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
 import java.awt.event.KeyEvent;
 import java.awt.font.TextAttribute;
 import java.awt.font.TextHitInfo;
 import java.awt.image.BufferedImage;
-import java.text.*;
-import java.text.AttributedCharacterIterator.Attribute;
-import java.net.URL;
-import java.util.regex.*;
-import java.awt.datatransfer.*;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLEncoder;
-import org.json.JSONArray;
+import java.nio.charset.Charset;
+import java.text.AttributedCharacterIterator;
+import java.text.AttributedCharacterIterator.Attribute;
+import java.text.CharacterIterator;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ChatUI extends Widget {
     private static final Resource alarmsfx = Resource.local().loadwait("sfx/chatalarm");
@@ -206,6 +209,7 @@ public class ChatUI extends Widget {
                 cb = add(new IButton("gfx/hud/chat-close", "", "-d", "-h"));
             else
                 cb = null;
+            new ChannelCreateEvent(closable,this).call();
         }
 
         public void append(Message msg) {
@@ -613,6 +617,7 @@ public class ChatUI extends Widget {
         public Log(String name) {
             super(false);
             this.name = name;
+            new LogCreateEvent(name, this);
         }
 
         public String name() {
@@ -659,6 +664,7 @@ public class ChatUI extends Widget {
                 }
             };
             add(this.in);
+            new EntryChannelCreateEvent(closable, this).call();
         }
 
         public int ih() {
@@ -772,6 +778,7 @@ public class ChatUI extends Widget {
             super(closable);
             this.name = name;
             this.urgency = urgency;
+            new ChatCreateEvent(closable,name,urgency,this).call();
         }
 
         private float colseq = 0;
@@ -837,6 +844,7 @@ public class ChatUI extends Widget {
 
         public PartyChat() {
             super(false, Resource.getLocString(Resource.BUNDLE_LABEL, "Party"), 2);
+            new PartyChatCreateEvent(false, Resource.getLocString(Resource.BUNDLE_LABEL, "Party"), 2, this).call();
         }
 
         public void uimsg(String msg, Object... args) {
@@ -895,6 +903,7 @@ public class ChatUI extends Widget {
         public PrivChat(boolean closable, int other) {
             super(closable);
             this.other = other;
+            new PrivateChatCreateEvent(closable, name2(), this).call();
         }
 
         public void uimsg(String msg, Object... args) {
@@ -934,6 +943,25 @@ public class ChatUI extends Widget {
 
         public String name() {
             BuddyWnd.Buddy b = getparent(GameUI.class).buddies.find(other);
+            if (b == null)
+                return ("???");
+            else
+                return (b.name);
+        }
+
+        public String name2() {
+            GameUI gameUI = new Mod().actions().getGUI();
+            if(gameUI == null) {
+                System.out.println("GAMEUI NULL!!!");
+                return "NULL";
+            }
+            BuddyWnd buddies = gameUI.buddies;
+            if(buddies == null)
+            {
+                System.out.println("BUDDIESWINDOW NULL!!!");
+                return "NULL";
+            }
+            BuddyWnd.Buddy b = buddies.find(other);
             if (b == null)
                 return ("???");
             else

@@ -1,7 +1,6 @@
 package haven.mod.event;
 
 import haven.mod.Mod;
-import haven.mod.ModAPI;
 import haven.mod.RunState;
 
 public class RunStateChangeEvent extends Event {
@@ -15,8 +14,8 @@ public class RunStateChangeEvent extends Event {
     }
 
     @Override
-    public boolean isCancellable() {
-        return false;
+    protected void initialization() {
+
     }
 
     public RunState getState() {
@@ -26,4 +25,5 @@ public class RunStateChangeEvent extends Event {
     public void setState(RunState state) {
         this.state = state;
     }
+
 }

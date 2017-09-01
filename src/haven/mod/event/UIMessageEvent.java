@@ -5,7 +5,7 @@ import haven.mod.RunState;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class UIMessageEvent extends Event {
+public class UIMessageEvent extends CancellableEvent {
 
     private int id;
     private String msg;
@@ -20,6 +20,11 @@ public class UIMessageEvent extends Event {
     @Override
     public ArrayList<RunState> runtype() {
         return (ArrayList<RunState>) Arrays.asList(RunState.ANY);
+    }
+
+    @Override
+    protected void initialization() {
+
     }
 
     public int getId()
@@ -51,4 +56,5 @@ public class UIMessageEvent extends Event {
     {
         this.args = arguments;
     }
+
 }

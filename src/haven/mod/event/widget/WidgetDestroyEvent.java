@@ -1,9 +1,9 @@
 package haven.mod.event.widget;
 
 import haven.Widget;
-import haven.mod.event.Event;
+import haven.mod.event.CancellableEvent;
 
-public class WidgetDestroyEvent extends Event {
+public class WidgetDestroyEvent extends CancellableEvent {
 
     protected Widget widget;
 
@@ -18,5 +18,10 @@ public class WidgetDestroyEvent extends Event {
     public WidgetDestroyEvent(Widget widget)
     {
         this.widget = widget;
+    }
+
+    @Override
+    public void initialization() {
+
     }
 }

@@ -13,9 +13,8 @@ public class FlowerMenuCancelEvent extends Event {
     }
 
     @Override
-    public boolean isCancellable()
-    {
-        return false;
+    protected void initialization() {
+
     }
 
     public FlowerMenu getFlowerMenu() {
@@ -25,4 +24,6 @@ public class FlowerMenuCancelEvent extends Event {
     public void setFlowerMenu(FlowerMenu flowerMenu) {
         this.flowerMenu = flowerMenu;
     }
+
+
 }

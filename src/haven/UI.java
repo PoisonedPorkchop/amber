@@ -27,7 +27,6 @@
 package haven;
 
 import haven.mod.Mod;
-import haven.mod.ModAPI;
 import haven.mod.event.UIMessageEvent;
 import haven.mod.event.widget.*;
 
@@ -149,12 +148,8 @@ public class UI {
 
     public void newwidget(int id, String type, int parent, Object[] pargs, Object... cargs) throws InterruptedException {
 
-        //WidgetPreCreateEvent
-        WidgetPreCreateEvent widgetPreCreateEvent = new WidgetPreCreateEvent(id, type, parent, pargs, cargs);
-        new Mod().getAPI().callEvent(widgetPreCreateEvent);
-        if(widgetPreCreateEvent.getCancelled())
+        if(new WidgetPreCreateEvent(id, type, parent, pargs, cargs).callAndGetCancelled())
             return;
-        //WidgetPreCreateEvent
 
         if (Config.quickbelt && type.equals("wnd") && cargs[1].equals("Belt")) {
             type = "wnd-belt";
@@ -181,12 +176,7 @@ public class UI {
 
             bind(wdg, id);
 
-            //WidgetPostCreateEvent
-            WidgetPostCreateEvent widgetPostCreateEvent = new WidgetPostCreateEvent(id, type, parent, pargs, cargs);
-            new Mod().getAPI().callEvent(widgetPostCreateEvent);
-            if(widgetPostCreateEvent.getCancelled())
-                return;
-            //WidgetPostCreateEvent
+            new WidgetPostCreateEvent(id, type, parent, pargs, wdg, cargs).call();
 
             // drop everything except water containers if in area mining mode
             if (Config.dropore && gui != null && gui.map != null && gui.map.areamine != null && wdg instanceof GItem) {
