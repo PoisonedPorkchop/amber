@@ -13,14 +13,15 @@ public class ModSelectorWindow extends Window {
     public static final int WIDTH = 460;
     public final Scrollport port;
     private final static int MAX_ITEMS = 10;
+    private ArrayList<HavenMod> selectedMods;
 
     public ModSelectorWindow() {
         super(Coord.z, "ModSelector");
-
-        int portHeight = new Mod().getAPI().getMods().size() > MAX_ITEMS ? TimerWdg.height * MAX_ITEMS : new Mod().getAPI().getMods().size() * TimerWdg.height;
-        port = new Scrollport(new Coord(WIDTH - 20 - 15, portHeight), TimerWdg.height) {
+        int portHeight = new Mod().getAPI().getMods().size() > MAX_ITEMS ? ModWdg.height * MAX_ITEMS : new Mod().getAPI().getMods().size() * ModWdg.height;
+        port = new Scrollport(new Coord(WIDTH - 20 - 15, portHeight), ModWdg.height) {
             @Override
             public void draw(GOut g) {
+                //System.out.println("Drawing shit.");
                 g.chcolor(0, 0, 0, 128);
                 g.frect(Coord.z, sz);
                 g.chcolor();
@@ -30,20 +31,20 @@ public class ModSelectorWindow extends Window {
         add(port, new Coord(20, 50));
 
 
-        ArrayList<HavenMod> selectedMods = new ArrayList<>();
+        selectedMods = new ArrayList<>();
         for(HavenMod mod : new Mod().getAPI().getMods())
             if(!mod.isRunOnStart())
                 selectedMods.add(mod);
 
-        for (int i = 0; i < selectedMods.size(); i++)
-            port.cont.add(new ModWdg(selectedMods.get(i)), new Coord(0, i * TimerWdg.height));
+        for (int i = 0; i < selectedMods.size(); i++) {
+            port.cont.add(new ModWdg(selectedMods.get(i)), new Coord(0, i * ModWdg.height));
+        }
 
         resize();
     }
 
     public void resize() {
-        List<TimerWdg> timers = Glob.timersThread.getall();
-        int portHeight = timers.size() > MAX_ITEMS ? TimerWdg.height * MAX_ITEMS : timers.size() * TimerWdg.height;
+        int portHeight = selectedMods.size() > MAX_ITEMS ? ModWdg.height * MAX_ITEMS : selectedMods.size() * ModWdg.height;
         port.resize(port.sz.x, portHeight);
         port.cont.update();
         port.bar.resize(portHeight);
