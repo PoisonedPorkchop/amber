@@ -112,7 +112,7 @@ public class ModAction {
 
     public Pathfinder pathfindTo(Coord location)
     {
-        return getGUI().map.pfLeftClick(location, null);
+        return getGUI().map.pfLeftClick(getBaseCoordFromWorldCoord(location), null);
     }
 
     public Pathfinder pathfindInteract(Gob gob)
@@ -230,6 +230,11 @@ public class ModAction {
     public Coord getLocationOfGob(Gob gob)
     {
         return gob.rc.floor(posres);
+    }
+
+    private Coord getBaseCoordFromWorldCoord(Coord worldCoord)
+    {
+        return worldCoord.mul(posres).floor();
     }
 
     /**
