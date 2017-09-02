@@ -9,7 +9,7 @@ import java.util.jar.JarFile;
 public abstract class HavenMod {
     private JarFile jar;
     private String modName;
-    private boolean runOnStart = false;
+    public abstract void create();
     public abstract void start();
     public abstract void exit();
     public JarFile getJar(){
@@ -25,13 +25,5 @@ public abstract class HavenMod {
 
     public void setModName(String modName) {
         this.modName = modName;
-    }
-
-    public boolean isRunOnStart() {
-        return runOnStart;
-    }
-
-    public void setRunOnStart(boolean runOnStart) {
-        this.runOnStart = runOnStart;
     }
 }

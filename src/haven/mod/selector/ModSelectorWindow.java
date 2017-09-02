@@ -31,10 +31,10 @@ public class ModSelectorWindow extends Window {
         add(port, new Coord(20, 50));
 
 
+        //TODO Add proper selection
         selectedMods = new ArrayList<>();
         for(HavenMod mod : new Mod().getAPI().getMods())
-            if(!mod.isRunOnStart())
-                selectedMods.add(mod);
+            selectedMods.add(mod);
 
         for (int i = 0; i < selectedMods.size(); i++) {
             port.cont.add(new ModWdg(selectedMods.get(i)), new Coord(0, i * ModWdg.height));
