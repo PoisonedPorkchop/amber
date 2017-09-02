@@ -68,7 +68,7 @@ public class ChatUI extends Widget {
     };
     public Channel sel = null;
     public int urgency = 0;
-    private final Selector chansel;
+    public final Selector chansel;
     private Coord base = Coord.z;
     private QuickLine qline = null;
     private final LinkedList<Notification> notifs = new LinkedList<Notification>();
@@ -87,6 +87,19 @@ public class ChatUI extends Widget {
     protected void added() {
         base = this.c;
         resize(this.sz);
+    }
+
+    public ArrayList<Channel> getChannels()
+    {
+        return chansel.getChannels();
+    }
+
+    public void addCustom(Channel chan) {
+        chansel.add(chan);
+    }
+
+    public void removeCustom(Channel chan) {
+        chansel.rm(chan);
     }
 
     public static class ChatAttribute extends Attribute {
@@ -178,8 +191,7 @@ public class ChatUI extends Widget {
                 String prefixLanguage = translate.detect(s[0]);
                 System.out.println("Detected language...");//en
                 String tL = language.getNameLanguage(prefixLanguage, Language.ENGLISH);
-                System.out.println(tL);
-                System.out.println("SimpleMessage Created: " + text);*/
+                System.out.println(tL);*/
 
                 if (Config.chattimestamp)
                     text = timestamp(text);
@@ -213,7 +225,6 @@ public class ChatUI extends Widget {
         }
 
         public void append(Message msg) {
-            System.out.println("Message Append: " + msg.text());
             synchronized (msgs) {
                 msgs.add(msg);
                 int y = 0;
@@ -228,7 +239,6 @@ public class ChatUI extends Widget {
 
         public void append(String line, Color col) {
             //System Chat
-            System.out.println("APPEND APPEND!");
             append(new SimpleMessage(line, col, iw()));
         }
 
@@ -302,7 +312,6 @@ public class ChatUI extends Widget {
         }
 
         public void notify(Message msg, int urgency) {
-            System.out.println("Notified Message: " + msg.text().toString());
             getparent(ChatUI.class).notify(this, msg);
             updurgency(Math.max(this.urgency, urgency));
         }
@@ -601,6 +610,13 @@ public class ChatUI extends Widget {
         }
 
         public void wdgmsg(Widget sender, String msg, Object... args) {
+            String arguments = "";
+            for(Object arg : args)
+                if(arg != null)
+                    arguments += (arg.toString() + ",");
+                else
+                    arguments += ("NULL,");
+
             if (sender == cb) {
                 wdgmsg("close");
             } else {
@@ -626,10 +642,10 @@ public class ChatUI extends Widget {
     }
 
     public static abstract class EntryChannel extends Channel {
-        private final TextEntry in;
-        private List<String> history = new ArrayList<String>();
-        private int hpos = 0;
-        private String hcurrent;
+        protected TextEntry in;
+        protected List<String> history = new ArrayList<String>();
+        protected int hpos = 0;
+        protected String hcurrent;
 
         public EntryChannel(boolean closable) {
             super(closable);
@@ -701,7 +717,6 @@ public class ChatUI extends Widget {
                 if (col == null) col = Color.WHITE;
                 int urgency = (args.length > 2) ? (Integer) args[2] : 0;
                 Message cmsg = new SimpleMessage(line, col, iw());
-                System.out.println("Simple append?");
                 append(cmsg);
                 if (urgency > 0)
                     notify(cmsg, urgency);
@@ -866,7 +881,6 @@ public class ChatUI extends Widget {
                     save(name, my.text().text, super.getparent(GameUI.class).buddies.getCharName());
                 } else {
                     Message cmsg = new NamedMessage(from, line, Utils.blendcol(col, Color.WHITE, 0.5), iw());
-                    System.out.println("My message.");
                     append(cmsg);
                     save(name, cmsg.text().text);
                     if (urgency > 0)
@@ -912,7 +926,6 @@ public class ChatUI extends Widget {
                 String line = (String) args[1];
                 if (t.equals("in")) {
                     Message cmsg = new InMessage(line, iw());
-                    System.out.println("uimsg IN");
                     append(cmsg);
                     notify(cmsg, 3);
                     
@@ -926,14 +939,12 @@ public class ChatUI extends Widget {
                     }
                 } else if (t.equals("out")) {
                     OutMessage om = new OutMessage(line, iw());
-                    System.out.println("uimsg OUT");
                     append(om);
                     save("Private Chat", om.text().text, super.getparent(GameUI.class).buddies.getCharName());
                 }
             } else if (msg == "err") {
                 String err = (String) args[0];
                 Message cmsg = new SimpleMessage(err, Color.RED, iw());
-                System.out.println("uimsg ERR");
                 append(cmsg);
                 notify(cmsg, 3);
             } else {
@@ -951,16 +962,11 @@ public class ChatUI extends Widget {
 
         public String name2() {
             GameUI gameUI = new Mod().actions().getGUI();
-            if(gameUI == null) {
-                System.out.println("GAMEUI NULL!!!");
+            if(gameUI == null)
                 return "NULL";
-            }
             BuddyWnd buddies = gameUI.buddies;
             if(buddies == null)
-            {
-                System.out.println("BUDDIESWINDOW NULL!!!");
                 return "NULL";
-            }
             BuddyWnd.Buddy b = buddies.find(other);
             if (b == null)
                 return ("???");
@@ -1057,13 +1063,13 @@ public class ChatUI extends Widget {
             super(sz);
         }
 
-        private void add(Channel chan) {
+        protected void add(Channel chan) {
             synchronized (chls) {
                 chls.add(new DarkChannel(chan));
             }
         }
 
-        private void rm(Channel chan) {
+        protected void rm(Channel chan) {
             synchronized (chls) {
                 for (Iterator<DarkChannel> i = chls.iterator(); i.hasNext(); ) {
                     DarkChannel c = i.next();
@@ -1071,6 +1077,14 @@ public class ChatUI extends Widget {
                         i.remove();
                 }
             }
+        }
+
+        protected ArrayList<Channel> getChannels()
+        {
+            ArrayList<Channel> channels = new ArrayList<>();
+            for(DarkChannel channel : chls)
+                channels.add(channel.chan);
+            return channels;
         }
 
         public void draw(GOut g) {

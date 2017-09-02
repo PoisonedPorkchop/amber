@@ -35,7 +35,7 @@ public class Client implements MessageListener{
     
     public void listen()
     {
-    	System.out.println("Now listening!");
+    	System.out.println("Client listening for Server!");
     	Thread listen = new Thread(new Runnable() {
     	    
     	    public void run()

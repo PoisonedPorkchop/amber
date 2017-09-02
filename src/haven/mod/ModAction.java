@@ -1,9 +1,12 @@
 package haven.mod;
 
 import haven.*;
+import haven.mod.chat.CustomChannel;
+import haven.mod.chat.CustomChat;
 import haven.pathfinder.PFListener;
 import haven.pathfinder.Pathfinder;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -69,7 +72,7 @@ public class ModAction {
         return getGUI().map.glob.map.tileset(id).getres().name;
     }
 
-    public Coord getLocationOfTile(Coord tile, Coord offset)
+    public Coord getLocationOfTile(Coord tile, MCache.Grid grid)
     {
         Mod.debug("Player start: " + getLocationOfGob(getPlayer()));
         int playerx = getLocationOfGob(getPlayer()).x + 24000;
@@ -86,8 +89,8 @@ public class ModAction {
         startx += ((tile.x * 1000)+500);
         starty += ((tile.y * 1000)+500);
 
-        startx += (offset.x * 100000);
-        starty += (offset.y * 100000);
+        startx += (grid.gc.x * 100000);
+        starty += (grid.gc.y * 100000);
 
         return new Coord(startx,starty);
     }
@@ -246,9 +249,96 @@ public class ModAction {
         return HavenPanel.lui.root.findchild(GameUI.class);
     }
 
+    public ArrayList<ChatUI.MultiChat> getPublicChats()
+    {
+        ArrayList<ChatUI.MultiChat> selectedChannels = new ArrayList<>();
+        for(ChatUI.Channel channel : getChannels())
+            if(channel instanceof ChatUI.MultiChat)
+                selectedChannels.add((ChatUI.MultiChat) channel);
+        return selectedChannels;
+    }
+
+    public ChatUI.PartyChat getPartyChat()
+    {
+        for(ChatUI.Channel channel : getChannels())
+            if(channel instanceof ChatUI.PartyChat)
+                return (ChatUI.PartyChat) channel;
+        return null;
+    }
+
+    public ArrayList<ChatUI.PrivChat> getPrivateChats()
+    {
+        ArrayList<ChatUI.PrivChat> selectedChannels = new ArrayList<>();
+        for(ChatUI.Channel channel : getChannels())
+            if(channel instanceof ChatUI.PrivChat)
+                selectedChannels.add((ChatUI.PrivChat) channel);
+        return selectedChannels;
+    }
+
+    public ArrayList<ChatUI.Channel> getChannels()
+    {
+        return getGUI().chat.getChannels();
+    }
+
+    public ChatUI.Channel getSystemLog()
+    {
+        for(ChatUI.Channel channel : getChannels())
+            if(channel.name().equals("System"))
+                return channel;
+        return null;
+    }
+
+    public ChatUI.Channel getChannelByName(String name)
+    {
+        for(ChatUI.Channel channel : getChannels())
+            if(channel.name().equals(name))
+                return channel;
+        return null;
+    }
+
+    public void printToSystem(String msg, Color color)
+    {
+        printToChannel(getSystemLog(), msg, color);
+    }
+
+    public void printToChannel(ChatUI.Channel channel, String msg, Color color)
+    {
+        channel.append(msg, color);
+    }
+
     public void sendMessage(ChatUI.MultiChat chat, String message)
     {
         chat.wdgmsg("msg", message);
     }
 
+    public void sendMessage(ChatUI.PrivChat chat, String message)
+    {
+        chat.wdgmsg("msg", message);
+    }
+
+    public CustomChannel addCustomChannel(CustomChannel channel)
+    {
+        if(new Mod().getAPI().addCustomChannel(channel))
+            getGUI().chat.add(channel);
+        return channel;
+    }
+
+    public void removeCustomChannel(CustomChannel remove)
+    {
+        if(new Mod().getAPI().removeCustomChannel(remove))
+            remove.reqdestroy();
+    }
+
+    public CustomChat addCustomChat(CustomChat channel)
+    {
+        if(new Mod().getAPI().addCustomChat(channel))
+            getGUI().chat.add(channel);
+        return channel;
+    }
+
+    public void removeCustomChat(CustomChat remove)
+    {
+        if(new Mod().getAPI().removeCustomChat(remove))
+            remove.reqdestroy();
+    }
 }

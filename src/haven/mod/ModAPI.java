@@ -4,6 +4,9 @@ import haven.Coord;
 import haven.HavenPanel;
 import haven.MainFrame;
 import haven.Widget;
+import haven.mod.chat.CustomChannel;
+import haven.mod.chat.CustomChat;
+import haven.mod.discord.Client;
 import haven.mod.event.Event;
 import haven.mod.event.EventClassLoader;
 import haven.mod.event.EventHandler;
@@ -31,9 +34,12 @@ public class ModAPI {
 
     protected HashMap<Class,ArrayList<Method>> eventhandlers;
     private HashMap<HavenMod,ClassLoader> mods;
+    private Client client;
     private RunState runState;
     private boolean created;
     private EventClassLoader eventLoader;
+    private ArrayList<CustomChannel> customChannels;
+    private ArrayList<CustomChat> customChats;
 
     public ModAPI()
     {
@@ -42,11 +48,14 @@ public class ModAPI {
         mods = new HashMap<>();
         created = false;
         eventLoader = new EventClassLoader();
+        customChannels = new ArrayList<>();
+        customChats = new ArrayList<>();
     }
 
     public void create()
     {
         if(!created) {
+            createClient();
             loadEvents();
             loadMods(this);
             created = true;
@@ -335,6 +344,43 @@ public class ModAPI {
         }
     }
 
+    protected boolean addCustomChannel(CustomChannel add)
+    {
+        if(!customChannels.contains(add)) {
+            this.customChannels.add(add);
+            return true;
+        }
+        return false;
+    }
 
+    protected boolean removeCustomChannel(CustomChannel remove)
+    {
+        return this.customChannels.remove(remove);
+    }
 
+    protected boolean addCustomChat(CustomChat add)
+    {
+        if(!customChats.contains(add)) {
+            this.customChats.add(add);
+            return true;
+        }
+        return false;
+    }
+
+    protected boolean removeCustomChat(CustomChat remove)
+    {
+        return this.customChats.remove(remove);
+    }
+
+    private void createClient()
+    {
+        if(client == null)
+        {
+            client = new Client();
+        }
+    }
+
+    public Client getClient() {
+        return client;
+    }
 }
