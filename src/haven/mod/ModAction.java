@@ -341,4 +341,97 @@ public class ModAction {
         if(new Mod().getAPI().removeCustomChat(remove))
             remove.reqdestroy();
     }
+
+    public ArrayList<Gob> getAggrod()
+    {
+        ArrayList<Gob> aggrodGobs = new ArrayList<>();
+        synchronized (getGUI()) {
+            synchronized (getGUI().fv) {
+                synchronized (getGUI().fv.lsrel) {
+                    synchronized (getGUI().ui.sess.glob.oc) {
+                        if (getGUI().fv != null) {
+                            if (getGUI().fv.lsrel != null) {
+                                for (Fightview.Relation relation : getGUI().fv.lsrel) {
+                                    aggrodGobs.add(getGUI().ui.sess.glob.oc.getgob(relation.gobid));
+                                }
+                                return aggrodGobs;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return aggrodGobs;
+    }
+
+    public void aggroAllNearbyEnemies() {
+        if (new Mod().actions().getGUI() != null) {
+            synchronized (new Mod().actions().getGUI()) {
+                synchronized (new Mod().actions().getGUI().ui) {
+                    synchronized (new Mod().actions().getGUI().ui.sess) {
+                        synchronized (new Mod().actions().getGUI().ui.sess.glob) {
+                            synchronized (new Mod().actions().getGUI().ui.sess.glob.oc) {
+                                synchronized (new Mod().actions().getGUI().map) {
+                                    double gobclsdist = Double.MAX_VALUE;
+                                    for (Gob gob : new Mod().actions().getGUI().ui.sess.glob.oc) {
+                                        try {
+                                            Resource res = gob.getres();
+                                            if(res != null) {
+                                                synchronized (res) {
+                                                    synchronized (new Mod().actions().getPlayer()) {
+                                                        if ("body".equals(res.basename()) && gob.id != new Mod().actions().getPlayer().id) {
+                                                            if (!gob.isFriend()) {
+                                                                double dist = new Mod().actions().getPlayer().rc.dist(gob.rc);
+                                                                System.out.println("Found enemy: " + gob.id + "-" + gob.sc.x + "-" + gob.sc.y + "-" + dist);
+
+                                                                if (dist < 340) {
+                                                                    new Mod().actions().getGUI().wdgmsg("act", "aggro");
+                                                                    new Mod().actions().getGUI().map.wdgmsg("click", gob.sc, new Mod().actions().getLocationOfGob(gob), 1, 0, 0, (int) gob.id, new Mod().actions().getLocationOfGob(gob), 0, 0);
+                                                                    Gob pl = new Mod().actions().getPlayer();
+                                                                    new Mod().actions().getGUI().map.wdgmsg("click", pl.sc, pl.rc.floor(posres), 3, 0);
+                                                                    //getGUI().wdgmsg("click", gob.sc, Coord.z, 1, 0, 0, (int) gob.id, gob.rc.floor(posres), 0, 0);
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        } catch (Loading l) {
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public void aggroGob(Gob gob)
+    {
+        synchronized (getGUI()) {
+            synchronized (getGUI().map) {
+                synchronized (gob) {
+                    new Mod().actions().getGUI().wdgmsg("act", "aggro");
+                    new Mod().actions().getGUI().map.wdgmsg("click", gob.sc, new Mod().actions().getLocationOfGob(gob), 1, 0, 0, (int) gob.id, new Mod().actions().getLocationOfGob(gob), 0, 0);
+                    Gob pl = new Mod().actions().getPlayer();
+                    new Mod().actions().getGUI().map.wdgmsg("click", pl.sc, pl.rc.floor(posres), 3, 0);
+                }
+            }
+        }
+    }
+
+    public void itemInteract(WItem item)
+    {
+        getGUI().ui.lcc = item.rootpos();
+        item.item.wdgmsg("iact", item.c, 0);
+    }
+
+    public void login(LoginScreen screen, String name, String pass)
+    {
+        screen.wdgmsg("forget");
+        screen.wdgmsg("login", new AuthClient.NativeCred(name,pass),false);
+    }
+
 }

@@ -26,10 +26,15 @@
 
 package haven;
 
+import haven.mod.Mod;
+
 import java.awt.*;
-import java.util.*;
-import java.awt.event.KeyEvent;
 import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Fightsess extends Widget {
     public static final Tex cdframe = Resource.loadtex("gfx/hud/combat/cool");
@@ -79,6 +84,8 @@ public class Fightsess extends Widget {
             else
                 keysftex[i] = Text.renderstroked(FightWnd.keysf[i - 5], Color.WHITE, Color.BLACK, Text.num12boldFnd).tex();
         }
+
+        System.out.println("Fight Session started!");
     }
 
     public void presize() {
@@ -103,6 +110,7 @@ public class Fightsess extends Widget {
     private final Map<Pair<Long, Resource>, Sprite> cfx = new CacheMap<Pair<Long, Resource>, Sprite>();
     private final Collection<Sprite> curfx = new ArrayList<Sprite>();
 
+    //Called when an effect, such as targeting arrow, is used on a target.
     private void fxon(long gobid, Resource fx) {
         MapView map = getparent(GameUI.class).map;
         Gob gob = ui.sess.glob.oc.getgob(gobid);
@@ -401,7 +409,9 @@ public class Fightsess extends Widget {
             }
         } else if (msg == "use") {
             this.use = (Integer) args[0];
+            System.out.println("Using ability?");
         } else if (msg == "used") {
+            System.out.println("Used ability?");
         } else {
             super.uimsg(msg, args);
         }
@@ -414,7 +424,20 @@ public class Fightsess extends Widget {
                 fv.lsrel.remove(cur);
                 fv.lsrel.addLast(cur);
             }
+            for(Fightview.Relation relation : fv.lsrel)
+            {
+                GameUI gameUI = new Mod().actions().getGUI();
+                BuddyWnd buddies = gameUI.buddies;
+                if(buddies == null)
+                    System.out.println("NULL BUDDIES!");
+                BuddyWnd.Buddy b = buddies.find((int)relation.gobid);
+                if (b == null)
+                    System.out.println("NULL BUDDY FOUND!");
+                else
+                    System.out.println("Buddy: " + b.name);
+            }
             fv.wdgmsg("bump", (int) fv.lsrel.get(0).gobid);
+            System.out.println("Switch!");
             return (true);
         }
 

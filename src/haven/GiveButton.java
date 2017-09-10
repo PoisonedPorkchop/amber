@@ -71,6 +71,7 @@ public class GiveButton extends Widget {
 
     public boolean mousedown(Coord c, int button) {
         wdgmsg("click", button);
+        System.out.println("Give button?");
         return (true);
     }
 

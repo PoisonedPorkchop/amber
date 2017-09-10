@@ -99,6 +99,7 @@ public class ModAPI {
             if (!mods.exists()) {
                 mods.mkdir();
             }
+            ClassLoader loader;
             for(File file : mods.listFiles())
                 if(file.isFile())
                     if(file.getName().contains(".")) {
@@ -378,6 +379,28 @@ public class ModAPI {
         {
             client = new Client();
         }
+    }
+
+    public Set<Widget> getAllWidgets()
+    {
+        return HavenPanel.lui.rwidgets.keySet();
+    }
+
+    public ArrayList<Widget> getAllWidgetsOfType(Class<? extends Widget> widgetClass)
+    {
+        ArrayList<Widget> typed = new ArrayList<>();
+        for (Widget widget : getAllWidgets())
+            if(widget.getClass().equals(widgetClass))
+                typed.add(widget);
+        return typed;
+    }
+
+    public Widget getFirstWidgetOfType(Class<? extends Widget> widgetClass)
+    {
+        ArrayList<Widget> widgets = getAllWidgetsOfType(widgetClass);
+        if(!widgets.isEmpty())
+            return widgets.get(0);
+        return null;
     }
 
     public Client getClient() {
