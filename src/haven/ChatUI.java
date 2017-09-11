@@ -1188,7 +1188,6 @@ public class ChatUI extends Widget {
             c = br.sub(0, 20);
             g.image(rqline.tex(), c);
             int lx = rqline.advance(qline.point + rqpre);
-            g.line(new Coord(br.x + lx + 1, br.y - 18), new Coord(br.x + lx + 1, br.y - 6), 1);
         } else {
             c = br.sub(0, 5);
         }

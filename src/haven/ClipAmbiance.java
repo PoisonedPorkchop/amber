@@ -30,7 +30,7 @@ import java.util.*;
 import haven.Audio.CS;
 import haven.Audio.VolAdjust;
 
-public class ClipAmbiance implements Rendered, Rendered.Instanced {
+public class ClipAmbiance implements Rendered {
     public final Desc desc;
     public double bvol;
     private Glob glob = null;
@@ -195,51 +195,11 @@ public class ClipAmbiance implements Rendered, Rendered.Instanced {
         }
     }
 
-    public void draw(GOut g) {
-        ActAudio list = g.st.get(ActAudio.slot);
-        if(list == null)
-            return;
-        g.apply();
-        if((glob == null) || (glob.list != list) || glob.dead) {
-            try {
-                glob = list.intern(new Glob(desc.parent.get().layer(Desc.class), list));
-            } catch(Loading l) {
-                return;
-            }
-        }
-        Coord3f pos = PView.mvxf(g).mul4(Coord3f.o);
-        double pd = Math.sqrt((pos.x * pos.x) + (pos.y * pos.y));
-        double svol = Math.min(1.0, 50.0 / pd);
-        glob.add(desc, svol * bvol);
-    }
-
     private class Instanced implements Rendered {
         final float[] lb;
 
         Instanced(float[] lb) {
             this.lb = lb;
-        }
-
-        public void draw(GOut g) {
-            ActAudio list = g.st.get(ActAudio.slot);
-            if(list == null)
-                return;
-            g.apply();
-            if((glob == null) || (glob.list != list) || glob.dead) {
-                try {
-                    glob = list.intern(new Glob(desc.parent.get().layer(Desc.class), list));
-                } catch(Loading l) {
-                    return;
-                }
-            }
-            Matrix4f cam = PView.camxf(g);
-            double svol = 0.0;
-            for(int i = 0; i < lb.length; i += 3) {
-                float[] pos = cam.mul4(new float[] {lb[i], lb[i + 1], lb[i + 2], 1.0f});
-                double pd = Math.sqrt((pos[0] * pos[0]) + (pos[1] * pos[1]));
-                svol += Math.min(1.0, 50.0 / pd);
-            }
-            glob.add(desc, svol * bvol);
         }
 
         public boolean setup(RenderList rl) {

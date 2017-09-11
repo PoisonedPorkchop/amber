@@ -26,13 +26,11 @@
 
 package haven;
 
-import java.awt.Color;
-import java.awt.image.*;
-import java.util.*;
-import java.nio.*;
-import javax.media.opengl.*;
-
 import haven.TexGL.TexOb;
+
+import javax.media.opengl.GL;
+import java.awt.image.BufferedImage;
+import java.nio.ByteBuffer;
 
 import static haven.GOut.checkerr;
 

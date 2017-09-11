@@ -125,7 +125,6 @@ public class ShadowMap extends GLState implements GLState.GlobalState, GLState.G
                     .mul(lproj.fin(Matrix4f.id))
                     .mul(lcam.fin(Matrix4f.id))
                     .mul(cm);
-            tgt.render(scene, g);
         }
     }
 

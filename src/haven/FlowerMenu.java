@@ -253,10 +253,6 @@ public class FlowerMenu extends Widget {
         }
     }
 
-    public void draw(GOut g) {
-        super.draw(g, false);
-    }
-
     public boolean keydown(java.awt.event.KeyEvent ev) {
         return (true);
     }

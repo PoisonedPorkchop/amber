@@ -31,7 +31,7 @@ import java.util.*;
 import java.nio.*;
 import javax.media.opengl.*;
 
-public class FastMesh implements FRendered, Rendered.Instanced, Disposable {
+public class FastMesh implements FRendered, Disposable {
     public static final GLState.Slot<GLState> vstate = new GLState.Slot<GLState>(GLState.Slot.Type.SYS, GLState.class);
     public final VertexBuf vert;
     public final ShortBuffer indb;
@@ -72,7 +72,6 @@ public class FastMesh implements FRendered, Rendered.Instanced, Disposable {
 
     public static abstract class Compiled {
         public abstract void dispose();
-        public void prepare(GOut g) {}
     }
 
     public abstract class Compiler {
@@ -85,57 +84,6 @@ public class FastMesh implements FRendered, Rendered.Instanced, Disposable {
 
             Entry(GLProgram prog, Compiled mesh, Object id) {this.prog = prog; this.mesh = mesh; this.id = id;}
         }
-
-        private Object[] getid(GOut g) {
-            ArrayList<Object> id = new ArrayList<Object>();
-            for(int i = 0; i < vert.bufs.length; i++) {
-                if(vert.bufs[i] instanceof VertexBuf.GLArray)
-                    id.add(((VertexBuf.GLArray)vert.bufs[i]).progid(g));
-                else
-                    id.add(null);
-            }
-	    /* XXX: Probably, each auto-inst should have to be ID'd in
-	     * some meaningful way, but I'm not currently sure what
-	     * would consitute a proper ID. */
-            id.add(g.st.prog.autoinst.length > 0);
-            return(ArrayIdentity.intern(id.toArray(new Object[0])));
-        }
-
-        private Compiled last = null;
-        public Compiled get(GOut g) {
-            if(last != null)
-                last.prepare(g);
-            g.apply();
-            GLProgram prog = g.st.prog;
-            {
-                Entry[] lc = cache;
-                for(int i = 0; i < lc.length; i++) {
-                    if(lc[i].prog == prog)
-                        return(last = lc[i].mesh);
-                }
-            }
-            Object[] id = getid(g);
-            Compiled ret;
-            synchronized(this) {
-                Entry[] lc = cache;
-                create: {
-                    for(int i = 0; i < lc.length; i++) {
-                        if(lc[i].id == id) {
-                            ret = cache[i].mesh;
-                            break create;
-                        }
-                    }
-                    ret = create(g);
-                }
-                int i = lc.length;
-                lc = Utils.extend(lc, i + 1);
-                lc[i] = new Entry(prog, ret, id);
-                cache = lc;
-                return(last = ret);
-            }
-        }
-
-        public abstract Compiled create(GOut g);
 
         public void dispose() {
             for(Entry ent : cache)
@@ -155,98 +103,6 @@ public class FastMesh implements FRendered, Rendered.Instanced, Disposable {
                 }
             }
         }
-
-        public DLCompiled create(GOut g) {return(new DLCompiled());}
-    }
-
-    public class VAOState extends GLState {
-        private GLBuffer ind;
-        private GLVertexArray vao;
-
-        private void bindindbo(GOut g) {
-            BGL gl = g.gl;
-            if((ind != null) && (ind.cur != g.curgl)) {
-                ind.dispose();
-                ind = null;
-            }
-            if(ind == null) {
-                ind = new GLBuffer(g);
-                gl.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, ind);
-                indb.rewind();
-                gl.glBufferData(GL.GL_ELEMENT_ARRAY_BUFFER, indb.remaining() * 2, indb, GL.GL_STATIC_DRAW);
-                GOut.checkerr(gl);
-            } else {
-                gl.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, ind);
-            }
-        }
-
-        public void apply(GOut g) {
-            BGL gl = g.gl;
-            if((vao != null) && (vao.cur != g.curgl)) {
-                vao.dispose();
-                vao = null;
-            }
-            if(vao == null) {
-                vao = new GLVertexArray(g);
-                gl.glBindVertexArray(vao);
-                for(VertexBuf.AttribArray buf : vert.bufs) {
-                    if(buf instanceof VertexBuf.GLArray)
-                        ((VertexBuf.GLArray)buf).bind(g, true);
-                }
-                bindindbo(g);
-            } else {
-                gl.glBindVertexArray(vao);
-            }
-        }
-
-        public void unapply(GOut g) {
-            BGL gl = g.gl;
-            gl.glBindVertexArray(null);
-            gl.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, null);
-        }
-
-        public int capplyfrom(GLState o) {
-            if(o instanceof VAOState)
-                return(1);
-            return(-1);
-        }
-
-        public void applyfrom(GOut g, GLState from) {
-            apply(g);
-        }
-
-        public void dispose() {
-            if(vao != null) {
-                vao.dispose();
-                vao = null;
-            }
-            if(ind != null) {
-                ind.dispose();
-                ind = null;
-            }
-        }
-
-        public void prep(Buffer buf) {
-            buf.put(vstate, this);
-        }
-    }
-
-    public class VAOCompiler extends Compiler {
-        public class VAOCompiled extends Compiled {
-            private VAOState st = new VAOState();
-
-            public void prepare(GOut g) {
-                GLState cur = g.st.cur(vstate);
-                if(cur != null)
-                    g.state(cur);
-            }
-
-            public void dispose() {
-                st.dispose();
-            }
-        }
-
-        public VAOCompiled create(GOut g) {return(new VAOCompiled());}
     }
 
     private void cbounds() {
@@ -293,7 +149,6 @@ public class FastMesh implements FRendered, Rendered.Instanced, Disposable {
                 }
                 switch(gc.pref.meshmode.val) {
                     case VAO:
-                        compiler = new VAOCompiler();
                         break;
                     case DLIST:
                         compiler = new DLCompiler();
@@ -315,62 +170,6 @@ public class FastMesh implements FRendered, Rendered.Instanced, Disposable {
 
     /* XXX: One might start to question if it isn't about time to
      * dispose of display-list drawing. */
-    private class Instanced implements Rendered, FRendered, Disposable {
-        final List<GLState.Buffer> instances;
-        final VAOCompiler compiler;
-        final Map<Program, Arrays> arrays = new HashMap<Program, Arrays>();
-
-        class Arrays {
-            final Program prog;
-            final GLBuffer[] data;
-
-            Arrays(GOut g, Program prog) {
-                this.prog = prog;
-                this.data = new GLBuffer[prog.autoinst.length];
-                for(int i = 0; i < data.length; i++) {
-                    data[i] = new GLBuffer(g);
-                    prog.autoinst[i].filliarr(g, instances, data[i]);
-                }
-            }
-
-            void bind(GOut g) {
-                for(int i = 0; i < data.length; i++)
-                    prog.autoinst[i].bindiarr(g, data[i]);
-            }
-
-            void unbind(GOut g) {
-                for(int i = 0; i < data.length; i++)
-                    prog.autoinst[i].unbindiarr(g, data[i]);
-            }
-
-            void dispose() {
-                for(GLBuffer buf : data)
-                    buf.dispose();
-            }
-        }
-
-        Instanced(VAOCompiler compiler, List<GLState.Buffer> instances) {
-            this.compiler = compiler;
-            this.instances = instances;
-        }
-
-        public boolean setup(RenderList r) {
-            throw(new RuntimeException("Instanced meshes are transformed into, not set up"));
-        }
-
-        public void dispose() {
-            for(Arrays ar : arrays.values())
-                ar.dispose();
-        }
-    }
-
-    public Rendered instanced(GLConfig gc, List<GLState.Buffer> st) {
-        Compiler compiler = compiler(gc);
-        if(!(compiler instanceof VAOCompiler))
-            return(null);
-        VAOCompiler vc = (VAOCompiler)compiler;
-        return(new Instanced((VAOCompiler)compiler, new ArrayList<GLState.Buffer>(st)));
-    }
 
     public void dispose() {
         if(compiler != null) {

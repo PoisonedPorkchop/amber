@@ -150,8 +150,6 @@ public interface ShaderMacro {
                     autolocs[i] = uniform(auto[i]);
             }
             for (int i = 0; i < auto.length; i++) {
-                if (all || adirty[i])
-                    auto[i].apply(g, autolocs[i]);
                 adirty[i] = false;
             }
         }

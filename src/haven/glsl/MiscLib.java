@@ -99,64 +99,6 @@ public abstract class MiscLib {
         }));
     }
 
-    public static final Uniform maploc = new Uniform.AutoApply(VEC3, PView.loc) {
-        public void apply(GOut g, VarID loc) {
-            Coord3f orig = PView.locxf(g).mul4(Coord3f.o);
-            try {
-                orig.z = Config.disableelev ? 0 : g.st.get(PView.ctx).glob().map.getcz(orig.x, -orig.y);
-            } catch(Loading l) {
-		    /* XXX: WaterTile's obfog effect is the only thing
-		     * that uses maploc, in order to get the precise
-		     * water surface level. Arguably, maploc should be
-		     * eliminated entirely and the obfog should pass
-		     * the water level in a uniform instead. However,
-		     * this works better for now, because with such a
-		     * mechanic, Skeleton.FxTrack audio sprites would
-		     * never complete if they get outside the map and
-		     * stuck as constantly loading and never
-		     * playing. Either way, when loading, the likely
-		     * quite slight deviation between origin-Z and
-		     * map-Z level probably doesn't matter a whole
-		     * lot, but solve pl0x. */
-            }
-
-            g.gl.glUniform3f(loc, orig.x, orig.y, orig.z);
-        }
-    };
-
-    public static final Uniform time = new Uniform.AutoApply(FLOAT, "time") {
-        public void apply(GOut g, VarID loc) {
-            g.gl.glUniform1f(loc, (System.currentTimeMillis() % 3000000L) / 1000f);
-        }
-    };
-    public static final Uniform globtime = new Uniform.AutoApply(FLOAT, "globtime") {
-        public void apply(GOut g, VarID loc) {
-            Glob glob = g.st.cur(PView.ctx).glob();
-            g.gl.glUniform1f(loc, (glob.globtime() % 10000000L) / 1000f);
-        }
-    };
-
-    private static Coord ssz(GOut g) {
-        PView.RenderState wnd = g.st.cur(PView.wnd);
-        if (wnd == null)
-            return (g.sz);
-        else
-            return (wnd.sz());
-    }
-
-    public static final Uniform pixelpitch = new Uniform.AutoApply(VEC2) {
-        public void apply(GOut g, VarID loc) {
-            Coord sz = ssz(g);
-            g.gl.glUniform2f(loc, 1.0f / sz.x, 1.0f / sz.y);
-        }
-    };
-    public static final Uniform screensize = new Uniform.AutoApply(VEC2) {
-        public void apply(GOut g, VarID loc) {
-            Coord sz = ssz(g);
-            g.gl.glUniform2f(loc, sz.x, sz.y);
-        }
-    };
-
     public static final Function colblend = new Function.Def(VEC4) {{
         Expression base = param(IN, VEC4).ref();
         Expression blend = param(IN, VEC4).ref();

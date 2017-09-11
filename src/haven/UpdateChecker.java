@@ -13,7 +13,8 @@ public class UpdateChecker extends Thread {
     }
 
     public void run() {
-        try {
+        //TODO Implement own version checker
+        /**try {
             JSONObject json = getjson();
             String latestver = json.getString("tag_name");
             if (isnewer(Config.version, latestver) && HavenPanel.lui != null && HavenPanel.lui.root != null) {
@@ -25,7 +26,7 @@ public class UpdateChecker extends Thread {
         } catch (Exception e) {
             System.err.println("WARNING: error checking for updates");
             e.printStackTrace();
-        }
+        }*/
     }
 
     private JSONObject getjson() throws IOException {

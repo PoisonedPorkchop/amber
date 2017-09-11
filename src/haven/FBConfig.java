@@ -44,104 +44,11 @@ public class FBConfig {
     public Attachment color[], depth;
     public GLState state;
     private RenderTarget[] tgts = new RenderTarget[0];
-    private ResolveFilter[] res = new ResolveFilter[0];
     private GLState resp;
 
     public FBConfig(PView.ConfContext ctx, Coord sz) {
         this.ctx = ctx;
         this.sz = sz;
-    }
-
-    public boolean cleanp() {
-        if (hdr || tdepth || (ms > 1))
-            return (false);
-        for (int i = 0; i < tgts.length; i++) {
-            if (tgts[i] != null)
-                return (false);
-        }
-        for (ResolveFilter rf : res) {
-            if (!rf.cleanp())
-                return (false);
-        }
-        return (true);
-    }
-
-    private void create() {
-        Collection<Attachment> color = new LinkedList<Attachment>();
-        Attachment depth;
-        Collection<ShaderMacro> shb = new LinkedList<ShaderMacro>();
-        Collection<GLState> stb = new LinkedList<GLState>();
-        {
-            int fmt = hdr ? GL.GL_RGBA16F : GL.GL_RGBA;
-            if (ms <= 1)
-                color.add(Attachment.mk(new TexE(sz, fmt, GL.GL_RGBA, GL.GL_UNSIGNED_BYTE)));
-            else
-                color.add(Attachment.mk(new TexMSE(sz, ms, fmt, GL.GL_RGBA, GL.GL_UNSIGNED_BYTE)));
-        }
-        if (tdepth) {
-            if (ms <= 1)
-                depth = Attachment.mk(new TexE(sz, GL2.GL_DEPTH_COMPONENT, GL2.GL_DEPTH_COMPONENT, GL.GL_UNSIGNED_INT));
-            else
-                depth = Attachment.mk(new TexMSE(sz, ms, GL2.GL_DEPTH_COMPONENT, GL2.GL_DEPTH_COMPONENT, GL.GL_UNSIGNED_INT));
-        } else {
-            depth = Attachment.mk(new GLFrameBuffer.RenderBuffer(sz, GL2.GL_DEPTH_COMPONENT, ms));
-        }
-        for (int i = 0; i < tgts.length; i++) {
-            if (tgts[i] != null) {
-                color.add(tgts[i].maketex(this));
-                GLState st = tgts[i].state(this, i + 1);
-                if (st != null)
-                    stb.add(st);
-                ShaderMacro code = tgts[i].code(this, i + 1);
-                if (code != null)
-                    shb.add(code);
-            }
-        }
-        this.color = color.toArray(new Attachment[0]);
-        this.depth = depth;
-    /* XXX: Shaders should be canonized and cached to avoid
-	 * creation of unnecessary identical programs when
-	 * configurations change. */
-        final ShaderMacro shader = ShaderMacro.compose(shb);
-        this.fb = new GLFrameBuffer(this.color, this.depth) {
-            public ShaderMacro shader() {
-                return (shader);
-            }
-        };
-        this.wnd = new PView.RenderState() {
-            public Coord ul() {
-                return (Coord.z);
-            }
-
-            public Coord sz() {
-                return (sz);
-            }
-        };
-        stb.add(fb);
-        stb.add(wnd);
-        this.state = GLState.compose(stb.toArray(new GLState[0]));
-        if (res.length > 0) {
-            ShaderMacro[] resp = new ShaderMacro[res.length];
-            for (int i = 0; i < res.length; i++)
-                resp[i] = res[i].code(this);
-            resp = ArrayIdentity.intern(resp);
-            ShaderMacro iresp;
-            synchronized (rescache) {
-                if ((iresp = rescache.get(resp)) == null)
-                    rescache.put(resp, iresp = ShaderMacro.compose(resp));
-            }
-            this.resp = new States.AdHoc(iresp) {
-                public void apply(GOut g) {
-                    for (ResolveFilter f : res)
-                        f.apply(FBConfig.this, g);
-                }
-
-                public void unapply(GOut g) {
-                    for (ResolveFilter f : res)
-                        f.unapply(FBConfig.this, g);
-                }
-            };
-        }
     }
 
     private static <T> boolean hasuo(T[] a, T[] b) {
@@ -165,8 +72,6 @@ public class FBConfig {
             return (false);
         if (!hasuo(a.tgts, b.tgts) || !hasuo(b.tgts, a.tgts))
             return (false);
-        if (!hasuo(a.res, b.res) || !hasuo(b.res, a.res))
-            return (false);
         return (true);
     }
 
@@ -176,33 +81,8 @@ public class FBConfig {
         color = last.color;
         depth = last.depth;
         tgts = last.tgts;
-        res = last.res;
         resp = last.resp;
         state = last.state;
-    }
-
-    public void fin(FBConfig last) {
-        if (ms <= 1)
-            add(new Resolve1());
-        else
-            add(new ResolveMS(ms));
-        if (equals(this, last)) {
-            subsume(last);
-            return;
-        }
-        if (last.fb != null)
-            last.fb.dispose();
-        if (cleanp())
-            return;
-        create();
-    }
-
-    public void resolve(GOut g) {
-        if (fb != null) {
-            for (ResolveFilter rf : res)
-                rf.prepare(this, g);
-            g.ftexrect(Coord.z, sz, resp);
-        }
     }
 
     public RenderTarget add(RenderTarget tgt) {
@@ -221,19 +101,6 @@ public class FBConfig {
         tgts = Utils.extend(tgts, i + 1);
         tgts[i] = tgt;
         return (tgt);
-    }
-
-    public ResolveFilter add(ResolveFilter rf) {
-        if (rf == null)
-            throw (new NullPointerException());
-        for (ResolveFilter p : res) {
-            if (Utils.eq(rf, p))
-                return (p);
-        }
-        int l = res.length;
-        res = Utils.extend(res, l + 1);
-        res[l] = rf;
-        return (rf);
     }
 
     public static abstract class RenderTarget {
@@ -260,97 +127,4 @@ public class FBConfig {
             g.gl.glUniform1i(loc, ((PView.ConfContext) g.st.get(PView.ctx)).cur.ms);
         }
     };
-
-    public interface ResolveFilter {
-        public boolean cleanp();
-
-        public void prepare(FBConfig cfg, GOut g);
-
-        public ShaderMacro code(FBConfig cfg);
-
-        public void apply(FBConfig cfg, GOut g);
-
-        public void unapply(FBConfig cfg, GOut g);
-    }
-
-    private static class Resolve1 implements ResolveFilter {
-        public void prepare(FBConfig cfg, GOut g) {
-        }
-
-        public boolean cleanp() {
-            return (true);
-        }
-
-        private static final Uniform ctex = new Uniform(Type.SAMPLER2D);
-        private static final ShaderMacro code = prog -> {
-            prog.fctx.fragcol.mod(in -> Cons.texture2D(ctex.ref(), Tex2D.rtexcoord.ref()), 0);
-        };
-
-        public ShaderMacro code(FBConfig cfg) {
-            return (code);
-        }
-
-        private GLState.TexUnit csmp;
-
-        public void apply(FBConfig cfg, GOut g) {
-            csmp = g.st.texalloc(g, ((GLFrameBuffer.Attach2D) cfg.color[0]).tex);
-            g.gl.glUniform1i(g.st.prog.uniform(ctex), csmp.id);
-        }
-
-        public void unapply(FBConfig cfg, GOut g) {
-            csmp.ufree(g);
-            csmp = null;
-        }
-
-        public boolean equals(Object o) {
-            return (o instanceof Resolve1);
-        }
-    }
-
-    private static class ResolveMS implements ResolveFilter {
-        private final int samples;
-
-        private ResolveMS(int samples) {
-            this.samples = samples;
-        }
-
-        public void prepare(FBConfig cfg, GOut g) {
-        }
-
-        public boolean cleanp() {
-            return (true);
-        }
-
-        private static final Uniform ctex = new Uniform(Type.SAMPLER2DMS);
-        private final ShaderMacro code = prog -> {
-            prog.fctx.fragcol.mod(new Macro1<Expression>() {
-                public Expression expand(Expression in) {
-                    Expression[] texels = new Expression[samples];
-                    for (int i = 0; i < samples; i++)
-                        texels[i] = Cons.texelFetch(ctex.ref(), Cons.ivec2(Cons.floor(Cons.mul(Tex2D.rtexcoord.ref(), MiscLib.screensize.ref()))), Cons.l(i));
-                    return (Cons.mul(Cons.add(texels), Cons.l(1.0 / samples)));
-                }
-            }, 0);
-        };
-
-        public ShaderMacro code(FBConfig cfg) {
-            return (code);
-        }
-
-        private GLState.TexUnit csmp;
-
-        public void apply(FBConfig cfg, GOut g) {
-            csmp = g.st.texalloc(g, ((GLFrameBuffer.AttachMS) cfg.color[0]).tex);
-            g.gl.glUniform1i(g.st.prog.uniform(ctex), csmp.id);
-        }
-
-        public void unapply(FBConfig cfg, GOut g) {
-            csmp.ufree(g);
-            csmp = null;
-        }
-
-        public boolean equals(Object o) {
-            return ((o instanceof ResolveMS) && (((ResolveMS) o).samples == samples));
-        }
-    }
 }

@@ -109,7 +109,6 @@ public abstract class ConsoleHost extends Widget {
                 cmdtext = cmdfoundry.render(":" + (cmdtextf = cmdline.line));
             g.image(cmdtext.tex(), c);
             int lx = cmdtext.advance(cmdline.point + 1);
-            g.line(c.add(lx + 1, 2), c.add(lx + 1, 14), 1);
         }
     }
 

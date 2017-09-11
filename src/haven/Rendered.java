@@ -36,10 +36,6 @@ public interface Rendered extends Drawn {
 
     public default Object staticp() {return(null);}
 
-    public static interface Instanced extends Rendered {
-        public Rendered instanced(GLConfig gc, List<GLState.Buffer> instances);
-    }
-
     public static interface RComparator<T extends Rendered> {
         public int compare(T a, T b, GLState.Buffer sa, GLState.Buffer sb);
     }

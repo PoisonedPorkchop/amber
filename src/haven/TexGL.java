@@ -102,23 +102,6 @@ public abstract class TexGL extends Tex {
             buf.put(slot, this);
         }
 
-        public void reapply(GOut g) {
-            BGL gl = g.gl;
-            gl.glUniform1i(g.st.prog.uniform(Tex2D.tex2d), sampler.id);
-        }
-
-        public void apply(GOut g) {
-            BGL gl = g.gl;
-            sampler = lbind(g, tex);
-            reapply(g);
-        }
-
-        public void unapply(GOut g) {
-            BGL gl = g.gl;
-            sampler.ufree(g);
-            sampler = null;
-        }
-
         public ShaderMacro shader() {
         /* XXX: This combinatorial stuff does not seem quite right. */
             if (tex.centroid)
@@ -145,8 +128,6 @@ public abstract class TexGL extends Tex {
             sampler = from.sampler;
             from.sampler = null;
             gl.glBindTexture(GL.GL_TEXTURE_2D, glid);
-            if (g.st.pdirty)
-                reapply(g);
         }
 
         public String toString() {
@@ -248,8 +229,6 @@ public abstract class TexGL extends Tex {
         this(sz, new Coord(nextp2(sz.x), nextp2(sz.y)));
     }
 
-    protected abstract void fill(GOut gl);
-
     public static int num() {
         synchronized (active) {
             return (active.size());
@@ -278,13 +257,6 @@ public abstract class TexGL extends Tex {
         t = new TexOb(g);
         gl.glBindTexture(GL.GL_TEXTURE_2D, t);
         setparams(g);
-        try {
-            fill(g);
-        } catch (Loading l) {
-            t.dispose();
-            t = null;
-            throw (l);
-        }
         try {
             checkerr(gl);
         } catch (GOut.GLOutOfMemoryException e) {
@@ -338,30 +310,6 @@ public abstract class TexGL extends Tex {
                 setparams = false;
             }
             return (t);
-        }
-    }
-
-    public void render(GOut g, Coord c, Coord ul, Coord br, Coord sz) {
-        BGL gl = g.gl;
-        g.st.prep(draw);
-        g.apply();
-        checkerr(gl);
-        if (!disableall) {
-            gl.glBegin(GL2.GL_QUADS);
-            float l = ((float) ul.x) / ((float) tdim.x);
-            float t = ((float) ul.y) / ((float) tdim.y);
-            float r = ((float) br.x) / ((float) tdim.x);
-            float b = ((float) br.y) / ((float) tdim.y);
-            gl.glTexCoord2f(l, t);
-            gl.glVertex3i(c.x, c.y, 0);
-            gl.glTexCoord2f(r, t);
-            gl.glVertex3i(c.x + sz.x, c.y, 0);
-            gl.glTexCoord2f(r, b);
-            gl.glVertex3i(c.x + sz.x, c.y + sz.y, 0);
-            gl.glTexCoord2f(l, b);
-            gl.glVertex3i(c.x, c.y + sz.y, 0);
-            gl.glEnd();
-            checkerr(gl);
         }
     }
 

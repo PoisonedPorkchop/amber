@@ -72,9 +72,5 @@ public class Attribute extends Variable.Global {
         public AutoInstanced(Type type) {
             super(type);
         }
-
-        public abstract void filliarr(GOut g, List<Buffer> inst, GLBuffer buf);
-        public abstract void bindiarr(GOut g, GLBuffer buf);
-        public abstract void unbindiarr(GOut g, GLBuffer buf);
     }
 }

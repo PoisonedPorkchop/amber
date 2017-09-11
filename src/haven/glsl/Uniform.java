@@ -77,7 +77,5 @@ public class Uniform extends Variable.Global {
             super(type);
             this.deps = deps;
         }
-
-        public abstract void apply(GOut g, VarID location);
     }
 }

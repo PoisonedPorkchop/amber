@@ -70,14 +70,6 @@ public abstract class States extends GLState {
             return (-1);
         }
 
-        public void applyfrom(GOut g, GLState o) {
-            apply(g);
-        }
-
-        public ShaderMacro shader() {
-            return (shader);
-        }
-
         public void prep(Buffer buf) {
             buf.put(color, this);
         }
@@ -93,8 +85,6 @@ public abstract class States extends GLState {
         public String toString() {
             return ("ColState(" + c + ")");
         }
-
-        private static final ShaderMacro shader = new haven.glsl.BaseColor();
     }
 
     public static final ColState vertexcolor = new ColState(0, 0, 0, 0) {
@@ -130,12 +120,6 @@ public abstract class States extends GLState {
 
         public boolean equals(Object o) {
             return (o == this);
-        }
-
-        static final ShaderMacro shader = ShaderMacro.compose(GLState.Instancer.mkinstanced, new BaseColor());
-
-        public ShaderMacro shader() {
-            return (shader);
         }
     }
 

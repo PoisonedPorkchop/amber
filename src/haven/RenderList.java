@@ -436,8 +436,6 @@ public class RenderList {
             int o = i + 1;
             tryinst: {
 		/* XXX: How to handle eyeorder and similar things is... tricky. This is an ugly hack. Please replace. */
-                if(!(s.r instanceof Rendered.Instanced) || (s.os.get(Rendered.order) instanceof Rendered.EyeOrder))
-                    break tryinst;
                 boolean copy = (s.statroot != null);
                 instbuf.clear();
                 instbuf.add(copy?s.os.copy():s.os);
@@ -449,19 +447,13 @@ public class RenderList {
                 }
                 if(o - i < INSTANCE_THRESHOLD)
                     break tryinst;
-                Rendered ir = ((Rendered.Instanced)s.r).instanced(cfg, instbuf);
-                if(ir == null)
-                    break tryinst;
                 Buffer ist = GLState.inststate(cfg, instbuf);
                 if(ist == null)
                     break tryinst;
-                s.r = ir;
                 s.os = ist;
                 s.instnum = instbuf.size();
                 for(int u = i + 1; u < o; u++)
                     list[u].skip = true;
-                if(ir instanceof Disposable)
-                    s.disp = (Disposable)ir;
             }
             i = o;
         }

@@ -44,10 +44,6 @@ public class TexSI extends Tex {
         return (parent.tcy(y + ul.y));
     }
 
-    public void render(GOut g, Coord c, Coord ul, Coord br, Coord sz) {
-        parent.render(g, c, this.ul.add(ul), this.ul.add(br), sz);
-    }
-
     public GLState draw() {
         return (parent.draw());
     }

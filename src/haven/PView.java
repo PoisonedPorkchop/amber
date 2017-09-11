@@ -82,7 +82,6 @@ public abstract class PView extends Widget {
 
         private final Global glob = new Global() {
             public void postsetup(RenderList rl) {
-                cfg.fin(cur);
                 cur = cfg;
                 cfg = new FBConfig(ConfContext.this, sz());
                 if (cur.fb != null) {

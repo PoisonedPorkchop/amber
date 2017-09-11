@@ -1317,24 +1317,7 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         }
     }
 
-    private void drawarrow(GOut g, double a) {
-        Coord hsz = sz.div(2);
-        double ca = -Coord.z.angle(hsz);
-        Coord ac;
-        if ((a > ca) && (a < -ca)) {
-            ac = new Coord(sz.x, hsz.y - (int) (Math.tan(a) * hsz.x));
-        } else if ((a > -ca) && (a < Math.PI + ca)) {
-            ac = new Coord(hsz.x - (int) (Math.tan(a - Math.PI / 2) * hsz.y), 0);
-        } else if ((a > -Math.PI - ca) && (a < ca)) {
-            ac = new Coord(hsz.x + (int) (Math.tan(a + Math.PI / 2) * hsz.y), sz.y);
-        } else {
-            ac = new Coord(0, hsz.y + (int) (Math.tan(a) * hsz.x));
-        }
-        Coord bc = ac.add(Coord.sc(a, -10));
-        g.line(bc, bc.add(Coord.sc(a, -40)), 2);
-        g.line(bc, bc.add(Coord.sc(a + Math.PI / 4, -10)), 2);
-        g.line(bc, bc.add(Coord.sc(a - Math.PI / 4, -10)), 2);
-    }
+
 
     public Coord3f screenxf(Coord3f mc) {
         if (Config.disableelev)
@@ -1383,7 +1366,6 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             if (Double.isNaN(a))
                 continue;
             g.chcolor(m.col);
-            drawarrow(g, a);
         }
         g.chcolor();
     }
@@ -1454,28 +1436,12 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         private Plob(Indir<Resource> res, Message sdt) {
             super(MapView.this.glob, Coord2d.z);
             setattr(new ResDrawable(this, res, sdt));
-            if (ui.mc.isect(rootpos(), sz)) {
-                delay(new Adjust(ui.mc.sub(rootpos()), 0));
-            }
         }
 
         public MapView mv() {
             return (MapView.this);
         }
 
-        private class Adjust extends Maptest {
-            int modflags;
-
-            Adjust(Coord c, int modflags) {
-                super(c);
-                this.modflags = modflags;
-            }
-
-            public void hit(Coord pc, Coord2d mc) {
-                adjust.adjust(Plob.this, pc, mc, modflags);
-                lastmc = pc;
-            }
-        }
     }
 
     private int olflash;
@@ -1552,26 +1518,6 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             this.pc = c;
         }
 
-        public void run(GOut g) {
-            GLState.Buffer bk = g.st.copy();
-            try {
-                BGL gl = g.gl;
-                g.st.set(clickbasic(g));
-                g.apply();
-                gl.glClear(GL.GL_DEPTH_BUFFER_BIT | GL.GL_COLOR_BUFFER_BIT);
-                checkmapclick(g, pc, mc -> {
-                    synchronized(ui) {
-                        if(mc != null)
-                            hit(pc, mc);
-                        else
-                            nohit(pc);
-                    }
-                });
-            } finally {
-                g.st.set(bk);
-            }
-        }
-
         protected abstract void hit(Coord pc, Coord2d mc);
 
         protected void nohit(Coord pc) {
@@ -1593,12 +1539,10 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             try {
                 BGL gl = g.gl;
                 g.st.set(clickbasic(g));
-                g.apply();
                 gl.glClear(GL.GL_DEPTH_BUFFER_BIT | GL.GL_COLOR_BUFFER_BIT);
                 checkmapclick(g, clickc, mc -> {mapcl = mc; ckdone(1);});
                 g.st.set(bk);
                 g.st.set(clickbasic(g));
-                g.apply();
                 gl.glClear(GL.GL_COLOR_BUFFER_BIT);
                 checkgobclick(g, clickc, cl -> {gobcl = cl; ckdone(2);});
             } finally {
@@ -1844,7 +1788,6 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             ((Camera) camera).drag(c);
         } else if (placing != null) {
             if ((placing.lastmc == null) || !placing.lastmc.equals(c)) {
-                delay(placing.new Adjust(c, ui.modflags()));
             }
         } else if (ui.modshift && !ui.modctrl && Config.resinfo) {
             long now = System.currentTimeMillis();
@@ -2024,39 +1967,19 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         }
 
         public boolean mmousedown(Coord cc, final int button) {
-            delay(new Maptest(cc) {
-                public void hit(Coord pc, Coord2d mc) {
-                    bk.mmousedown(mc.round(), button);
-                }
-            });
             return (true);
         }
 
         public boolean mmouseup(Coord cc, final int button) {
-            delay(new Maptest(cc) {
-                public void hit(Coord pc, Coord2d mc) {
-                    bk.mmouseup(mc.round(), button);
-                }
-            });
             return (true);
         }
 
         public boolean mmousewheel(Coord cc, final int amount) {
-            delay(new Maptest(cc) {
-                public void hit(Coord pc, Coord2d mc) {
-                    bk.mmousewheel(mc.round(), amount);
-                }
-            });
             return (true);
         }
 
         public void mmousemove(Coord cc) {
             if (mv) {
-                delay(new Maptest(cc) {
-                    public void hit(Coord pc, Coord2d mc) {
-                        bk.mmousemove(mc.round());
-                    }
-                });
             }
         }
     }

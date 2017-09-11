@@ -36,17 +36,8 @@ import java.util.*;
 import static haven.GOut.checkerr;
 
 public abstract class GLState {
-    public abstract void apply(GOut g);
-    public abstract void unapply(GOut g);
-    public abstract void prep(Buffer buf);
 
-    public void applyfrom(GOut g, GLState from) {
-        throw(new RuntimeException("Called applyfrom on non-conformant GLState (" + from + " -> " + this + ")"));
-    }
-    public void applyto(GOut g, GLState to) {
-    }
-    public void reapply(GOut g) {
-    }
+    public abstract void prep(Buffer buf);
 
     @Deprecated
     public ShaderMacro[] shaders() {
@@ -532,156 +523,12 @@ public abstract class GLState {
             return(next.copy());
         }
 
-        public <T extends GLState> void apply(GOut g, Slot<T> slot, T state) {
-            int id = slot.id;
-            next.states[id] = state;
-            GLState old = cur.states[id];
-            if((old == null) && (state == null)) {
-            } else if((old != null) && (state == null)) {
-                if(shaders[id] != null)
-                    throw(new RuntimeException("Cannot quick-apply states with shaders"));
-                old.unapply(g);
-                cur.states[id] = null;
-            } else if((old == null) && (state != null)) {
-                if(state.shader() != null)
-                    throw(new RuntimeException("Cannot quick-apply states with shaders"));
-                state.apply(g);
-                cur.states[id] = state;
-            } else if((old != null) && (state != null) && !old.equals(state)) {
-                if(state.shader() != shaders[id])
-                    throw(new RuntimeException("Cannot quick-apply states with shader replacement"));
-                if(state.capplyfrom(old) >= 0) {
-                    state.applyfrom(g, old);
-                    cur.states[id] = state;
-                } else {
-                    old.unapply(g);
-                    cur.states[id] = null;
-                    state.apply(g);
-                    cur.states[id] = state;
-                }
-            }
-        }
-
-        public void apply(GOut g) {
-            Slot.update();
-            long st = 0;
-            if(Config.profile) st = System.nanoTime();
-            Slot<?>[] deplist = GLState.deplist;
-            if(trans.length < deplist.length) {
-                synchronized(Slot.class) {
-                    trans = new boolean[deplist.length];
-                    repl = new boolean[deplist.length];
-                    shaders = Utils.extend(shaders, deplist.length);
-                    nshaders = Utils.extend(shaders, deplist.length);
-                }
-            }
-            bufdiff(cur, next, trans, repl);
-            nproghash = proghash;
-            for(int i = trans.length - 1; i >= 0; i--) {
-                nshaders[i] = shaders[i];
-                if(repl[i] || trans[i]) {
-                    GLState nst = next.states[i];
-                    ShaderMacro ns = (nst == null)?null:nst.shader();
-                    if(ns != nshaders[i]) {
-                        nproghash ^= System.identityHashCode(nshaders[i]) ^ System.identityHashCode(ns);
-                        nshaders[i] = ns;
-                        sdirty = true;
-                    }
-                }
-            }
-            if(sdirty || (prog == null)) {
-                ShaderMacro.Program np;
-                np = findprog(nproghash, nshaders);
-                if(np != prog) {
-                    np.apply(g);
-                    prog = np;
-                    if(debug)
-                        checkerr(g.gl);
-                    pdirty = true;
-                }
-            }
-            cur.copy(old);
-            for(int i = deplist.length - 1; i >= 0; i--) {
-                int id = deplist[i].id;
-                if(repl[id]) {
-                    if(cur.states[id] != null) {
-                        cur.states[id].unapply(g);
-                        if(debug)
-                            stcheckerr(g, "unapply", cur.states[id]);
-                    }
-                    cur.states[id] = null;
-                    proghash ^= System.identityHashCode(shaders[id]);
-                    shaders[id] = null;
-                }
-            }
-	    /* Note on invariants: States may exit non-locally
-	     * from apply, applyto/applyfrom or reapply (e.g. by
-	     * throwing Loading exceptions) in a defined way
-	     * provided they do so before they have changed any GL
-	     * state. If they exit non-locally after GL state has
-	     * been altered, future results are undefined. */
-            for(int i = 0; i < deplist.length; i++) {
-                int id = deplist[i].id;
-                if(repl[id]) {
-                    if(next.states[id] != null) {
-                        next.states[id].apply(g);
-                        cur.states[id] = next.states[id];
-                        proghash ^= System.identityHashCode(shaders[id]) ^ System.identityHashCode(nshaders[id]);
-                        shaders[id] = nshaders[id];
-                        if(debug)
-                            stcheckerr(g, "apply", cur.states[id]);
-                    }
-                    if(!pdirty)
-                        prog.adirty(deplist[i]);
-                } else if(trans[id]) {
-                    cur.states[id].applyto(g, next.states[id]);
-                    if(debug)
-                        stcheckerr(g, "applyto", cur.states[id]);
-                    next.states[id].applyfrom(g, cur.states[id]);
-                    cur.states[id] = next.states[id];
-                    proghash ^= System.identityHashCode(shaders[id]) ^ System.identityHashCode(nshaders[id]);
-                    shaders[id] = nshaders[id];
-                    if(debug)
-                        stcheckerr(g, "applyfrom", cur.states[id]);
-                    if(!pdirty)
-                        prog.adirty(deplist[i]);
-                } else if(pdirty && (shaders[id] != null)) {
-                    cur.states[id].reapply(g);
-                    if(debug)
-                        stcheckerr(g, "reapply", cur.states[id]);
-                }
-            }
-            if(cproj != proj) {
-                matmode(g, GL2.GL_PROJECTION);
-                g.gl.glLoadMatrixf((cproj = proj).m, 0);
-            }
-            prog.autoapply(g, pdirty);
-            pdirty = sdirty = false;
-            checkerr(g.gl);
-            if(Config.profile)
-                time += System.nanoTime() - st;
-        }
-
         public boolean inststate(List<Buffer> instances) {
             Buffer st = GLState.inststate(cfg, instances);
-            if(st == null)
-                return(false);
+            if (st == null)
+                return (false);
             set(st);
-            return(true);
-        }
-
-        public void bindiarr(GOut g, List<Buffer> instances) {
-            for(int i = 0; i < prog.autoinst.length; i++) {
-                if(prog.curinst[i] == null)
-                    prog.curinst[i] = new GLBuffer(g);
-                prog.autoinst[i].filliarr(g, instances, prog.curinst[i]);
-                prog.autoinst[i].bindiarr(g, prog.curinst[i]);
-            }
-        }
-
-        public void unbindiarr(GOut g) {
-            for(int i = 0; i < prog.autoinst.length; i++)
-                prog.autoinst[i].unbindiarr(g, prog.curinst[i]);
+            return (true);
         }
 
         public static class ApplyException extends RuntimeException {

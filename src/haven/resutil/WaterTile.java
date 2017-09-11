@@ -199,90 +199,11 @@ public class WaterTile extends Tiler {
         private BetterSurface() {
         }
 
-        private ShaderMacro shader = new ShaderMacro() {
-            final AutoVarying skyc = new AutoVarying(Type.VEC3) {
-                protected Expression root(VertexContext vctx) {
-                    return (mul(icam.ref(), reflect(MiscLib.vertedir(vctx).depref(), vctx.eyen.depref())));
-                }
-            };
-
-            public void modify(final ProgramContext prog) {
-                MiscLib.fragedir(prog.fctx);
-                final ValBlock.Value nmod = prog.fctx.uniform.new Value(Type.VEC3) {
-                    public Expression root() {
-                /*
-				return(mul(sub(mix(pick(texture2D(snrm.ref(),
-								  add(mul(pick(MiscLib.fragmapv.ref(), "st"), vec2(l(0.01), l(0.012))),
-								      mul(Cons.mod(MiscLib.time.ref(), l(2.0)), vec2(l(0.025), l(0.035))))),
-							"rgb"),
-						   pick(texture2D(snrm.ref(),
-								  add(mul(pick(MiscLib.fragmapv.ref(), "st"), vec2(l(0.019), l(0.018))),
-								      mul(Cons.mod(add(MiscLib.time.ref(), l(1.0)), l(2.0)), vec2(l(-0.035), l(-0.025))))),
-							"rgb"),
-						   abs(sub(Cons.mod(MiscLib.time.ref(), l(2.0)), l(1.0)))),
-					       l(0.5)), vec3(l(1.0 / 16), l(1.0 / 16), l(1.0))));
-				*/
-                        return (mul(sub(mix(add(pick(texture2D(snrm.ref(),
-                                add(mul(pick(MiscLib.fragmapv.ref(), "st"), vec2(l(0.01), l(0.012))),
-                                        mul(MiscLib.time.ref(), vec2(l(0.025), l(0.035))))),
-                                "rgb"),
-                                pick(texture2D(snrm.ref(),
-                                        add(mul(pick(MiscLib.fragmapv.ref(), "st"), vec2(l(0.019), l(0.018))),
-                                                mul(MiscLib.time.ref(), vec2(l(-0.035), l(-0.025))))),
-                                        "rgb")),
-                                add(pick(texture2D(snrm.ref(),
-                                        add(mul(pick(MiscLib.fragmapv.ref(), "st"), vec2(l(0.01), l(0.012))),
-                                                add(mul(MiscLib.time.ref(), vec2(l(0.025), l(0.035))), vec2(l(0.5), l(0.5))))),
-                                        "rgb"),
-                                        pick(texture2D(snrm.ref(),
-                                                add(mul(pick(MiscLib.fragmapv.ref(), "st"), vec2(l(0.019), l(0.018))),
-                                                        add(mul(MiscLib.time.ref(), vec2(l(-0.035), l(-0.025))), vec2(l(0.5), l(0.5))))),
-                                                "rgb")),
-                                abs(sub(Cons.mod(MiscLib.time.ref(), l(2.0)), l(1.0)))),
-                                l(0.5 * 2)), vec3(l(1.0 / 16), l(1.0 / 16), l(1.0))));
-				/*
-				return(mul(sub(add(pick(texture2D(snrm.ref(),
-								  add(mul(pick(MiscLib.fragmapv.ref(), "st"), vec2(l(0.01), l(0.012))),
-								      mul(MiscLib.time.ref(), vec2(l(0.025), l(0.035))))),
-							"rgb"),
-						   pick(texture2D(snrm.ref(),
-								  add(mul(pick(MiscLib.fragmapv.ref(), "st"), vec2(l(0.019), l(0.018))),
-								      mul(MiscLib.time.ref(), vec2(l(-0.035), l(-0.025))))),
-							"rgb")),
-					       l(0.5 * 2)), vec3(l(1.0 / 16), l(1.0 / 16), l(1.0))));
-				*/
-				/*
-				return(mul(sub(pick(texture2D(snrm.ref(),
-							      mul(pick(MiscLib.fragmapv.ref(), "st"), l(0.005))),
-						    "rgb"),
-					       l(0.5)), vec3(l(1.0 / 32), l(1.0 / 32), l(1.0))));
-				*/
-                    }
-                };
-                nmod.force();
-                MiscLib.frageyen(prog.fctx).mod(in -> {
-                    Expression m = nmod.ref();
-                    return (add(mul(pick(m, "x"), vec3(l(1.0), l(0.0), l(0.0))),
-                            mul(pick(m, "y"), vec3(l(0.0), l(1.0), l(0.0))),
-                            mul(pick(m, "z"), in)));
-                }, -10);
-                prog.fctx.fragcol.mod(in -> mul(in, textureCube(ssky.ref(),
-                        neg(mul(icam.ref(), reflect(MiscLib.fragedir(prog.fctx).depref(),
-                                MiscLib.frageyen(prog.fctx).depref())))),
-                        l(0.4))
-                        , 0);
-            }
-        };
-
         public void reapply(GOut g) {
             BGL gl = g.gl;
             gl.glUniform1i(g.st.prog.uniform(ssky), tsky.id);
             gl.glUniform1i(g.st.prog.uniform(snrm), tnrm.id);
             gl.glUniformMatrix3fv(g.st.prog.uniform(icam), 1, false, PView.camxf(g).transpose().trim3(), 0);
-        }
-
-        public ShaderMacro shader() {
-            return (shader);
         }
 
         public void apply(GOut g) {
@@ -382,9 +303,7 @@ public class WaterTile extends Tiler {
         }
 
         final AutoVarying fragd = new AutoVarying(Type.FLOAT) {
-            protected Expression root(VertexContext vctx) {
-                return (sub(pick(MiscLib.maploc.ref(), "z"), pick(vctx.mapv.depref(), "z")));
-            }
+
         };
 
         final ShaderMacro shader = prog -> {

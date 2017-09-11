@@ -38,7 +38,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Queue;
 
-public class HavenPanel extends GLCanvas implements Runnable, Console.Directory {
+public class HavenPanel implements Runnable, Console.Directory {
     UI ui;
     public static UI lui;
     boolean inited = false;
@@ -78,15 +78,10 @@ public class HavenPanel extends GLCanvas implements Runnable, Console.Directory 
     }
 
     public HavenPanel(int w, int h, GLCapabilitiesChooser cc) {
-        super(stdcaps(), cc, null, null);
-        if (gldebug)
-            setContextCreationFlags(getContextCreationFlags() | GLContext.CTX_OPTION_DEBUG);
-        setSize(this.w = w, this.h = h);
         newui(null);
         initgl();
         if (Toolkit.getDefaultToolkit().getMaximumCursorColors() >= 256 || Config.hwcursor)
             cursmode = "awt";
-        setCursor(Toolkit.getDefaultToolkit().createCustomCursor(TexI.mkbuf(new Coord(1, 1)), new java.awt.Point(), ""));
     }
 
     public HavenPanel(int w, int h) {
@@ -94,122 +89,7 @@ public class HavenPanel extends GLCanvas implements Runnable, Console.Directory 
     }
 
     private void initgl() {
-        final Thread caller = Thread.currentThread();
         final haven.error.ErrorHandler h = haven.error.ErrorHandler.find();
-        addGLEventListener(new GLEventListener() {
-            Debug.DumpGL dump = null;
-
-            public void takescreenshot(int width, int height) {
-                try {
-                    String curtimestamp = new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss.SSS").format(new Date());
-                    File outputfile = new File(String.format("screenshots/%s.png", curtimestamp));
-                    outputfile.getParentFile().mkdirs();
-                    Screenshot.writeToFile(outputfile, width, height);
-                    ui.root.findchild(GameUI.class).msg(String.format("Screenshot has been saved as \"%s\"", outputfile.getName()), Color.WHITE);
-                } catch (Exception ex) {
-                    System.out.println("Unable to take screenshot: " + ex.getMessage());
-                }
-            }
-
-            public void display(GLAutoDrawable d) {
-                if (HavenPanel.needtotakescreenshot) {
-                    takescreenshot(d.getWidth(), d.getHeight());
-                    HavenPanel.needtotakescreenshot = false;
-                }
-
-                GL2 gl = d.getGL().getGL2();
-            /*
-            if((dump == null) || (dump.getDownstreamGL() != gl))
-			dump = new Debug.DumpGL((GL4bc)gl);
-		    if(Debug.kf2 && !Debug.pk2)
-			dump.dump("/tmp/gldump");
-		    dump.reset();
-		    gl = dump;
-		    */
-                if (inited)
-                    redraw(gl);
-            }
-
-            public void init(GLAutoDrawable d) {
-                try {
-                    GL gl = d.getGL();
-                    if (h != null) {
-                        String vendor = gl.glGetString(gl.GL_VENDOR);
-                        isATI = vendor.contains("AMD") || vendor.contains("ATI");
-                        h.lsetprop("gpu", vendor + " (" + gl.glGetString(gl.GL_RENDERER) + ") - " + gl.glGetString(gl.GL_VERSION));
-                        // h.lsetprop("gl.vendor", vendor);
-                        // h.lsetprop("gl.version", gl.glGetString(gl.GL_VERSION));
-                        // h.lsetprop("gl.renderer", gl.glGetString(gl.GL_RENDERER));
-                        // h.lsetprop("gl.exts", Arrays.asList(gl.glGetString(gl.GL_EXTENSIONS).split(" ")));
-                        // h.lsetprop("gl.caps", d.getChosenGLCapabilities().toString());
-                        // h.lsetprop("gl.conf", glconf);
-                    }
-                    glconf = GLConfig.fromgl(gl, d.getContext(), getChosenGLCapabilities());
-                    if (gldebug) {
-                        if (!d.getContext().isGLDebugMessageEnabled())
-                            System.err.println("GL debugging not actually enabled");
-                        ((GL2) gl).glDebugMessageControl(GL.GL_DONT_CARE, GL.GL_DONT_CARE, GL.GL_DONT_CARE, 0, null, true);
-                    }
-                    glconf.pref = GLSettings.load(glconf, true);
-                    ui.cons.add(glconf);
-                    gstate = new GLState() {
-                        public void apply(GOut g) {
-                            BGL gl = g.gl;
-                            gl.glColor3f(1, 1, 1);
-                            gl.glPointSize(4);
-                            gl.joglSetSwapInterval(1);
-                            gl.glEnable(GL.GL_BLEND);
-                            //gl.glEnable(GL.GL_LINE_SMOOTH);
-                            gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
-                            if (g.gc.glmajver >= 2)
-                                gl.glBlendEquationSeparate(GL.GL_FUNC_ADD, GL2.GL_MAX);
-                            if (g.gc.havefsaa()) {
-                    /* Apparently, having sample
-                     * buffers in the config enables
-					 * multisampling by default on
-					 * some systems. */
-                                g.gl.glDisable(GL.GL_MULTISAMPLE);
-                            }
-                            GOut.checkerr(gl);
-                        }
-
-                        public void unapply(GOut g) {
-                        }
-
-                        public void prep(Buffer buf) {
-                            buf.put(global, this);
-                        }
-                    };
-                } catch (RuntimeException e) {
-                    uncaught = e;
-                    throw (e);
-                }
-            }
-
-            public void reshape(GLAutoDrawable d, final int x, final int y, final int w, final int h) {
-                ostate = OrthoState.fixed(new Coord(w, h));
-                rtstate = new GLState() {
-                    public void apply(GOut g) {
-                        g.st.proj = Projection.makeortho(new Matrix4f(), 0, w, 0, h, -1, 1);
-                    }
-
-                    public void unapply(GOut g) {
-                    }
-
-                    public void prep(Buffer buf) {
-                        buf.put(proj2d, this);
-                    }
-                };
-                HavenPanel.this.w = w;
-                HavenPanel.this.h = h;
-            }
-
-            public void displayChanged(GLAutoDrawable d, boolean cp1, boolean cp2) {
-            }
-
-            public void dispose(GLAutoDrawable d) {
-            }
-        });
     }
 
     public static abstract class OrthoState extends GLState {
@@ -237,66 +117,7 @@ public class HavenPanel extends GLCanvas implements Runnable, Console.Directory 
     }
 
     public void init() {
-        setFocusTraversalKeysEnabled(false);
         newui(null);
-        addKeyListener(new KeyAdapter() {
-            public void keyTyped(KeyEvent e) {
-                synchronized (events) {
-                    events.add(e);
-                    events.notifyAll();
-                }
-            }
-
-            public void keyPressed(KeyEvent e) {
-                synchronized (events) {
-                    events.add(e);
-                    events.notifyAll();
-                }
-            }
-
-            public void keyReleased(KeyEvent e) {
-                synchronized (events) {
-                    events.add(e);
-                    events.notifyAll();
-                }
-            }
-        });
-        addMouseListener(new MouseAdapter() {
-            public void mousePressed(MouseEvent e) {
-                synchronized (events) {
-                    events.add(e);
-                    events.notifyAll();
-                }
-            }
-
-            public void mouseReleased(MouseEvent e) {
-                synchronized (events) {
-                    events.add(e);
-                    events.notifyAll();
-                }
-            }
-        });
-        addMouseMotionListener(new MouseMotionListener() {
-            public void mouseDragged(MouseEvent e) {
-                synchronized (events) {
-                    mousemv = e;
-                }
-            }
-
-            public void mouseMoved(MouseEvent e) {
-                synchronized (events) {
-                    mousemv = e;
-                }
-            }
-        });
-        addMouseWheelListener(new MouseWheelListener() {
-            public void mouseWheelMoved(MouseWheelEvent e) {
-                synchronized (events) {
-                    events.add(e);
-                    events.notifyAll();
-                }
-            }
-        });
         inited = true;
     }
 
@@ -307,8 +128,6 @@ public class HavenPanel extends GLCanvas implements Runnable, Console.Directory 
         ui.root.guprof = uprof;
         ui.root.grprof = rprof;
         ui.root.ggprof = gprof;
-        if (getParent() instanceof Console.Directory)
-            ui.cons.add((Console.Directory) getParent());
         ui.cons.add(this);
         if (glconf != null)
             ui.cons.add(glconf);
@@ -410,7 +229,6 @@ public class HavenPanel extends GLCanvas implements Runnable, Console.Directory 
     private final Runnable drawfun = new Runnable() {
         private void uglyjoglhack() throws InterruptedException {
             try {
-                display();
             } catch (RuntimeException e) {
                 InterruptedException ie = Utils.hascause(e, InterruptedException.class);
                 if (ie != null)
@@ -423,8 +241,6 @@ public class HavenPanel extends GLCanvas implements Runnable, Console.Directory 
         public void run() {
             try {
                 uglyjoglhack();
-                if (state == null)
-                    throw (new RuntimeException("State applier is still null after redraw"));
                 synchronized (drawfun) {
                     drawfun.notifyAll();
                 }
@@ -546,10 +362,6 @@ public class HavenPanel extends GLCanvas implements Runnable, Console.Directory 
         } finally {
             ui.destroy();
         }
-    }
-
-    public GraphicsConfiguration getconf() {
-        return (getGraphicsConfiguration());
     }
 
     private Map<String, Console.Command> cmdmap = new TreeMap<String, Console.Command>();

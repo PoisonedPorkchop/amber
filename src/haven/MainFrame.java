@@ -52,7 +52,7 @@ import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 
 
-public class MainFrame extends java.awt.Frame implements Runnable, Console.Directory {
+public class MainFrame implements Runnable, Console.Directory {
     HavenPanel p;
     private final ThreadGroup g;
     public final Thread mt;
@@ -72,56 +72,6 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
         }
     }
 
-    DisplayMode findmode(int w, int h) {
-        GraphicsDevice dev = getGraphicsConfiguration().getDevice();
-        if (!dev.isFullScreenSupported())
-            return (null);
-        DisplayMode b = null;
-        for (DisplayMode m : dev.getDisplayModes()) {
-            int d = m.getBitDepth();
-            if ((m.getWidth() == w) && (m.getHeight() == h) && ((d == 24) || (d == 32) || (d == DisplayMode.BIT_DEPTH_MULTI))) {
-                if ((b == null) || (d > b.getBitDepth()) || ((d == b.getBitDepth()) && (m.getRefreshRate() > b.getRefreshRate())))
-                    b = m;
-            }
-        }
-        return (b);
-    }
-
-    public void setfs() {
-        GraphicsDevice dev = getGraphicsConfiguration().getDevice();
-        if (prefs != null)
-            return;
-        prefs = dev.getDisplayMode();
-        try {
-            setVisible(false);
-            dispose();
-            setUndecorated(true);
-            setVisible(true);
-            dev.setFullScreenWindow(this);
-            dev.setDisplayMode(fsmode);
-            pack();
-        } catch (Exception e) {
-            throw (new RuntimeException(e));
-        }
-    }
-
-    public void setwnd() {
-        GraphicsDevice dev = getGraphicsConfiguration().getDevice();
-        if (prefs == null)
-            return;
-        try {
-            dev.setDisplayMode(prefs);
-            dev.setFullScreenWindow(null);
-            setVisible(false);
-            dispose();
-            setUndecorated(false);
-            setVisible(true);
-        } catch (Exception e) {
-            throw (new RuntimeException(e));
-        }
-        prefs = null;
-    }
-
     public boolean hasfs() {
         return (prefs != null);
     }
@@ -134,49 +84,13 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
                 if (args.length == 3) {
                     int w = Integer.parseInt(args[1]),
                             h = Integer.parseInt(args[2]);
-                    p.setSize(w, h);
-                    pack();
                     Utils.setprefc("wndsz", new Coord(w, h));
                 } else if (args.length == 2) {
                     if (args[1].equals("dyn")) {
-                        setResizable(true);
                         Utils.setprefb("wndlock", false);
                     } else if (args[1].equals("lock")) {
-                        setResizable(false);
                         Utils.setprefb("wndlock", true);
                     }
-                }
-            }
-        });
-        cmdmap.put("fsmode", new Console.Command() {
-            public void run(Console cons, String[] args) throws Exception {
-                if (args.length == 3) {
-                    DisplayMode mode = findmode(Integer.parseInt(args[1]), Integer.parseInt(args[2]));
-                    if (mode == null)
-                        throw (new Exception("No such mode is available"));
-                    fsmode = mode;
-                    Utils.setprefc("fsmode", new Coord(mode.getWidth(), mode.getHeight()));
-                }
-            }
-        });
-        cmdmap.put("fs", new Console.Command() {
-            public void run(Console cons, String[] args) {
-                if (args.length >= 2) {
-                    Runnable r;
-                    if (Utils.atoi(args[1]) != 0) {
-                        r = new Runnable() {
-                            public void run() {
-                                setfs();
-                            }
-                        };
-                    } else {
-                        r = new Runnable() {
-                            public void run() {
-                                setwnd();
-                            }
-                        };
-                    }
-                    getToolkit().getSystemEventQueue().invokeLater(r);
                 }
             }
         });
@@ -186,20 +100,7 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
         return (cmdmap);
     }
 
-    private void seticon() {
-        Image icon;
-        try {
-            InputStream data = MainFrame.class.getResourceAsStream("icon.png");
-            icon = javax.imageio.ImageIO.read(data);
-            data.close();
-        } catch (IOException e) {
-            throw (new Error(e));
-        }
-        setIconImage(icon);
-    }
-
     public MainFrame(Coord isz) {
-        super("Haven and Hearth");
         Coord sz;
         if (isz == null) {
             sz = Utils.getprefc("wndsz", new Coord(800, 600));
@@ -211,55 +112,7 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
         this.g = new ThreadGroup(HackThread.tg(), "Haven client");
         this.mt = new HackThread(this.g, this, "Haven main thread");
         p = new HavenPanel(sz.x, sz.y);
-        if (fsmode == null) {
-            Coord pfm = Utils.getprefc("fsmode", null);
-            if (pfm != null)
-                fsmode = findmode(pfm.x, pfm.y);
-        }
-        if (fsmode == null) {
-            DisplayMode cm = getGraphicsConfiguration().getDevice().getDisplayMode();
-            fsmode = findmode(cm.getWidth(), cm.getHeight());
-        }
-        if (fsmode == null)
-            fsmode = findmode(800, 600);
-        add(p);
-        pack();
-        setResizable(!Utils.getprefb("wndlock", false));
-        p.requestFocus();
-        seticon();
-        setVisible(true);
         p.init();
-        addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                g.interrupt();
-            }
-
-            public void windowActivated(WindowEvent e) {
-                p.bgmode = false;
-            }
-
-            public void windowDeactivated(WindowEvent e) {
-                p.bgmode = true;
-            }
-        });
-        if ((isz == null) && Utils.getprefb("wndmax", false))
-            setExtendedState(getExtendedState() | MAXIMIZED_BOTH);
-    }
-
-    private void savewndstate() {
-        if (prefs == null) {
-            if (getExtendedState() == NORMAL)
-        /* Apparent, getSize attempts to return the "outer
-         * size" of the window, including WM decorations, even
-		 * though setSize sets the "inner size" of the
-		 * window. Therefore, use the Panel's size instead; it
-		 * ought to correspond to the inner size at all
-		 * times. */ {
-                Dimension dim = p.getSize();
-                Utils.setprefc("wndsz", new Coord(dim.width, dim.height));
-            }
-            Utils.setprefb("wndmax", (getExtendedState() & MAXIMIZED_BOTH) != 0);
-        }
     }
 
     public void run() {
@@ -279,19 +132,17 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
                             Config.authck = null;
                         }
                         fun = bill;
-                        setTitle(TITLE);
+                        System.out.println("Welcome to " + TITLE);
                     } else {
                         fun = new RemoteUI(sess);
-                        setTitle(TITLE + " \u2013 " + sess.username);
+                        System.out.println("Welcome to " + TITLE + " \u2013 " + sess.username);
                     }
                     sess = fun.run(p.newui(sess));
                 }
             } catch (InterruptedException e) {
             }
-            savewndstate();
         } finally {
             ui.interrupt();
-            dispose();
         }
     }
 
@@ -356,11 +207,7 @@ public class MainFrame extends java.awt.Frame implements Runnable, Console.Direc
         MainFrame f = new MainFrame(null);
         Mod mod = new Mod();
         mod.getAPI().create();
-        //Gets the required game instance of maid... But where is this made or initialized or used???
-        Maid.getInstance();
 
-        if (Utils.getprefb("fullscreen", false))
-            f.setfs();
         f.mt.start();
         try {
             f.mt.join();

@@ -680,11 +680,12 @@ public class Widget {
         }
     }
 
-    public void draw(GOut g, boolean strict) {
+    //Enable in case of defaults needed
+    /**public void draw(GOut g, boolean strict) {
     }
 
     public void draw(GOut g) {
-    }
+    }*/
 
     public boolean mousedown(Coord c, int button) {
         for (Widget wdg = lchild; wdg != null; wdg = wdg.prev) {

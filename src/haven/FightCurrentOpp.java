@@ -15,15 +15,4 @@ public class FightCurrentOpp extends Sprite {
         return true;
     }
 
-    public void draw(GOut g) {
-        g.apply();
-        BGL gl = g.gl;
-        gl.glLineWidth(8f);
-        gl.glBegin(GL2.GL_LINES);
-        gl.glVertex3f(-6, -6, 2);
-        gl.glVertex3f(6, 6, 2);
-        gl.glVertex3f(6, -6, 2);
-        gl.glVertex3f(-6, 6, 2);
-        gl.glEnd();
-    }
 }

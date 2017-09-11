@@ -192,7 +192,6 @@ public class GOut {
         if (tex == null)
             return;
         st.set(cur2d);
-        tex.crender(this, c.add(tx), ul, sz);
         checkerr();
     }
 
@@ -210,7 +209,6 @@ public class GOut {
         if (tex == null)
             return;
         st.set(cur2d);
-        tex.crender(this, c.add(tx), ul, this.sz, sz);
         checkerr();
     }
 
@@ -229,7 +227,6 @@ public class GOut {
             br.x = this.ul.x + this.sz.x;
         if (br.y > this.ul.y + this.sz.y)
             br.y = this.ul.y + this.sz.y;
-        tex.crender(this, c.add(this.tx), ul, br.sub(ul));
         checkerr();
     }
 
@@ -260,7 +257,6 @@ public class GOut {
         st.set(cur2d);
         if (s != null)
             state(s);
-        tex.crender(this, c.add(tx), ul, sz);
         checkerr();
     }
 
@@ -272,27 +268,12 @@ public class GOut {
         gl.glVertex2f(x + tx.x, y + tx.y);
     }
 
-    public void apply() {
-        st.apply(this);
-    }
-
     public void state(GLState st) {
         this.st.prep(st);
     }
 
     public void state2d() {
         st.set(cur2d);
-    }
-
-    public void line(Coord c1, Coord c2, double w) {
-        st.set(cur2d);
-        apply();
-        gl.glLineWidth((float) w);
-        gl.glBegin(GL.GL_LINES);
-        vertex(c1);
-        vertex(c2);
-        gl.glEnd();
-        checkerr();
     }
 
     public void text(String text, Coord c) {
@@ -328,7 +309,6 @@ public class GOut {
 
     public void poly(Coord... c) {
         st.set(cur2d);
-        apply();
         gl.glBegin(GL2.GL_POLYGON);
         for (Coord vc : c)
             vertex(vc);
@@ -339,7 +319,6 @@ public class GOut {
     public void poly2(Object... c) {
         st.set(cur2d);
         st.put(States.color, States.vertexcolor);
-        apply();
         gl.glBegin(GL2.GL_POLYGON);
         for (int i = 0; i < c.length; i += 2) {
             Coord vc = (Coord) c[i];
@@ -353,7 +332,6 @@ public class GOut {
 
     public void polyline(float w, Coord... c) {
         st.set(cur2d);
-        apply();
         gl.glLineWidth(w);
         gl.glBegin(GL2.GL_LINE_LOOP);
         for (Coord vc : c)
@@ -372,7 +350,6 @@ public class GOut {
         if ((ul.x >= br.x) || (ul.y >= br.y))
             return;
         st.set(cur2d);
-        apply();
         gl.glBegin(GL2.GL_QUADS);
         gl.glVertex2i(ul.x, ul.y);
         gl.glVertex2i(br.x, ul.y);
@@ -384,7 +361,6 @@ public class GOut {
 
     public void frect(Coord c1, Coord c2, Coord c3, Coord c4) {
         st.set(cur2d);
-        apply();
         gl.glBegin(GL2.GL_QUADS);
         vertex(c1);
         vertex(c2);
@@ -420,7 +396,6 @@ public class GOut {
 
         st.set(cur2d);
         state(s);
-        apply();
 
         float l = tl + ((tr - tl) * ((float) ult.x) / ((float) sz.x));
         float t = tt + ((tb - tt) * ((float) ult.y) / ((float) sz.y));
@@ -446,7 +421,6 @@ public class GOut {
     // NOTE: this is terribly slow and should not be used in critical methods.
     public void fellipse(Coord c, Coord r, double a1, double a2) {
         st.set(cur2d);
-        apply();
         gl.glBegin(GL.GL_TRIANGLE_FAN);
         vertex(c);
         double d = 0.1;
@@ -468,7 +442,6 @@ public class GOut {
 
     public void fcircle(int x, int y, double rad, final int points) {
         st.set(cur2d);
-        apply();
 
         int circumference = points - 1;
 
@@ -500,7 +473,6 @@ public class GOut {
 
     public void rect(Coord ul, Coord sz) {
         st.set(cur2d);
-        apply();
         gl.glLineWidth(1);
         gl.glBegin(GL.GL_LINE_LOOP);
         vertex(ul.x + 0.5f, ul.y + 0.5f);
@@ -513,7 +485,6 @@ public class GOut {
 
     public void prect(Coord c, Coord ul, Coord br, double a) {
         st.set(cur2d);
-        apply();
         gl.glEnable(GL2.GL_POLYGON_SMOOTH);
         gl.glBegin(GL.GL_TRIANGLE_FAN);
         vertex(c);

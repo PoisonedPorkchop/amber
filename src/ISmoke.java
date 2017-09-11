@@ -98,7 +98,6 @@ public class ISmoke extends Sprite implements CDel {
         updpos(g);
 
         if (posb != null) {
-            g.apply();
             BGL bgl = g.gl;
             bgl.glEnable('衡');
             bgl.glEnableClientState('聴');
@@ -176,7 +175,6 @@ public class ISmoke extends Sprite implements CDel {
                 Expression[] var10004 = new Expression[1];
                 var10004[0] = VertexContext.projxf(Cons.add(new Expression[]{this.var2.vctx.eyev.depref(), Cons.vec4(new Expression[]{bollsz.ref() /*ISmoke.access$000*/, Cons.l(0.0D), Cons.l(0.0D), Cons.l(0.0D)})}));
                 var10000[0] = Cons.sub(var10003.call(var10004), this.pdiv.call(new Expression[]{this.var2.vctx.posv.depref()}));
-                var10000[1] = Cons.pick(MiscLib.screensize.ref(), "x");
                 return Cons.mul(var10000);
             }
 
