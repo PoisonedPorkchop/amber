@@ -40,8 +40,6 @@ public class Grainslot extends Widget implements DTarget {
             } catch (Loading var4) {
             }
         }
-
-        super.draw(var1);
     }
 
     public boolean mousedown(Coord var1, int var2) {

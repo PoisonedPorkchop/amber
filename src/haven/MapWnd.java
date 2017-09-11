@@ -136,12 +136,6 @@ public class MapWnd extends Window {
             }, new Coord(btnsz + 20, 0));
         }
 
-        @Override
-        public void draw(GOut g) {
-            super.draw(g);
-            g.image(renderz(), new Coord((btnsz * 2 + 20) / 2 - zoomtex.sz().x / 2, btnsz / 2 - zoomtex.sz().y / 2));
-        }
-
         private Tex renderz() {
             if (zoomtex == null)
                 zoomtex = Text.renderstroked((5 - MapFileWidget.zoom) + "", Color.WHITE, Color.BLACK).tex();

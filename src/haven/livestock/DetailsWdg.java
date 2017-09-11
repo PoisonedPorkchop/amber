@@ -54,21 +54,6 @@ public class DetailsWdg extends Widget {
     }
 
     @Override
-    public void draw(GOut g) {
-        g.chcolor(255, 255, 255, 128);
-        g.line(sepStart, sepEnd, 1);
-
-        if (hover) {
-            g.chcolor(255, 255, 255, 40);
-            g.frect(Coord.z, sz);
-        }
-
-        g.chcolor();
-
-        super.draw(g, true);
-    }
-
-    @Override
     public boolean mousedown(Coord c, int button) {
         Gob gob = gameui().map.glob.oc.getgob(animal.gobid);
         if (gob != null) {

@@ -135,11 +135,6 @@ public class LoginScreen extends Widget {
             super.wdgmsg(sender, name, args);
         }
 
-        public void draw(GOut g) {
-            g.image(label.tex(), new Coord((sz.x / 2) - (label.sz().x / 2), 0));
-            super.draw(g);
-        }
-
         public boolean globtype(char k, KeyEvent ev) {
             if ((k == 'f') && ((ev.getModifiersEx() & (KeyEvent.META_DOWN_MASK | KeyEvent.ALT_DOWN_MASK)) != 0)) {
                 LoginScreen.this.wdgmsg("forget");
@@ -340,14 +335,6 @@ public class LoginScreen extends Widget {
     protected void added() {
         presize();
         parent.setfocus(this);
-    }
-
-    public void draw(GOut g) {
-        super.draw(g);
-        if (error != null)
-            g.image(error.tex(), new Coord(420 - (error.sz().x / 2), 450));
-        if (progress != null)
-            g.image(progress.tex(), new Coord(420 - (progress.sz().x / 2), 350));
     }
 
     public boolean type(char k, KeyEvent ev) {

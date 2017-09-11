@@ -19,14 +19,6 @@ public class ModSelectorWindow extends Window {
         super(Coord.z, "ModSelector");
         int portHeight = new Mod().getAPI().getMods().size() > MAX_ITEMS ? ModWdg.height * MAX_ITEMS : new Mod().getAPI().getMods().size() * ModWdg.height;
         port = new Scrollport(new Coord(WIDTH - 20 - 15, portHeight), ModWdg.height) {
-            @Override
-            public void draw(GOut g) {
-                //System.out.println("Drawing shit.");
-                g.chcolor(0, 0, 0, 128);
-                g.frect(Coord.z, sz);
-                g.chcolor();
-                super.draw(g);
-            }
         };
         add(port, new Coord(20, 50));
 

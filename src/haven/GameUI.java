@@ -172,14 +172,6 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         buffs = ulpanel.add(new Bufflist(), new Coord(95, 65));
         umpanel.add(new Cal(), new Coord(0, 10));
         add(new Widget(new Coord(300, 40)) {
-            @Override
-            public void draw(GOut g) {
-                if (Config.showservertime) {
-                    Tex time = ui.sess.glob.servertimetex;
-                    if (time != null)
-                        g.image(time, new Coord(300 / 2 - time.sz().x / 2, 0));
-                }
-            }
         }, new Coord(HavenPanel.w / 2 - 300 / 2, umpanel.sz.y));
         syslog = chat.add(new ChatUI.Log(Resource.getLocString(Resource.BUNDLE_LABEL, "System")));
         opts = add(new OptWnd());
@@ -649,33 +641,6 @@ public class GameUI extends ConsoleHost implements Console.Directory {
             g.atextstroked((int) (prog * 100) + "%", hgc, 0.5, 2.5, Color.WHITE, Color.BLACK, Text.num12boldFnd);
     }
 
-    public void draw(GOut g) {
-        beltwdg.c = new Coord(chat.c.x, Math.min(chat.c.y - beltwdg.sz.y + 4, sz.y - beltwdg.sz.y));
-        super.draw(g);
-        if (prog >= 0)
-            drawprog(g, prog);
-        int by = sz.y;
-        if (chat.visible)
-            by = Math.min(by, chat.c.y);
-        if (beltwdg.visible)
-            by = Math.min(by, beltwdg.c.y);
-        if (cmdline != null) {
-            drawcmd(g, new Coord(blpw + 10, by -= 20));
-        } else if (lastmsg != null) {
-            if ((System.currentTimeMillis() - msgtime) > 3000) {
-                lastmsg = null;
-            } else {
-                g.chcolor(0, 0, 0, 192);
-                g.frect(new Coord(blpw + 8, by - 22), lastmsg.sz().add(4, 4));
-                g.chcolor();
-                g.image(lastmsg.tex(), new Coord(blpw + 10, by -= 20));
-            }
-        }
-        if (!chat.visible) {
-            chat.drawsmall(g, new Coord(blpw + 10, by), 50);
-        }
-    }
-
     public void tick(double dt) {
         super.tick(dt);
         if (!afk && (System.currentTimeMillis() - ui.lastevent > 300000)) {
@@ -891,11 +856,6 @@ public class GameUI extends ConsoleHost implements Console.Directory {
                     }
                 }
             }, 0, 0);
-        }
-
-        public void draw(GOut g) {
-            g.image(menubg, Coord.z);
-            super.draw(g);
         }
     }
 
@@ -1221,24 +1181,6 @@ public class GameUI extends ConsoleHost implements Console.Directory {
                     return (i + (curbelt * 12));
             }
             return (-1);
-        }
-
-        public void draw(GOut g) {
-            g.image(nkeybg, Coord.z);
-            for (int i = 0; i < 10; i++) {
-                int slot = i + (curbelt * 12);
-                Coord c = beltc(i);
-                g.image(invsq, beltc(i));
-                try {
-                    if (belt[slot] != null)
-                        g.image(belt[slot].get().layer(Resource.imgc).tex(), c.add(1, 1));
-                } catch (Loading e) {
-                }
-                g.chcolor(FBelt.keysClr);
-                FastText.aprint(g, new Coord(c.x + invsq.sz().x - 2, c.y + invsq.sz().y), 1, 1, "" + (i + 1));
-                g.chcolor();
-            }
-            super.draw(g);
         }
 
         public boolean mousedown(Coord c, int button) {

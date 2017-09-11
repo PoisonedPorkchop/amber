@@ -116,16 +116,6 @@ public abstract class Dropbox<T> extends ListWidget<T> {
         }
     }
 
-    public void draw(GOut g) {
-        g.chcolor(Color.BLACK);
-        g.frect(Coord.z, sz);
-        g.chcolor();
-        if (sel != null)
-            drawitem(g.reclip(Coord.z, new Coord(sz.x - drop.sz().x, itemh)), sel, 0);
-        g.image(drop, dropc);
-        super.draw(g);
-    }
-
     public boolean mousedown(Coord c, int btn) {
         if (super.mousedown(c, btn))
             return (true);

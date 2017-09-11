@@ -195,33 +195,6 @@ public class Equipory extends Widget implements DTarget {
             g.image(invsq, ecoords[i]);
     }
 
-    public void draw(GOut g) {
-        drawslots(g);
-        super.draw(g);
-
-        if (armorclass == null) {
-            int h = 0, s = 0;
-            try {
-                for (int i = 0; i < quickslots.length; i++) {
-                    WItem itm = quickslots[i];
-                    if (itm != null) {
-                        for (ItemInfo info : itm.item.info()) {
-                            if (info instanceof Armor) {
-                                h += ((Armor)info).hard;
-                                s += ((Armor)info).soft;
-                                break;
-                            }
-                        }
-                    }
-                }
-                armorclass = Text.render(Resource.getLocString(Resource.BUNDLE_LABEL, "Armor Class: ") + h + "/" + s, Color.BLACK, acf).tex();
-            } catch (Exception e) { // fail silently
-            }
-        }
-        if (armorclass != null)
-            g.image(armorclass, new Coord(acx - armorclass.sz().x / 2, bg.sz().y - armorclass.sz().y));
-    }
-
     public boolean iteminteract(Coord cc, Coord ul) {
         return (false);
     }

@@ -291,60 +291,6 @@ public class MenuGrid extends Widget {
         return (ret);
     }
 
-    public void draw(GOut g) {
-        long now = System.currentTimeMillis();
-        for (int y = 0; y < gsz.y; y++) {
-            for (int x = 0; x < gsz.x; x++) {
-                Coord p = bgsz.mul(new Coord(x, y));
-                g.image(Inventory.invsq, p);
-                Pagina btn = layout[x][y];
-                if (btn != null) {
-                    Tex btex = btn.img.tex();
-                    g.image(btex, p.add(1, 1));
-                    if (btn.meter > 0) {
-                        double m = btn.meter / 1000.0;
-                        if (btn.dtime > 0)
-                            m += (1 - m) * (double) (now - btn.gettime) / (double) btn.dtime;
-                        m = Utils.clip(m, 0, 1);
-                        g.chcolor(255, 255, 255, 128);
-			            g.fellipse(p.add(bgsz.div(2)), bgsz.div(2), Math.PI / 2, ((Math.PI / 2) + (Math.PI * 2 * m)));
-                        g.chcolor();
-                    }
-                    if (btn.newp != 0) {
-                        if (btn.fstart == 0) {
-                            btn.fstart = now;
-                        } else {
-                            double ph = ((now - btn.fstart) / 1000.0) - (((x + (y * gsz.x)) * 0.15) % 1.0);
-                            if (ph < 1.25) {
-                                g.chcolor(255, 255, 255, (int) (255 * ((Math.cos(ph * Math.PI * 2) * -0.5) + 0.5)));
-                                g.image(glowmask(btn), p.sub(4, 4));
-                                g.chcolor();
-                            } else {
-                                g.chcolor(255, 255, 255, 128);
-                                g.image(glowmask(btn), p.sub(4, 4));
-                                g.chcolor();
-                            }
-                        }
-                    }
-                    if (btn == pressed) {
-                        g.chcolor(new Color(0, 0, 0, 128));
-                        g.frect(p.add(1, 1), btex.sz());
-                        g.chcolor();
-                    }
-                }
-            }
-        }
-        super.draw(g);
-        if (dragging != null) {
-            final Tex dt = dragging.img.tex();
-            ui.drawafter(new UI.AfterDraw() {
-                public void draw(GOut g) {
-                    g.image(dt, ui.mc.add(dt.sz().div(2).inv()));
-                }
-            });
-        }
-    }
-
     private Pagina curttp = null;
     private boolean curttl = false;
     private Tex curtt = null;

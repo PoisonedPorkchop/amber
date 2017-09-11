@@ -192,26 +192,6 @@ public class Fightview extends Widget {
         super.destroy();
     }
 
-    public void draw(GOut g) {
-        int y = 10;
-        if (curava != null)
-            y = curava.c.y + curava.sz.y + 10;
-        int x = width - bg.sz().x - 10;
-        for (Relation rel : lsrel) {
-            if (rel == current) {
-                rel.show(false);
-                continue;
-            }
-            g.image(bg, new Coord(x, y));
-            rel.ava.c = new Coord(x + 25, ((bg.sz().y - rel.ava.sz.y) / 2) + y);
-            rel.give.c = new Coord(x + 5, 4 + y);
-            rel.purs.c = new Coord(rel.ava.c.x + rel.ava.sz.x + 5, 4 + y);
-            rel.show(true);
-            y += bg.sz().y + ymarg;
-        }
-        super.draw(g);
-    }
-
     public static class Notfound extends RuntimeException {
         public final long id;
 

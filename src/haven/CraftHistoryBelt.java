@@ -31,17 +31,6 @@ public class CraftHistoryBelt extends Widget {
     }
 
     @Override
-    public void draw(GOut g) {
-        for (int i = 0; i < SIZE; i++) {
-            int slot = i;
-            Coord c = beltc(i);
-            g.image(invsq, c);
-            if (belt[slot] != null)
-                g.image(belt[slot].img.tex(), c.add(1, 1));
-        }
-    }
-
-    @Override
     public boolean mousedown(Coord c, int button) {
         int slot = beltslot(c);
         if (slot != -1) {

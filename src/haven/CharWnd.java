@@ -189,24 +189,6 @@ public class CharWnd extends Window {
             }
         }
 
-        public void draw(GOut g) {
-            int d = (trtm > 0) ? ((int) (System.currentTimeMillis() - trtm)) : Integer.MAX_VALUE;
-            g.chcolor(0, 0, 0, 255);
-            g.frect(marg, sz.sub(marg.mul(2)));
-            drawels(g, els, 255);
-            if (d < 1000)
-                drawels(g, etr, 255 - ((d * 255) / 1000));
-            g.chcolor();
-            g.image(frame, Coord.z);
-            if (d < 2500) {
-                GOut g2 = g.reclipl(trmg.inv(), sz.add(trmg.mul(2)));
-                g2.chcolor(255, 255, 255, 255 - ((d * 255) / 2500));
-                g2.image(trol, Coord.z);
-            } else {
-                trtm = 0;
-            }
-        }
-
         public void update(Object... args) {
             int n = 0;
             this.cap = (Float) args[n++];
@@ -559,17 +541,6 @@ public class CharWnd extends Window {
             }
         }
 
-        public void draw(GOut g) {
-            g.chcolor(bg);
-            g.frect(Coord.z, sz);
-            g.chcolor();
-            super.draw(g);
-            Coord cn = new Coord(0, sz.y / 2);
-            g.aimage(img, cn.add(5, 0), 0, 0.5);
-            g.aimage(rnm.tex(), cn.add(img.sz().x + 10, 1), 0, 0.5);
-            g.aimage(ct.tex(), cn.add(sz.x - 40, 1), 1, 0.5);
-        }
-
         private void updcost() {
             int cost = 100 * ((tbv + (tbv * tbv)) - (attr.base + (attr.base * attr.base))) / 2;
             scost += cost - this.cost;
@@ -715,19 +686,6 @@ public class CharWnd extends Window {
             this.tw = tw;
             this.tenc = tenc;
             this.tlph = (int) Math.round(tlph);
-        }
-
-        public void draw(GOut g) {
-            upd();
-            super.draw(g);
-            g.chcolor(255, 192, 255, 255);
-            g.aimage(twt.get().tex(), new Coord(sz.x - 4, 17), 1.0, 0.0);
-            g.chcolor(255, 255, 192, 255);
-            g.aimage(tenct.get().tex(), new Coord(sz.x - 4, 47), 1.0, 0.0);
-            g.chcolor(192, 192, 255, 255);
-            g.aimage(texpt.get().tex(), sz.add(-4, -15), 1.0, 0.0);
-            g.chcolor(192, 192, 255, 255);
-            g.aimage(tlpht.get().tex(), sz.add(-4, -49), 1.0, 0.0);
         }
     }
 
@@ -1395,22 +1353,6 @@ public class CharWnd extends Window {
                 layouth(cont);
                 layoutc(cont);
                 layouto(cont);
-            }
-
-            public void draw(GOut g) {
-                refresh: if(refresh) {
-                    Scrollport newch = new Scrollport(sz);
-                    try {
-                        layout(newch.cont);
-                    } catch(Loading l) {
-                        break refresh;
-                    }
-                    if(current != null)
-                        current.destroy();
-                    current = add(newch, Coord.z);
-                    refresh = false;
-                }
-                super.draw(g);
             }
 
             public void refresh() {
@@ -2127,12 +2069,6 @@ public class CharWnd extends Window {
             this.wounds = wounds.add(new WoundList(attrw + 10, 12), new Coord(265, 35).add(wbox.btloff()));
             Frame.around(wounds, Collections.singletonList(this.wounds));
             woundbox = wounds.add(new Widget(new Coord(attrw + 10, this.wounds.sz.y)) {
-                public void draw(GOut g) {
-                    g.chcolor(0, 0, 0, 128);
-                    g.frect(Coord.z, sz);
-                    g.chcolor();
-                    super.draw(g);
-                }
 
                 public void cdestroy(Widget w) {
                     if (w == wound)
@@ -2147,12 +2083,6 @@ public class CharWnd extends Window {
             quests = tabs.add();
             quests.add(new Img(catf.render(Resource.getLocString(Resource.BUNDLE_LABEL, "Quest Log")).tex()), new Coord(0, 0));
             questbox = quests.add(new Widget(new Coord(attrw + 10, 260)) {
-                public void draw(GOut g) {
-                    g.chcolor(0, 0, 0, 128);
-                    g.frect(Coord.z, sz);
-                    g.chcolor();
-                    super.draw(g);
-                }
 
                 public void cdestroy(Widget w) {
                     if (w == quest)

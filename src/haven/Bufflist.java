@@ -79,8 +79,4 @@ public class Bufflist extends Widget {
     public void cdestroy(Widget ch) {
         arrange(null);
     }
-
-    public void draw(GOut g) {
-        draw(g, false);
-    }
 }

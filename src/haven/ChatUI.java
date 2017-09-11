@@ -261,33 +261,6 @@ public class ChatUI extends Widget {
             }
         }
 
-        public void draw(GOut g) {
-            g.chcolor(0, 0, 0, 128);
-            g.frect(Coord.z, sz);
-            g.chcolor();
-            int y = 0;
-            boolean sel = false;
-            synchronized (msgs) {
-                for (Message msg : msgs) {
-                    if ((selstart != null) && (msg == selstart.msg))
-                        sel = true;
-                    int y1 = y - sb.val;
-                    int y2 = y1 + msg.sz().y;
-                    if ((y2 > 0) && (y1 < ih())) {
-                        if (sel)
-                            drawsel(g, msg, y1);
-                        g.image(msg.tex(), new Coord(0, y1));
-                    }
-                    if ((selend != null) && (msg == selend.msg))
-                        sel = false;
-                    y += msg.sz().y;
-                }
-            }
-            sb.max = y - ih();
-            super.draw(g);
-            updurgency(0);
-        }
-
         public boolean mousewheel(Coord c, int amount) {
             sb.ch(amount * 15);
             return (true);
@@ -1242,19 +1215,6 @@ public class ChatUI extends Widget {
     private static final Tex bvrb = bvlb;
     private static final Tex bmf = Resource.loadtex("gfx/hud/chat-mid");
     private static final Tex bcbd = Resource.loadtex("gfx/hud/chat-close-g");
-
-    public void draw(GOut g) {
-        g.rimage(Window.bg, marg, sz.sub(marg.x * 2, marg.y));
-        super.draw(g);
-        g.image(bulc, new Coord(0, 0));
-        g.image(burc, new Coord(sz.x - burc.sz().x, 0));
-        g.rimagev(bvlb, new Coord(0, bulc.sz().y), sz.y - bulc.sz().y);
-        g.rimagev(bvrb, new Coord(sz.x - bvrb.sz().x, burc.sz().y), sz.y - burc.sz().y);
-        g.rimageh(bhb, new Coord(bulc.sz().x, 0), sz.x - bulc.sz().x - burc.sz().x);
-        g.aimage(bmf, new Coord(sz.x / 2, 0), 0.5, 0);
-        if ((sel == null) || (sel.cb == null))
-            g.aimage(bcbd, new Coord(sz.x, 0), 1, 0);
-    }
 
     public void notify(Channel chan, Channel.Message msg) {
         synchronized (notifs) {

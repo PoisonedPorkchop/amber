@@ -74,26 +74,6 @@ public class FBelt extends Widget implements DTarget, DropTarget {
     }
 
     @Override
-    public void draw(GOut g) {
-        for (int slot = 0; slot < 12; slot++) {
-            Coord c = beltc(slot);
-            g.image(invsq, c);
-            try {
-                Indir<Resource> ires = belt[slot];
-                if (ires != null)
-                    g.image(ires.get().layer(Resource.imgc).tex(), c.add(1, 1));
-            } catch (Loading e) {
-            } catch (Exception re) {
-                // possibly a resource from another client
-                belt[slot] = null;
-            }
-            g.chcolor(keysClr);
-            FastText.aprint(g, new Coord(c.x + invsq.sz().x - 2, c.y + invsq.sz().y), 1, 1, "F" + (slot + 1));
-            g.chcolor();
-        }
-    }
-
-    @Override
     public boolean mousedown(Coord c, int button) {
         int slot = beltslot(c);
         if (slot != -1) {

@@ -12,24 +12,6 @@ public class QuickSlotsWdg extends Widget implements DTarget {
         super(new Coord(44 + 44 + 6, 44));
     }
 
-    @Override
-    public void draw(GOut g) {
-        Equipory e = gameui().getequipory();
-        if (e != null) {
-            g.image(sbg, Coord.z);
-            WItem left = e.quickslots[6];
-            if (left != null) {
-                drawitem(g.reclipl(lc, g.sz), left);
-                drawamountbar(g, left.item, 44 + 6);
-            }
-            WItem right = e.quickslots[7];
-            if (right != null) {
-                drawitem(g.reclipl(rc, g.sz), right);
-                drawamountbar(g, right.item, 0);
-            }
-        }
-    }
-
     private void drawitem(GOut g, WItem witem) {
         GItem item = witem.item;
         GSprite spr = item.spr();

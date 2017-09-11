@@ -134,17 +134,6 @@ public class StatusWdg extends Widget {
     }
 
     @Override
-    public void draw(GOut g) {
-        g.image(players, Coord.z);
-        g.image(pingtime, new Coord(0, players.sz().y));
-
-        int w = players.sz().x;
-        if (pingtime.sz().x > w)
-            w = pingtime.sz().x;
-        this.sz = new Coord(w,  players.sz().y + pingtime.sz().y);
-    }
-
-    @Override
     public void reqdestroy() {
         tg.interrupt();
         super.reqdestroy();

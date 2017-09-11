@@ -50,24 +50,6 @@ public abstract class Listbox<T> extends ListWidget<T> {
         g.chcolor();
     }
 
-    public void draw(GOut g) {
-        sb.max = listitems() - h;
-        drawbg(g);
-        int n = listitems();
-        for (int i = 0; (i * itemh) < sz.y; i++) {
-            int idx = i + sb.val;
-            if (idx >= n)
-                break;
-            T item = listitem(idx);
-            int w = sz.x - (sb.vis() ? sb.sz.x : 0);
-            GOut ig = g.reclip(new Coord(0, i * itemh), new Coord(w, itemh));
-            if (item == sel)
-                drawsel(ig);
-            drawitem(ig, item, idx);
-        }
-        super.draw(g);
-    }
-
     public boolean mousewheel(Coord c, int amount) {
         sb.ch(amount);
         return (true);

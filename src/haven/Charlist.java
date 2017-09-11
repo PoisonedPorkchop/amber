@@ -85,36 +85,6 @@ public class Charlist extends Widget {
             y = 0;
     }
 
-    public void draw(GOut g) {
-        int y = 20;
-        synchronized (chars) {
-            for (Char c : chars) {
-                // c.ava.hide();
-                c.plb.hide();
-            }
-            for (int i = 0; (i < height) && (i + this.y < chars.size()); i++) {
-                boolean sel = (i + this.y) == this.sel;
-                Char c = chars.get(i + this.y);
-                if (hasfocus && sel) {
-                    g.chcolor(255, 255, 128, 255);
-                    g.image(bg, new Coord(0, y));
-                    g.chcolor();
-                } else {
-                    g.image(bg, new Coord(0, y));
-                }
-                // c.ava.show();
-                c.plb.show();
-                // int off = (bg.sz().y - c.ava.sz.y) / 2;
-                // c.ava.c = new Coord(off, off + y);
-                c.plb.c = bg.sz().add(-10, y - 2).sub(c.plb.sz);
-                // g.image(c.nt.tex(), new Coord(off + c.ava.sz.x + 5, off + y));
-                g.image(c.nt.tex(), new Coord(5, 5 + y));
-                y += bg.sz().y + margin;
-            }
-        }
-        super.draw(g);
-    }
-
     public boolean mousewheel(Coord c, int amount) {
         scroll(amount);
         return (true);

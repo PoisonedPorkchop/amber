@@ -79,20 +79,6 @@ public class Scrollport extends Widget {
             else
                 return (c.add(0, sy));
         }
-
-        public void draw(GOut g) {
-            Widget next;
-
-            for (Widget wdg = child; wdg != null; wdg = next) {
-                next = wdg.next;
-                if (!wdg.visible)
-                    continue;
-                Coord cc = xlate(wdg.c, true);
-                if ((cc.y + wdg.sz.y < 0) || (cc.y > sz.y))
-                    continue;
-                wdg.draw(g.reclip(cc, wdg.sz));
-            }
-        }
     }
 
     public boolean mousewheel(Coord c, int amount) {

@@ -151,8 +151,4 @@ public class Partyview extends Widget {
         super.wdgmsg(sender, msg, args);
     }
 
-    public void draw(GOut g) {
-        update();
-        super.draw(g);
-    }
 }

@@ -210,17 +210,6 @@ public class MinimapWnd extends Widget {
     }
 
     @Override
-    public void draw(GOut g) {
-        Coord bgc = new Coord();
-        for (bgc.y = tlm.y; bgc.y < tlm.y + asz.y; bgc.y += bg.sz().y) {
-            for (bgc.x = tlm.x; bgc.x < tlm.x + asz.x; bgc.x += bg.sz().x)
-                g.image(bg, bgc, tlm, asz);
-        }
-        drawframe(g);
-        super.draw(g);
-    }
-
-    @Override
     public Coord contentsz() {
         Coord max = new Coord(0, 0);
         for (Widget wdg = child; wdg != null; wdg = wdg.next) {

@@ -51,16 +51,6 @@ public class Inventory extends Widget implements DTarget {
         }
     }
 
-    public void draw(GOut g) {
-        Coord c = new Coord();
-        for (c.y = 0; c.y < isz.y; c.y++) {
-            for (c.x = 0; c.x < isz.x; c.x++) {
-                g.image(invsq, c.mul(sqsz));
-            }
-        }
-        super.draw(g);
-    }
-
     public Inventory(Coord sz) {
         super(invsq.sz().add(new Coord(-1, -1)).mul(sz).add(new Coord(1, 1)));
         isz = sz;

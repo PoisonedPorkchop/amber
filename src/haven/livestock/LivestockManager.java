@@ -84,13 +84,7 @@ public class LivestockManager extends Window {
             visible = false;
             c = Coord.z;
             scrollPort = new Scrollport(new Coord(WINDOW_WIDTH - 40, 290)) {
-                @Override
-                public void draw(GOut g) {
-                    g.chcolor(0, 0, 0, 128);
-                    g.frect(Coord.z, sz);
-                    g.chcolor();
-                    super.draw(g);
-                }
+
             };
             add(scrollPort, new Coord(0, 25));
         }

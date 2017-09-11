@@ -45,16 +45,6 @@ public class RichTextBox extends Widget {
         this(sz, text, new RichText.Foundry(attrs));
     }
 
-    public void draw(GOut g) {
-        if (bg != null) {
-            g.chcolor(bg);
-            g.frect(Coord.z, sz);
-            g.chcolor();
-        }
-        g.image(text.tex(), new Coord(10, 10 - sb.val));
-        super.draw(g);
-    }
-
     public void settext(String text) {
         this.text = fnd.render(text, sz.x - 20);
         sb.max = this.text.sz().y + 20 - sz.y;

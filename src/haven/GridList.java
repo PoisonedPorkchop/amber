@@ -115,42 +115,6 @@ public abstract class GridList<T> extends Widget {
         return ((col * iw) + (((ww - (rw * iw)) * col) / (rw - 1)));
     }
 
-    public void draw(GOut g) {
-        drawbg(g);
-        int yo = sb.val;
-        int W = sz.x - sb.sz.x, w = sz.x - (sb.vis() ? sb.sz.x : 0);
-        for (Group grp : groups) {
-            if (grp.items.size() == 0)
-                continue;
-            if ((grp.ey - yo < 0) || (grp.sy - yo >= sz.y))
-                continue;
-            int iy = grp.sy - yo;
-            if (grp.name != null) {
-                g.image(grp.rname().tex(), new Coord(0, grp.sy - yo));
-                iy += grp.rname().sz().y;
-            }
-            int rw = Math.max((W - grp.itemsz.x) / (grp.itemsz.x + Math.max(grp.marg.x, 0)), 0) + 1;
-            int sr = Math.max(-iy, 0) / (grp.itemsz.y + grp.marg.y);
-            for (int i = sr * rw; i < grp.items.size(); i++) {
-                Coord c = new Coord(0, iy + ((i / rw) * (grp.itemsz.y + grp.marg.y)));
-                if (grp.marg.x >= 0)
-                    c.x = (i % rw) * (grp.itemsz.x + grp.marg.x);
-                else
-                    c.x = adjx(i % rw, grp.itemsz.x, rw, w);
-                GOut ig = g.reclip(c, grp.itemsz);
-                T item = grp.items.get(i);
-                if (item == sel)
-                    drawsel(ig);
-                try {
-                    drawitem(ig, item);
-                } catch (Loading l) {
-                    ig.image(WItem.missing.layer(Resource.imgc).tex(), Coord.z, g.sz);
-                }
-            }
-        }
-        super.draw(g);
-    }
-
     public boolean mousewheel(Coord c, int amount) {
         sb.ch(amount * 20);
         return (true);
