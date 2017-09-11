@@ -102,28 +102,6 @@ public class MenuSearch extends GameUI.Hidewnd {
         }
 
         @Override
-        protected void drawbg(GOut g) {
-            g.chcolor(0, 0, 0, 120);
-            g.frect(Coord.z, sz);
-            g.chcolor();
-        }
-
-        @Override
-        protected void drawitem(GOut g, Action a, int idx) {
-            try {
-                if (a.img == null) {
-                    Resource res = a.pagina.res.get();
-                    a.img = new TexI(PUtils.convolvedown(res.layer(Resource.imgc).img, new Coord(itemh, itemh), CharWnd.iconfilter));
-                    a.name = Text.render(res.layer(Resource.action).name).tex();
-                }
-                g.image(a.img, Coord.z);
-                g.image(a.name, nameoff);
-            } catch (Loading e) {
-                g.image(WItem.missing.layer(Resource.imgc).tex(), Coord.z, new Coord(itemh, itemh));
-            }
-        }
-
-        @Override
         public void change(Action a) {
             if (a != null) {
                 super.change(a);

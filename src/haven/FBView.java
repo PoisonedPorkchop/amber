@@ -83,7 +83,6 @@ public class FBView {
             g.st.set(def);
             g.apply();
             clear(g);
-            rls.render(g);
         } finally {
             g.st.set(bk);
         }

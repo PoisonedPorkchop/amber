@@ -315,15 +315,6 @@ public class OptWnd extends Window {
         }
 
         private CPanel curcf = null;
-
-        public void draw(GOut g) {
-            if ((curcf == null) || (g.gc.pref != curcf.cf)) {
-                if (curcf != null)
-                    curcf.destroy();
-                curcf = add(new CPanel(g.gc.pref), Coord.z);
-            }
-            super.draw(g);
-        }
     }
 
     public OptWnd(boolean gopts) {
@@ -1624,11 +1615,6 @@ public class OptWnd extends Window {
             }
 
             @Override
-            protected void drawitem(GOut g, Locale item, int i) {
-                g.text(item.getDisplayName(), Coord.z);
-            }
-
-            @Override
             public void change(Locale item) {
                 super.change(item);
                 Utils.setpref("language", item.toString());
@@ -1652,11 +1638,6 @@ public class OptWnd extends Window {
             @Override
             protected int listitems() {
                 return fonts.size();
-            }
-
-            @Override
-            protected void drawitem(GOut g, String item, int i) {
-                g.text(item, Coord.z);
             }
 
             @Override
@@ -1716,11 +1697,6 @@ public class OptWnd extends Window {
             }
 
             @Override
-            protected void drawitem(GOut g, Pair<String, Integer> item, int i) {
-                g.text(item.a, Coord.z);
-            }
-
-            @Override
             public void change(Pair<String, Integer> item) {
                 super.change(item);
                 Config.combatkeys = item.b;
@@ -1748,11 +1724,6 @@ public class OptWnd extends Window {
             @Override
             protected int listitems() {
                 return fontSize.size();
-            }
-
-            @Override
-            protected void drawitem(GOut g, Integer item, int i) {
-                g.text(item.toString(), Coord.z);
             }
 
             @Override

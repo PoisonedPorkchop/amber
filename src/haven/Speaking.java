@@ -48,25 +48,4 @@ public class Speaking extends GAttrib {
         this.text = Text.render(text, Color.BLACK);
     }
 
-    public void draw(GOut g, Coord c) {
-        Coord sz = text.sz();
-        if (sz.x < 10)
-            sz.x = 10;
-        Coord tl = c.add(new Coord(sx, sb.bsz().y + sz.y + svans.sz().y - 1).inv());
-        Coord ftl = tl.add(sb.tloff());
-        g.chcolor(Color.WHITE);
-        g.frect(ftl, sz);
-        sb.draw(g, tl, sz.add(sb.bsz()));
-        g.chcolor(Color.BLACK);
-        g.image(text.tex(), ftl);
-        g.chcolor(Color.WHITE);
-        g.image(svans, c.add(0, -svans.sz().y));
-    }
-
-    final PView.Draw2D fx = new PView.Draw2D() {
-        public void draw2d(GOut g) {
-            if (gob.sc != null)
-                Speaking.this.draw(g, gob.sc.add(new Coord(gob.sczu.mul(zo))).add(3, 0));
-        }
-    };
 }

@@ -162,15 +162,6 @@ public class Composited implements Rendered, MapView.Clickable {
                 this.z2 = z2;
             }
 
-            public void draw(GOut g) {
-                m.draw(g);
-            }
-
-            public void drawflat(GOut g) {
-                if (z2 == 0)
-                    m.drawflat(g);
-            }
-
             public boolean setup(RenderList r) {
                 r.prepo(modorder);
                 r.prepo(mat);
@@ -189,9 +180,6 @@ public class Composited implements Rendered, MapView.Clickable {
             lay.add(new Layer(mat, z, lz++));
         }
 
-        public void draw(GOut g) {
-        }
-
         public boolean setup(RenderList r) {
             m.setup(r);
             for (Layer lay : this.lay)
@@ -206,9 +194,6 @@ public class Composited implements Rendered, MapView.Clickable {
         private SpriteEqu(ED ed) {
             super(ed);
             this.spr = Sprite.create(eqowner, ed.res.res.get(), ed.res.sdt.clone());
-        }
-
-        public void draw(GOut g) {
         }
 
         public boolean setup(RenderList rl) {
@@ -227,9 +212,6 @@ public class Composited implements Rendered, MapView.Clickable {
         private LightEqu(ED ed) {
             super(ed);
             this.l = ed.res.res.get().layer(Light.Res.class).make();
-        }
-
-        public void draw(GOut g) {
         }
 
         public boolean setup(RenderList rl) {
@@ -522,9 +504,6 @@ public class Composited implements Rendered, MapView.Clickable {
         for (Equ equ : this.equ)
             rl.add(equ, equ.et);
         return (false);
-    }
-
-    public void draw(GOut g) {
     }
 
     public void tick(int dt) {

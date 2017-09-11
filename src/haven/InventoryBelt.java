@@ -10,13 +10,6 @@ public class InventoryBelt extends Widget implements DTarget {
     public Coord isz;
     Map<GItem, WItem> wmap = new HashMap<GItem, WItem>();
 
-    public void draw(GOut g) {
-        Coord c = new Coord();
-        for (; c.x < isz.x * isz.y * sqsz.x; c.x += sqsz.x)
-            g.image(invsq, c);
-        super.draw(g);
-    }
-
     public InventoryBelt(Coord sz) {
         super(invsq.sz().add(new Coord(-1 + 3, -1)).mul(sz.x * sz.y, 1).add(new Coord(1, 1)));
         isz = sz;

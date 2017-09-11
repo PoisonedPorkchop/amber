@@ -122,16 +122,6 @@ public interface Rendered extends Drawn {
     };
 
     public static class Dot implements Rendered {
-        public void draw(GOut g) {
-            BGL gl = g.gl;
-            g.st.put(Light.lighting, null);
-            g.state(States.xray);
-            g.apply();
-            gl.glBegin(GL2.GL_POINTS);
-            gl.glColor3f(1.0f, 0.0f, 0.0f);
-            gl.glVertex3f(0.0f, 0.0f, 0.0f);
-            gl.glEnd();
-        }
 
         public boolean setup(RenderList r) {
             return(true);
@@ -149,27 +139,6 @@ public interface Rendered extends Drawn {
             this(java.awt.Color.BLACK);
         }
 
-        public void draw(GOut g) {
-            BGL gl = g.gl;
-            g.st.put(Light.lighting, null);
-            g.state(States.xray);
-            g.apply();
-            gl.glBegin(GL.GL_LINES);
-            gl.glColor4fv(mid, 0);
-            gl.glVertex3f(0, 0, 0);
-            gl.glColor3f(1, 0, 0);
-            gl.glVertex3f(1, 0, 0);
-            gl.glColor4fv(mid, 0);
-            gl.glVertex3f(0, 0, 0);
-            gl.glColor3f(0, 1, 0);
-            gl.glVertex3f(0, 1, 0);
-            gl.glColor4fv(mid, 0);
-            gl.glVertex3f(0, 0, 0);
-            gl.glColor3f(0, 0, 1);
-            gl.glVertex3f(0, 0, 1);
-            gl.glEnd();
-        }
-
         public boolean setup(RenderList r) {
             r.state().put(States.color, null);
             return(true);
@@ -183,17 +152,6 @@ public interface Rendered extends Drawn {
             this.end = end;
         }
 
-        public void draw(GOut g) {
-            BGL gl = g.gl;
-            g.apply();
-            gl.glBegin(GL.GL_LINES);
-            gl.glColor3f(1, 0, 0);
-            gl.glVertex3f(0, 0, 0);
-            gl.glColor3f(0, 1, 0);
-            gl.glVertex3f(end.x, end.y, end.z);
-            gl.glEnd();
-        }
-
         public boolean setup(RenderList r) {
             r.state().put(States.color, null);
             r.state().put(Light.lighting, null);
@@ -202,57 +160,6 @@ public interface Rendered extends Drawn {
     }
 
     public static class Cube implements Rendered {
-        public void draw(GOut g) {
-            BGL gl = g.gl;
-            g.apply();
-
-            gl.glEnable(GL2.GL_COLOR_MATERIAL);
-            gl.glBegin(GL2.GL_QUADS);
-            gl.glNormal3f(0.0f, 0.0f, 1.0f);
-            gl.glColor3f(0.0f, 0.0f, 1.0f);
-            gl.glVertex3f(-1.0f, 1.0f, 1.0f);
-            gl.glVertex3f(-1.0f, -1.0f, 1.0f);
-            gl.glVertex3f(1.0f, -1.0f, 1.0f);
-            gl.glVertex3f(1.0f, 1.0f, 1.0f);
-
-            gl.glNormal3f(1.0f, 0.0f, 0.0f);
-            gl.glColor3f(1.0f, 0.0f, 0.0f);
-            gl.glVertex3f(1.0f, 1.0f, 1.0f);
-            gl.glVertex3f(1.0f, -1.0f, 1.0f);
-            gl.glVertex3f(1.0f, -1.0f, -1.0f);
-            gl.glVertex3f(1.0f, 1.0f, -1.0f);
-
-            gl.glNormal3f(-1.0f, 0.0f, 0.0f);
-            gl.glColor3f(0.0f, 1.0f, 1.0f);
-            gl.glVertex3f(-1.0f, 1.0f, 1.0f);
-            gl.glVertex3f(-1.0f, 1.0f, -1.0f);
-            gl.glVertex3f(-1.0f, -1.0f, -1.0f);
-            gl.glVertex3f(-1.0f, -1.0f, 1.0f);
-
-            gl.glNormal3f(0.0f, 1.0f, 0.0f);
-            gl.glColor3f(0.0f, 1.0f, 0.0f);
-            gl.glVertex3f(-1.0f, 1.0f, 1.0f);
-            gl.glVertex3f(1.0f, 1.0f, 1.0f);
-            gl.glVertex3f(1.0f, 1.0f, -1.0f);
-            gl.glVertex3f(-1.0f, 1.0f, -1.0f);
-
-            gl.glNormal3f(0.0f, -1.0f, 0.0f);
-            gl.glColor3f(1.0f, 0.0f, 1.0f);
-            gl.glVertex3f(-1.0f, -1.0f, 1.0f);
-            gl.glVertex3f(-1.0f, -1.0f, -1.0f);
-            gl.glVertex3f(1.0f, -1.0f, -1.0f);
-            gl.glVertex3f(1.0f, -1.0f, 1.0f);
-
-            gl.glNormal3f(0.0f, 0.0f, -1.0f);
-            gl.glColor3f(1.0f, 1.0f, 0.0f);
-            gl.glVertex3f(-1.0f, 1.0f, -1.0f);
-            gl.glVertex3f(1.0f, 1.0f, -1.0f);
-            gl.glVertex3f(1.0f, -1.0f, -1.0f);
-            gl.glVertex3f(-1.0f, -1.0f, -1.0f);
-            gl.glEnd();
-            gl.glColor3f(1.0f, 1.0f, 1.0f);
-            gl.glDisable(GL2.GL_COLOR_MATERIAL);
-        }
 
         public boolean setup(RenderList rls) {
             rls.state().put(States.color, null);
@@ -267,85 +174,6 @@ public interface Rendered extends Drawn {
         public TCube(Coord3f bn, Coord3f bp) {
             this.bn = bn;
             this.bp = bp;
-        }
-
-        public void draw(GOut g) {
-            BGL gl = g.gl;
-
-            g.state(Light.deflight);
-            g.state(sc);
-            g.apply();
-            gl.glEnable(GL2.GL_COLOR_MATERIAL);
-            gl.glBegin(GL2.GL_QUADS);
-            gl.glNormal3f(0.0f, 0.0f, 1.0f);
-            gl.glVertex3f(bn.x, bp.y, bp.z);
-            gl.glVertex3f(bn.x, bn.y, bp.z);
-            gl.glVertex3f(bp.x, bn.y, bp.z);
-            gl.glVertex3f(bp.x, bp.y, bp.z);
-
-            gl.glNormal3f(1.0f, 0.0f, 0.0f);
-            gl.glVertex3f(bp.x, bp.y, bp.z);
-            gl.glVertex3f(bp.x, bn.y, bp.z);
-            gl.glVertex3f(bp.x, bn.y, bn.z);
-            gl.glVertex3f(bp.x, bp.y, bn.z);
-
-            gl.glNormal3f(-1.0f, 0.0f, 0.0f);
-            gl.glVertex3f(bn.x, bp.y, bp.z);
-            gl.glVertex3f(bn.x, bp.y, bn.z);
-            gl.glVertex3f(bn.x, bn.y, bn.z);
-            gl.glVertex3f(bn.x, bn.y, bp.z);
-
-            gl.glNormal3f(0.0f, 1.0f, 0.0f);
-            gl.glVertex3f(bn.x, bp.y, bp.z);
-            gl.glVertex3f(bp.x, bp.y, bp.z);
-            gl.glVertex3f(bp.x, bp.y, bn.z);
-            gl.glVertex3f(bn.x, bp.y, bn.z);
-
-            gl.glNormal3f(0.0f, -1.0f, 0.0f);
-            gl.glVertex3f(bn.x, bn.y, bp.z);
-            gl.glVertex3f(bn.x, bn.y, bn.z);
-            gl.glVertex3f(bp.x, bn.y, bn.z);
-            gl.glVertex3f(bp.x, bn.y, bp.z);
-
-            gl.glNormal3f(0.0f, 0.0f, -1.0f);
-            gl.glVertex3f(bn.x, bp.y, bn.z);
-            gl.glVertex3f(bp.x, bp.y, bn.z);
-            gl.glVertex3f(bp.x, bn.y, bn.z);
-            gl.glVertex3f(bn.x, bn.y, bn.z);
-            gl.glEnd();
-            gl.glDisable(GL2.GL_COLOR_MATERIAL);
-
-            g.st.put(Light.lighting, null);
-            g.state(ec);
-            g.apply();
-            gl.glLineWidth(1.2f);
-            gl.glBegin(GL2.GL_LINE_STRIP);
-            gl.glVertex3f(bn.x, bn.y, bp.z);
-            gl.glVertex3f(bn.x, bp.y, bp.z);
-            gl.glVertex3f(bp.x, bp.y, bp.z);
-            gl.glVertex3f(bp.x, bn.y, bp.z);
-            gl.glVertex3f(bn.x, bn.y, bp.z);
-            gl.glEnd();
-            gl.glBegin(GL2.GL_LINE_STRIP);
-            gl.glVertex3f(bn.x, bn.y, bn.z);
-            gl.glVertex3f(bn.x, bp.y, bn.z);
-            gl.glVertex3f(bp.x, bp.y, bn.z);
-            gl.glVertex3f(bp.x, bn.y, bn.z);
-            gl.glVertex3f(bn.x, bn.y, bn.z);
-            gl.glEnd();
-            gl.glBegin(GL2.GL_LINES);
-            gl.glVertex3f(bn.x, bn.y, bn.z); gl.glVertex3f(bn.x, bn.y, bp.z);
-            gl.glVertex3f(bp.x, bn.y, bn.z); gl.glVertex3f(bp.x, bn.y, bp.z);
-            gl.glVertex3f(bp.x, bp.y, bn.z); gl.glVertex3f(bp.x, bp.y, bp.z);
-            gl.glVertex3f(bn.x, bp.y, bn.z); gl.glVertex3f(bn.x, bp.y, bp.z);
-            gl.glEnd();
-            gl.glPointSize(5);
-            gl.glBegin(GL2.GL_POINTS);
-            gl.glVertex3f(bn.x, bn.y, bn.z); gl.glVertex3f(bn.x, bn.y, bp.z);
-            gl.glVertex3f(bp.x, bn.y, bn.z); gl.glVertex3f(bp.x, bn.y, bp.z);
-            gl.glVertex3f(bp.x, bp.y, bn.z); gl.glVertex3f(bp.x, bp.y, bp.z);
-            gl.glVertex3f(bn.x, bp.y, bn.z); gl.glVertex3f(bn.x, bp.y, bp.z);
-            gl.glEnd();
         }
 
         public boolean setup(RenderList rls) {
@@ -379,16 +207,6 @@ public interface Rendered extends Drawn {
                 buf.put(PView.loc, null);
             }
         };
-
-        public void draw(GOut g) {
-            BGL gl = g.gl;
-            g.apply();
-            pos.bind(g, false);
-            tex.bind(g, false);
-            gl.glDrawArrays(GL2.GL_QUADS, 0, 4);
-            pos.unbind(g);
-            tex.unbind(g);
-        }
 
         public boolean setup(RenderList rls) {
             rls.prepo(state);

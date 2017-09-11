@@ -12,45 +12,6 @@ public class QuickSlotsWdg extends Widget implements DTarget {
         super(new Coord(44 + 44 + 6, 44));
     }
 
-    private void drawitem(GOut g, WItem witem) {
-        GItem item = witem.item;
-        GSprite spr = item.spr();
-        if (spr != null) {
-            g.defstate();
-            witem.drawmain(g, spr);
-            g.defstate();
-        } else {
-            g.image(WItem.missing.layer(Resource.imgc).tex(), Coord.z, ssz);
-        }
-    }
-
-    public void drawamountbar(GOut g, GItem item, int offset) {
-        if (item.spr() != null) {
-            try {
-                for (ItemInfo info : item.info()) {
-                    if (info instanceof ItemInfo.Contents) {
-                        ItemInfo.Contents imtcnt = (ItemInfo.Contents) info;
-                        if (imtcnt.content > 0) {
-                            double capacity;
-                            if (item.getname().contains("Bucket"))
-                                capacity = imtcnt.isseeds ? 1000D : 10.0D;
-                            else
-                                return;
-                            double content = imtcnt.content;
-                            int height = sz.y - 2;
-                            int h = (int) (content / capacity * height);
-                            g.chcolor(WItem.famountclr);
-                            g.frect(new Coord(sz.x - 4 - offset, height - h + 1), new Coord(3, h));
-                            g.chcolor();
-                            return;
-                        }
-                    }
-                }
-            } catch (Exception ex) { // fail silently if info is not ready
-            }
-        }
-    }
-
     @Override
     public boolean drop(Coord cc, Coord ul) {
         Equipory e = gameui().getequipory();

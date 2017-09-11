@@ -364,23 +364,6 @@ public class Skeleton {
         }
 
         public final Rendered debug = new Rendered() {
-            public void draw(GOut g) {
-                BGL gl = g.gl;
-                g.st.put(Light.lighting, null);
-                g.state(States.xray);
-                g.apply();
-                gl.glBegin(GL2.GL_LINES);
-                for (int i = 0; i < blist.length; i++) {
-                    if (blist[i].parent != null) {
-                        int pi = blist[i].parent.idx;
-                        gl.glColor3f(1.0f, 0.0f, 0.0f);
-                        gl.glVertex3f(gpos[pi][0], gpos[pi][1], gpos[pi][2]);
-                        gl.glColor3f(0.0f, 1.0f, 0.0f);
-                        gl.glVertex3f(gpos[i][0], gpos[i][1], gpos[i][2]);
-                    }
-                }
-                gl.glEnd();
-            }
 
             public boolean setup(RenderList rl) {
                 rl.prepo(States.vertexcolor);

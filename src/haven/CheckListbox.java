@@ -39,21 +39,6 @@ public class CheckListbox extends Listbox<CheckListboxItem> {
         return items.size();
     }
 
-    public void drawbg(GOut g) {
-        g.chcolor(0, 0, 0, 128);
-        g.frect(Coord.z, sz);
-        g.chcolor();
-    }
-
-    protected void drawitem(GOut g, CheckListboxItem itm, int idx) {
-        if (itm.selected)
-            g.image(chk, new Coord(sz.x - sb.sz.x - chk.sz().x - 3, -1), new Coord(itemh, itemh));
-        Text t = Text.render(itm.name);
-        Tex T = t.tex();
-        g.image(T, new Coord(2, 2), t.sz());
-        T.dispose();
-    }
-
     public String[] getselected() {
         List<String> sitems = new ArrayList<String>();
         for (CheckListboxItem itm : items) {

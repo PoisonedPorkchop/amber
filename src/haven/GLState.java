@@ -856,8 +856,6 @@ public abstract class GLState {
             this.r = r;
         }
 
-        public void draw(GOut g) {}
-
         public boolean setup(RenderList rl) {
             rl.add(r, GLState.this);
             return(false);

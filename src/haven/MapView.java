@@ -1082,16 +1082,6 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
             return (cst);
         }
 
-        protected void render(GOut g, Rendered r) {
-            try {
-                if (r instanceof FRendered)
-                    ((FRendered) r).drawflat(g);
-            } catch (RenderList.RLoad l) {
-                if (ignload) return;
-                else throw (l);
-            }
-        }
-
         public void get(GOut g, Coord c, final Callback<T> cb) {
             g.getpixel(c, col -> cb.done(rmap.get(new States.ColState(col))));
         }
@@ -1129,16 +1119,6 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                 return ((MapMesh) r);
             return (null);
         }
-
-        protected void render(GOut g, Rendered r) {
-            if (r instanceof MapMesh) {
-                MapMesh m = (MapMesh) r;
-                if (mode != 0)
-                    g.state(States.vertexcolor);
-                if ((limit == null) || (limit == m))
-                    m.drawflat(g, mode);
-            }
-        }
     }
 
     private void checkmapclick(final GOut g, final Coord c, final Callback<Coord2d> cb) {
@@ -1152,15 +1132,12 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
                 Maplist rl = new Maplist(g.gc);
                 rl.setup(map, clickbasic(g));
                 rl.fin();
-
-                rl.render(g);
                 if(clickdb)
                     g.getimage(img -> Debug.dumpimage(img, Debug.somedir("click1.png")));
                 rl.get(g, c, hit -> {cut = hit; ckdone(1);});
                 // rl.limit = hit;
 
                 rl.mode = 1;
-                rl.render(g);
                 if(clickdb)
                     g.getimage(img -> Debug.dumpimage(img, Debug.somedir("click2.png")));
                 g.getpixel(c, col -> {
@@ -1272,7 +1249,6 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
         Clicklist<ClickInfo> rl = curgoblist;
         rl.setup(gobs, clickbasic(g));
         rl.fin();
-        rl.render(g);
         if(clickdb)
             g.getimage(img -> Debug.dumpimage(img, Debug.somedir("click3.png")));
         rl.get(g, c, inf -> cb.done(((inf == null) || (inf.gob == null))?null:inf));
@@ -1413,53 +1389,6 @@ public class MapView extends PView implements DTarget, Console.Directory, PFList
     }
 
     private Loading camload = null, lastload = null;
-
-    public void draw(GOut g) {
-        glob.map.sendreqs();
-        if ((olftimer != 0) && (olftimer < System.currentTimeMillis()))
-            unflashol();
-        try {
-            if (camload != null)
-                throw (new Loading(camload));
-            Gob pl = player();
-            if (pl != null)
-                this.cc = new Coord2d(pl.getc());
-            undelay(delayed, g);
-            super.draw(g);
-            undelay(delayed2, g);
-            poldraw(g);
-            partydraw(g);
-            try {
-                glob.map.reqarea(cc.floor(tilesz).sub(MCache.cutsz.mul(view + 1)),
-                        cc.floor(tilesz).add(MCache.cutsz.mul(view + 1)));
-            } catch (Defer.DeferredException e) {
-                // there seems to be a rare problem with fetching gridcuts when teleporting, not sure why...
-                // we ignore Defer.DeferredException to prevent the client for crashing
-            }
-
-            if (showgrid) {
-                double tx = Math.ceil(cc.x / tilesz.x / MCache.cutsz.x);
-                double ty = Math.ceil(cc.y / tilesz.y / MCache.cutsz.y);
-                Coord tc = new Coord((int)(tx - view - 1) * MCache.cutsz.x, (int)(ty - view - 1) * MCache.cutsz.y);
-                if (!tc.equals(lasttc)) {
-                    lasttc = tc;
-                    gridol.update(tc);
-                }
-            }
-        } catch (Loading e) {
-            lastload = e;
-            String text = e.getMessage();
-            if (text == null)
-                text = "Loading...";
-            g.chcolor(Color.BLACK);
-            g.frect(Coord.z, sz);
-            g.chcolor(Color.WHITE);
-            g.atext(text, sz.div(2), 0.5, 0.5);
-            if (e instanceof Resource.Loading) {
-                ((Resource.Loading) e).boostprio(5);
-            }
-        }
-    }
 
     public void tick(double dt) {
         camload = null;

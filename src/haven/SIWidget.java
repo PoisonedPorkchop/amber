@@ -43,13 +43,6 @@ public abstract class SIWidget extends Widget {
         return (buf);
     }
 
-    public void draw(GOut g) {
-        if (this.surf == null) {
-            this.surf = new TexI(draw());
-        }
-        g.image(surf, Coord.z);
-    }
-
     public void redraw() {
         if (surf != null)
             surf.dispose();

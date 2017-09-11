@@ -34,26 +34,6 @@ public class GobHitbox extends Sprite {
         return true;
     }
 
-    public void draw(GOut g) {
-        g.apply();
-        BGL gl = g.gl;
-        if (mode ==  GL2.GL_LINE_LOOP) {
-            gl.glLineWidth(2.0F);
-            gl.glBegin(mode);
-            gl.glVertex3f(a.x, a.y, 1);
-            gl.glVertex3f(b.x, b.y, 1);
-            gl.glVertex3f(c.x, c.y, 1);
-            gl.glVertex3f(d.x, d.y, 1);
-        } else {
-            gl.glBegin(mode);
-            gl.glVertex3f(a.x, a.y, 1);
-            gl.glVertex3f(d.x, d.y, 1);
-            gl.glVertex3f(c.x, c.y, 1);
-            gl.glVertex3f(b.x, b.y, 1);
-        }
-        gl.glEnd();
-    }
-
     public static class BBox {
         public Coord a;
         public Coord b;

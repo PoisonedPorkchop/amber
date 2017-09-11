@@ -50,19 +50,6 @@ public class Img extends Widget {
         }
     }
 
-    public void draw(GOut g) {
-        if (res != null) {
-            try {
-                img = res.get().layer(Resource.imgc).tex();
-                resize(img.sz());
-                res = null;
-            } catch (Loading e) {
-            }
-        }
-        if (img != null)
-            g.image(img, Coord.z);
-    }
-
     public Img(Tex img) {
         super(img.sz());
         this.res = null;

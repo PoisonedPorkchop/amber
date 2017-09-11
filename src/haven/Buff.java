@@ -65,39 +65,6 @@ public class Buff extends Widget {
         return (ntext);
     }
 
-    public void draw(GOut g) {
-        g.chcolor(255, 255, 255, a);
-        if (ameter >= 0) {
-            g.image(cframe, Coord.z);
-            g.chcolor(0, 0, 0, a);
-            g.frect(ameteroff, ametersz);
-            g.chcolor(255, 255, 255, a);
-            g.frect(ameteroff, new Coord((ameter * ametersz.x) / 100, ametersz.y));
-        } else {
-            g.image(frame, Coord.z);
-        }
-        try {
-            Tex img = res.get().layer(Resource.imgc).tex();
-            g.image(img, imgoff);
-            if (nmeter >= 0)
-                g.aimage(nmeter(), imgoff.add(img.sz()).sub(1, 1), 1, 1);
-            if (cmeter >= 0) {
-                double m = cmeter / 100.0;
-                if (cticks >= 0) {
-                    double ot = cticks * 0.06;
-                    double pt = (System.currentTimeMillis() - gettime) / 1000.0;
-                    m *= (ot - pt) / ot;
-                }
-                m = Utils.clip(m, 0.0, 1.0);
-                g.chcolor(255, 255, 255, 170);
-                Coord ccc = img.sz().div(2);
-                g.prect(imgoff.add(ccc), ccc.inv(), img.sz().sub(ccc), Math.PI * 2 * m);
-                g.chcolor(255, 255, 255, a);
-            }
-        } catch (Loading e) {
-        }
-    }
-
     private String shorttip() {
         if (tt != null)
             return (tt);

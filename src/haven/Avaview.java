@@ -173,19 +173,6 @@ public class Avaview extends PView {
             comp.tick((int) (dt * 1000));
     }
 
-    public void draw(GOut g) {
-        try {
-            updcomp();
-            super.draw(g);
-        } catch (Loading e) {
-            g.image(missing, Coord.z, sz);
-        }
-        if (color != null) {
-            g.chcolor(color);
-            Window.wbox.draw(g, Coord.z, sz);
-        }
-    }
-
     public boolean mousedown(Coord c, int button) {
         if (canactivate) {
             wdgmsg("click", button);

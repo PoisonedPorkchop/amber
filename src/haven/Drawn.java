@@ -27,5 +27,4 @@
 package haven;
 
 public interface Drawn {
-    public void draw(GOut g);
 }

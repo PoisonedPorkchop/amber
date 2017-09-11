@@ -69,17 +69,6 @@ public class Makewindow extends Widget {
             this.rawinfo = info;
         }
 
-        public void draw(GOut g) {
-            try {
-                if (spr == null)
-                    spr = GSprite.create(this, res.get(), sdt.clone());
-                spr.draw(g);
-            } catch (Loading e) {
-            }
-            if (num != null)
-                g.aimage(num, Inventory.sqsz, 1.0, 1.0);
-        }
-
         public BufferedImage shorttip() {
             List<ItemInfo> info = info();
             if (info.isEmpty()) {
@@ -204,84 +193,6 @@ public class Makewindow extends Widget {
         } else {
             super.uimsg(msg, args);
         }
-    }
-
-    public void draw(GOut g) {
-        Coord c = new Coord(xoff, 0);
-        for (Spec s : inputs) {
-            GOut sg = g.reclip(c, Inventory.invsq.sz());
-            sg.image(Inventory.invsq, Coord.z);
-            s.draw(sg);
-            c = c.add(Inventory.sqsz.x, 0);
-        }
-        if (qmod != null) {
-            g.image(qmodl.tex(), new Coord(0, qmy + 4));
-            c = new Coord(xoff, qmy);
-
-            CharWnd chrwdg = null;
-            try {
-                chrwdg = ((GameUI) parent.parent).chrwdg;
-            } catch (Exception e) { // fail silently
-            }
-
-            List<Integer> qmodValues = new ArrayList<Integer>(3);
-
-            for (Indir<Resource> qm : qmod) {
-                try {
-                    Tex t = qm.get().layer(Resource.imgc).tex();
-                    g.image(t, c);
-                    c = c.add(t.sz().x + 1, 0);
-
-                    if (Config.showcraftcap && chrwdg != null) {
-                        String name = qm.get().basename();
-                        for (CharWnd.SAttr attr : chrwdg.skill) {
-                            if (name.equals(attr.attr.nm)) {
-                                Coord sz = attr.attr.comptex.sz();
-                                g.image(attr.attr.comptex, c.add(3, t.sz().y / 2 - sz.y / 2));
-                                c = c.add(sz.x + 8, 0);
-                                qmodValues.add(attr.attr.comp);
-                                break;
-                            }
-                        }
-                        for (CharWnd.Attr attr : chrwdg.base) {
-                            if (name.equals(attr.attr.nm)) {
-                                Coord sz = attr.attr.comptex.sz();
-                                g.image(attr.attr.comptex, c.add(3, t.sz().y / 2 - sz.y / 2));
-                                c = c.add(sz.x + 8, 0);
-                                qmodValues.add(attr.attr.comp);
-                                break;
-                            }
-                        }
-                    }
-                } catch (Loading l) {
-                }
-            }
-
-            if (Config.showcraftcap && qmodValues.size() > 0) {
-                long product = 1;
-                for (long cap : qmodValues)
-                    product *= cap;
-
-                if (product != qModProduct) {
-                    qModProduct = product;
-                    softcap = Text.renderstroked("" + (int) Math.pow(product, 1.0 / qmodValues.size()),
-                            Color.WHITE, Color.BLACK, Text.num12boldFnd).tex();
-                }
-
-                Coord sz = softcap.sz();
-                Coord szl = softcapl.sz();
-                g.image(softcapl, this.sz.sub(sz.x + szl.x + 8, this.sz.y / 2 + szl.y / 2));
-                g.image(softcap, this.sz.sub(sz.x, this.sz.y / 2 + sz.y / 2));
-            }
-        }
-        c = new Coord(xoff, outy);
-        for (Spec s : outputs) {
-            GOut sg = g.reclip(c, Inventory.invsq.sz());
-            sg.image(Inventory.invsq, Coord.z);
-            s.draw(sg);
-            c = c.add(Inventory.sqsz.x, 0);
-        }
-        super.draw(g);
     }
 
     private long hoverstart;

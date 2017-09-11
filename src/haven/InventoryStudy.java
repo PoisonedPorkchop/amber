@@ -12,52 +12,6 @@ public class InventoryStudy extends Inventory {
     }
 
     @Override
-    public void draw(GOut g) {
-        if (Config.studyhist) {
-            if (histtex == null) {
-                histtex = new Tex[16];
-                String chrid = gameui().chrid;
-                if (chrid != "") {
-                    String[] hist = Utils.getprefsa("studyhist_" + chrid, null);
-                    if (hist != null) {
-                        for (int i = 0; i < 16; i++) {
-                            if (!hist[i].equals("null")) {
-                                final int _i = i;
-                                Defer.later(new Defer.Callable<Void>() {
-                                    public Void call() {
-                                        try {
-                                            Resource res = Resource.remote().load(hist[_i]).get();
-                                            histtex[_i] = res.layer(Resource.imgc).tex();
-                                        } catch (Loading le) {
-                                            Defer.later(this);
-                                        }
-                                        return null;
-                                    }
-                                });
-                            }
-                        }
-                    }
-                }
-            }
-            g.chcolor(histclr);
-            for (int i = 0; i < 16; i++) {
-                Tex tex = histtex[i];
-                if (tex != null) {
-                    try {
-                        int y = i / 4 * Inventory.sqsz.y + 1;
-                        int x = i % 4 * Inventory.sqsz.x + 1;
-                        g.image(tex, new Coord(x, y));
-                    } catch (Resource.LoadException le) {
-                    }
-                }
-            }
-            g.chcolor();
-        }
-
-        super.draw(g);
-    }
-
-    @Override
     public void addchild(Widget child, Object... args) {
         super.addchild(child, args);
 

@@ -53,15 +53,4 @@ public class BPRadSprite extends Sprite {
         rl.state().put(States.color, null);
         return true;
     }
-
-    public void draw(GOut g) {
-        g.state(smat);
-        g.apply();
-        this.posa.bind(g, false);
-        this.nrma.bind(g, false);
-        this.sidx.rewind();
-        g.gl.glDrawElements(4, this.sidx.capacity(), 5123, this.sidx);
-        this.posa.unbind(g);
-        this.nrma.unbind(g);
-    }
 }

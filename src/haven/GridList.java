@@ -100,17 +100,6 @@ public abstract class GridList<T> extends Widget {
         update();
     }
 
-    protected void drawbg(GOut g) {
-    }
-
-    protected void drawsel(GOut g) {
-        g.chcolor(255, 255, 0, 128);
-        g.frect(Coord.z, g.sz);
-        g.chcolor();
-    }
-
-    protected abstract void drawitem(GOut g, T item);
-
     private static int adjx(int col, int iw, int rw, int ww) {
         return ((col * iw) + (((ww - (rw * iw)) * col) / (rw - 1)));
     }

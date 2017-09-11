@@ -65,24 +65,6 @@ public class IMeter extends Widget {
         }
     }
 
-    public void draw(GOut g) {
-        try {
-            Tex bg = this.bg.get().layer(Resource.imgc).tex();
-            g.chcolor(0, 0, 0, 255);
-            g.frect(off, msz);
-            g.chcolor();
-            for (Meter m : meters) {
-                int w = msz.x;
-                w = (w * m.a) / 100;
-                g.chcolor(m.c);
-                g.frect(off, new Coord(w, msz.y));
-            }
-            g.chcolor();
-            g.image(bg, Coord.z);
-        } catch (Loading l) {
-        }
-    }
-
     public void uimsg(String msg, Object... args) {
         if (msg == "set") {
             List<Meter> meters = new LinkedList<Meter>();

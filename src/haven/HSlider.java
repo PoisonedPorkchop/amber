@@ -51,14 +51,6 @@ public class HSlider extends Widget {
         this.max = max;
     }
 
-    public void draw(GOut g) {
-        int cy = (sflarp.sz().y - schain.sz().y) / 2;
-        for (int x = 0; x < sz.x; x += schain.sz().x)
-            g.image(schain, new Coord(x, cy));
-        int fx = ((sz.x - sflarp.sz().x) * (val - min)) / (max - min);
-        g.image(sflarp, new Coord(fx, 0));
-    }
-
     public boolean mousedown(Coord c, int button) {
         if (button != 1)
             return (false);

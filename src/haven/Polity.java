@@ -63,25 +63,6 @@ public class Polity extends Widget {
             return (memb.size());
         }
 
-        protected void drawbg(GOut g) {
-            g.chcolor(0, 0, 0, 128);
-            g.frect(Coord.z, sz);
-            g.chcolor();
-        }
-
-        public void drawitem(GOut g, Member m, int idx) {
-            if ((mw instanceof MemberWidget) && Utils.eq(((MemberWidget) mw).id, m.id))
-                drawsel(g);
-            Text rn;
-            if (m.id == null) {
-                rn = self;
-            } else {
-                BuddyWnd.Buddy b = getparent(GameUI.class).buddies.find(m.id);
-                rn = (b == null) ? unk : (b.rname());
-            }
-            g.aimage(rn.tex(), new Coord(0, 10), 0, 0.5);
-        }
-
         public void change(Member pm) {
             if (pm == null)
                 Polity.this.wdgmsg("sel");

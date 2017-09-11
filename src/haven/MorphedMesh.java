@@ -60,11 +60,6 @@ public class MorphedMesh extends FastMesh {
         return (super.setup(rl));
     }
 
-    public void cdraw(GOut g) {
-        ((MorphedBuf) vert).update2(g);
-        super.cdraw(g);
-    }
-
     protected boolean compile() {
         return (false);
     }

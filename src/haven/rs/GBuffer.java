@@ -157,7 +157,6 @@ public class GBuffer {
         g.apply();
         glbuf.glClearColor(0, 0, 0, 0);
         glbuf.glClear(GL.GL_COLOR_BUFFER_BIT);
-        curdraw.draw(g);
         ctx.state.clean();
         GLObject.disposeall(ctx.curgl, glbuf);
 

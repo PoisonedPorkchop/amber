@@ -27,19 +27,6 @@ public class CharterList extends Listbox<String> {
     }
 
     @Override
-    protected void drawbg(GOut g) {
-        g.chcolor(0, 0, 0, 120);
-        g.frect(Coord.z, sz);
-        g.chcolor();
-    }
-
-    @Override
-    protected void drawitem(GOut g, String chrt, int idx) {
-        g.text(chrt, txtoff);
-        g.image(xicon, new Coord(sz.x - xicon.sz().x - (sb.vis() ? 10 : 1), 3));
-    }
-
-    @Override
     public void change(String chrt) {
         if (chrt != null) {
             super.change(chrt);

@@ -325,107 +325,6 @@ public class HavenPanel extends GLCanvas implements Runnable, Console.Directory 
         return (Toolkit.getDefaultToolkit().createCustomCursor(buf, new java.awt.Point(hs.x, hs.y), ""));
     }
 
-    void rootdraw(GLState.Applier state, UI ui, BGL gl) {
-        GLState.Buffer ibuf = new GLState.Buffer(state.cfg);
-        gstate.prep(ibuf);
-        ostate.prep(ibuf);
-        GOut g = new GOut(gl, state.cgl, state.cfg, state, ibuf, new Coord(w, h));
-        state.set(ibuf);
-
-        g.state(ostate);
-        g.apply();
-        gl.glClearColor(0, 0, 0, 1);
-        gl.glClear(GL.GL_COLOR_BUFFER_BIT);
-        synchronized (ui) {
-            ui.draw(g);
-        }
-
-        if (Config.showfps) {
-            FastText.aprint(g, new Coord(HavenPanel.w - 50, 15), 0, 1, "FPS: " + fps);
-        }
-
-        if (Config.dbtext) {
-            int y = h - 165;
-            FastText.aprintf(g, new Coord(10, y -= 15), 0, 1, "FPS: %d (%d%%, %d%% idle)", fps, (int) (uidle * 100.0), (int) (ridle * 100.0));
-            Runtime rt = Runtime.getRuntime();
-            long free = rt.freeMemory(), total = rt.totalMemory();
-            FastText.aprintf(g, new Coord(10, y -= 15), 0, 1, "Mem: %,011d/%,011d/%,011d/%,011d", free, total - free, total, rt.maxMemory());
-            FastText.aprintf(g, new Coord(10, y -= 15), 0, 1, "Tex-current: %d", TexGL.num());
-            FastText.aprintf(g, new Coord(10, y -= 15), 0, 1, "GL progs: %d", g.st.numprogs());
-            FastText.aprintf(g, new Coord(10, y -= 15), 0, 1, "Stats slots: %d", GLState.Slot.num());
-            GameUI gi = ui.root.findchild(GameUI.class);
-            if ((gi != null) && (gi.map != null)) {
-                try {
-                    FastText.aprintf(g, new Coord(10, y -= 15), 0, 1, "Mapview: %s", gi.map);
-                } catch (Loading e) {
-                }
-                if (gi.map.rls != null)
-                    FastText.aprintf(g, new Coord(10, y -= 15), 0, 1, "Rendered: %,d+%,d(%,d), cached %,d/%,d+%,d(%,d)", gi.map.rls.drawn, gi.map.rls.instanced, gi.map.rls.instancified, gi.map.rls.cacheroots, gi.map.rls.cached, gi.map.rls.cacheinst, gi.map.rls.cacheinstn);
-            }
-            if (Resource.remote().qdepth() > 0)
-                FastText.aprintf(g, new Coord(10, y -= 15), 0, 1, "RQ depth: %d (%d)", Resource.remote().qdepth(), Resource.remote().numloaded());
-        }
-        Object tooltip;
-        try {
-            synchronized (ui) {
-                tooltip = ui.root.tooltip(mousepos, ui.root);
-            }
-        } catch (Loading e) {
-            tooltip = "...";
-        }
-        Tex tt = null;
-        if (tooltip != null) {
-            if (tooltip instanceof Text) {
-                tt = ((Text) tooltip).tex();
-            } else if (tooltip instanceof Tex) {
-                tt = (Tex) tooltip;
-            } else if (tooltip instanceof Indir<?>) {
-                Indir<?> t = (Indir<?>) tooltip;
-                Object o = t.get();
-                if (o instanceof Tex)
-                    tt = (Tex) o;
-            } else if (tooltip instanceof String) {
-                if (((String) tooltip).length() > 0)
-                    tt = (Text.render((String) tooltip)).tex();
-            }
-        }
-        if (tt != null) {
-            Coord sz = tt.sz();
-            Coord pos = mousepos.add(sz.inv());
-            if (pos.x < 10)
-                pos.x = 10;
-            if (pos.y < 10)
-                pos.y = 10;
-            g.chcolor(244, 247, 21, 192);
-            g.rect(pos.add(-3, -3), sz.add(6, 6));
-            g.chcolor(35, 35, 35, 192);
-            g.frect(pos.add(-2, -2), sz.add(4, 4));
-            g.chcolor();
-            g.image(tt, pos);
-        }
-        ui.lasttip = tooltip;
-        Resource curs = ui.root.getcurs(mousepos);
-        if (curs != null) {
-            if (cursmode == "awt") {
-                if (curs != lastcursor) {
-                    try {
-                        setCursor(makeawtcurs(curs.layer(Resource.imgc).img, curs.layer(Resource.negc).cc));
-                        lastcursor = curs;
-                    } catch (Exception e) {
-                        cursmode = "tex";
-                    }
-                }
-            } else if (cursmode == "tex") {
-                Coord dc = mousepos.add(curs.layer(Resource.negc).cc.inv());
-                g.image(curs.layer(Resource.imgc), dc);
-            }
-        }
-        state.clean();
-        GLObject.disposeall(state.cgl, gl);
-        if (gldebug)
-            gl.bglGetDebugMessageLog(msg -> System.err.println(msg));
-    }
-
     private static class Frame {
         BufferBGL buf;
         CPUProfile.Frame pf;
@@ -595,7 +494,6 @@ public class HavenPanel extends GLCanvas implements Runnable, Console.Directory 
 
                     BufferBGL buf = new BufferBGL();
                     GLState.Applier state = this.state;
-                    rootdraw(state, ui, buf);
                     if (curf != null)
                         curf.tick("draw");
                     synchronized (drawfun) {

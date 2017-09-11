@@ -155,17 +155,6 @@ public class LoginScreen extends Widget {
         }
 
         @Override
-        protected void drawbg(GOut g) {
-            g.chcolor(0, 0, 0, 120);
-            g.frect(Coord.z, sz);
-            g.chcolor();
-        }
-
-        @Override
-        protected void drawsel(GOut g) {
-        }
-
-        @Override
         protected LoginData listitem(int i) {
             synchronized (Config.logins) {
                 return Config.logins.get(i);
@@ -196,19 +185,6 @@ public class LoginScreen extends Widget {
                 hover = c.y / ITEM_HEIGHT + sb.val;
             else
                 hover = -1;
-        }
-
-        @Override
-        protected void drawitem(GOut g, LoginData item, int i) {
-            if (hover == i) {
-                g.chcolor(96, 96, 96, 255);
-                g.frect(Coord.z, g.sz);
-                g.chcolor();
-            }
-            Tex tex = Text.render(item.name, Color.WHITE, textfs).tex();
-            int y = ITEM_HEIGHT / 2 - tex.sz().y / 2;
-            g.image(tex, new Coord(5, y));
-            g.image(xicon, new Coord(sz.x - 25, y));
         }
 
         @Override

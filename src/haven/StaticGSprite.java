@@ -43,10 +43,6 @@ public class StaticGSprite extends GSprite {
         this.img = img;
     }
 
-    public void draw(GOut g) {
-        g.image(img, Coord.z);
-    }
-
     public Coord sz() {
         return (img.sz);
     }

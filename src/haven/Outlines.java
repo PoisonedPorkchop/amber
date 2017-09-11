@@ -39,9 +39,6 @@ import javax.media.opengl.*;
 public class Outlines implements Rendered {
     private boolean symmetric;
 
-    public void draw(GOut g) {
-    }
-
     private final static Uniform snrm = new Uniform(SAMPLER2D);
     private final static Uniform sdep = new Uniform(SAMPLER2D);
     private final static Uniform msnrm = new Uniform(SAMPLER2DMS);

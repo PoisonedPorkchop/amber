@@ -126,9 +126,6 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered {
             public void setupmain(RenderList rl);
         }
 
-        public void draw(GOut g) {
-        }
-
         public boolean setup(RenderList rl) {
             if (spr != null)
                 rl.add(spr, null);
@@ -434,10 +431,6 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered {
         }
     }
 
-    @Override
-    public void draw(GOut g) {
-    }
-
     public void determineType(String name) {
         if (name.startsWith("gfx/terobjs/trees") && !name.endsWith("log") && !name.endsWith("oldtrunk"))
             type = Type.TREE;
@@ -633,8 +626,6 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered {
             }
         }
         Speaking sp = getattr(Speaking.class);
-        if (sp != null)
-            rl.add(sp.fx, null);
         KinInfo ki = getattr(KinInfo.class);
         if (ki != null)
             rl.add(ki.fx, null);

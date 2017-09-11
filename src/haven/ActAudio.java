@@ -118,18 +118,6 @@ public class ActAudio extends GLState.Abstract {
             this(new VolAdjust(clip));
         }
 
-        public void draw(GOut g) {
-            g.apply();
-            ActAudio list = g.st.cur(slot);
-            if (list != null) {
-                Coord3f pos = PView.mvxf(g).mul4(Coord3f.o);
-                double pd = Math.sqrt((pos.x * pos.x) + (pos.y * pos.y));
-                this.clip.vol = Math.min(1.0, 50.0 / pd);
-                this.clip.bal = Utils.clip(Math.atan2(pos.x, -pos.z) / (Math.PI / 8.0), -1, 1);
-                list.pos.add(clip);
-            }
-        }
-
         public boolean setup(RenderList rl) {
             return (true);
         }
@@ -202,20 +190,6 @@ public class ActAudio extends GLState.Abstract {
                 vacc += vol;
                 n++;
             }
-        }
-
-        public void draw(GOut g) {
-            g.apply();
-            if (glob == null) {
-                ActAudio list = g.st.cur(slot);
-                if (list == null)
-                    return;
-                glob = list.intern(new Glob(res));
-            }
-            Coord3f pos = PView.mvxf(g).mul4(Coord3f.o);
-            double pd = Math.sqrt((pos.x * pos.x) + (pos.y * pos.y));
-            double svol = Math.min(1.0, 50.0 / pd);
-            glob.add(svol * bvol);
         }
 
         public boolean setup(RenderList rl) {

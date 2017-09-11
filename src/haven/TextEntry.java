@@ -127,15 +127,6 @@ public class TextEntry extends SIWidget {
         g.dispose();
     }
 
-    public void draw(GOut g) {
-        super.draw(g);
-        if (hasfocus && (((System.currentTimeMillis() - focusstart) % 1000) < 500)) {
-            int cx = tcache.advance(buf.point);
-            int lx = cx - sx + 1;
-            g.image(caret, toff.add(coff).add(lx, 0));
-        }
-    }
-
     public TextEntry(int w, String deftext) {
         super(new Coord(w, mext.getHeight()));
         rsettext(deftext);

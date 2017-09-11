@@ -67,25 +67,6 @@ public class VMeter extends Widget {
         this.cl = cl;
     }
 
-    public void draw(GOut g) {
-        g.image(bg, Coord.z);
-        g.chcolor(cl);
-        int hm = (sz.y - 6);
-        int h = (hm * amount) / 100;
-        g.image(fg, new Coord(0, 0), new Coord(0, sz.y - 3 - h), sz.add(0, h));
-
-        Widget p = this.parent;
-        if (p instanceof Window) {
-            Integer lvl = this.levels.get(((Window) p).origcap);
-            if (lvl != null) {
-                g.chcolor(Color.WHITE);
-                int y = sz.y - 3 - (hm * lvl) / 100;
-                g.line(new Coord(3, y), new Coord(sz.x - 3, y), 1);
-                g.chcolor();
-            }
-        }
-    }
-
     public void uimsg(String msg, Object... args) {
         if (msg == "set") {
             amount = (Integer) args[0];

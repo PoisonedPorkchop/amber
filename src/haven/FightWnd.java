@@ -244,39 +244,6 @@ public class FightWnd extends Widget {
             super.change(act);
         }
 
-        public void draw(GOut g) {
-            if (loading) {
-                loading = false;
-                for (Action act : acts) {
-                    try {
-                        Resource res = act.res.get();
-                        act.rnm = attrf.render(res.layer(Resource.tooltip).t);
-                    } catch (Loading l) {
-                        act.rnm = attrf.render("...");
-                        loading = true;
-                    }
-                }
-
-                Collections.sort(acts, new Comparator<Action>() {
-                    public int compare(Action a, Action b) {
-                        int ret = a.rnm.text.compareTo(b.rnm.text);
-                        return (ret);
-                    }
-                });
-            }
-            if((drag != null) && (dp == null)) {
-                try {
-                    final Tex dt = drag.res.get().layer(Resource.imgc).tex();
-                    ui.drawafter(new UI.AfterDraw() {
-                        public void draw(GOut g) {
-                            g.image(dt, ui.mc.add(dt.sz().div(2).inv()));
-                        }
-                    });
-                } catch(Loading l) {}
-            }
-            super.draw(g);
-        }
-
         public boolean mousedown(Coord c, int button) {
             if (button == 1) {
                 super.mousedown(c, button);
@@ -642,11 +609,6 @@ public class FightWnd extends Widget {
             }
 
             @Override
-            protected void drawitem(GOut g, Pair<String, Integer> item, int i) {
-                g.text(item.a, Coord.z);
-            }
-
-            @Override
             public void change(Pair<String, Integer> item) {
                 super.change(item);
                 filter = item.b;
@@ -680,11 +642,6 @@ public class FightWnd extends Widget {
             @Override
             protected int listitems() {
                 return saves.length;
-            }
-
-            @Override
-            protected void drawitem(GOut g, Pair<Text, Integer> item, int i) {
-                g.image(item.a.tex(), Coord.z);
             }
 
             @Override

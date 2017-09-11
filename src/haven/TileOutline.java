@@ -27,19 +27,6 @@ public class TileOutline implements Rendered {
     }
 
     @Override
-    public void draw(GOut g) {
-        g.apply();
-        BGL gl = g.gl;
-        FloatBuffer vbuf = getCurrentBuffer();
-        vbuf.rewind();
-        gl.glLineWidth(1.0F);
-        gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
-        gl.glVertexPointer(3, GL2.GL_FLOAT, 0, vbuf);
-        gl.glDrawArrays(GL2.GL_LINES, 0, area * 4);
-        gl.glDisableClientState(GL2.GL_VERTEX_ARRAY);
-    }
-
-    @Override
     public boolean setup(RenderList rl) {
         rl.prepo(location);
         rl.prepo(States.ndepthtest);

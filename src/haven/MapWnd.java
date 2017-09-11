@@ -177,22 +177,6 @@ public class MapWnd extends Window {
             return (super.mousedown(c, button));
         }
 
-        public void draw(GOut g) {
-            g.chcolor(0, 0, 0, 128);
-            g.frect(Coord.z, sz);
-            g.chcolor();
-            super.draw(g);
-            try {
-                Coord ploc = xlate(resolve(player));
-                if (ploc != null) {
-                    g.chcolor(255, 0, 0, 255);
-                    g.image(plx, ploc.sub(plx.sz().div(2)));
-                    g.chcolor();
-                }
-            } catch (Loading l) {
-            }
-        }
-
         public Resource getcurs(Coord c) {
             if (domark)
                 return (markcurs);
@@ -262,11 +246,6 @@ public class MapWnd extends Window {
             }
 
             @Override
-            protected void drawitem(GOut g, Pair<String, String> item, int i) {
-                g.text(item.a, Dropbox.itemtextc);
-            }
-
-            @Override
             public void change(Pair<String, String> item) {
                 super.change(item);
                 if (item.b == null)
@@ -303,19 +282,6 @@ public class MapWnd extends Window {
         }
 
         private Function<String, Text> names = new CachedFunction<>(500, nm -> fnd.render(nm));
-
-        protected void drawbg(GOut g) {
-        }
-
-        public void drawitem(GOut g, Marker mark, int idx) {
-            g.chcolor(((idx % 2) == 0) ? every : other);
-            g.frect(Coord.z, g.sz);
-            if (mark instanceof PMarker)
-                g.chcolor(((PMarker) mark).color);
-            else
-                g.chcolor();
-            g.aimage(names.apply(mark.nm).tex(), new Coord(5, itemh / 2), 0, 0.5);
-        }
 
         public void change(Marker mark) {
             change2(mark);
@@ -406,11 +372,6 @@ public class MapWnd extends Window {
     }
 
     private static final Tex sizer = Resource.loadtex("gfx/hud/wnd/sizer");
-
-    protected void drawframe(GOut g) {
-        g.image(sizer, ctl.add(csz).sub(sizer.sz()));
-        super.drawframe(g);
-    }
 
     public boolean keydown(KeyEvent ev) {
         if (ev.getKeyCode() == KeyEvent.VK_HOME) {

@@ -50,25 +50,6 @@ public class GiveButton extends Widget {
         this(state, bg.sz());
     }
 
-    public void draw(GOut g) {
-        if (state == 0)
-            g.chcolor(255, 192, 192, 255);
-        else if (state == 1)
-            g.chcolor(192, 192, 255, 255);
-        else if (state == 2)
-            g.chcolor(192, 255, 192, 255);
-        g.image(bg, Coord.z, sz);
-        g.chcolor();
-        if ((state & 1) != 0)
-            g.image(ol, Coord.z, sz);
-        else
-            g.image(sl, Coord.z, sz);
-        if ((state & 2) != 0)
-            g.image(or, Coord.z, sz);
-        else
-            g.image(sr, Coord.z, sz);
-    }
-
     public boolean mousedown(Coord c, int button) {
         wdgmsg("click", button);
         System.out.println("Give button?");

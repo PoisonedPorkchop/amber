@@ -479,9 +479,6 @@ public class MapMesh implements Rendered, Disposable {
             mesh.dispose();
         }
 
-        public void draw(GOut g) {
-        }
-
         public boolean setup(RenderList rl) {
             rl.prepc(gmorder);
             rl.prepc(gmoff);
@@ -550,9 +547,6 @@ public class MapMesh implements Rendered, Disposable {
                 final FastMesh mesh = buf.mkmesh();
                 final int z = i;
                 class OL implements Rendered, Disposable {
-                    public void draw(GOut g) {
-                        mesh.draw(g);
-                    }
 
                     public void dispose() {
                         mesh.dispose();
@@ -577,9 +571,6 @@ public class MapMesh implements Rendered, Disposable {
             if (!(d instanceof ConsHooks) || !((ConsHooks) d).clean())
                 i.remove();
         }
-    }
-
-    public void draw(GOut g) {
     }
 
     private void consflat() {
@@ -633,11 +624,6 @@ public class MapMesh implements Rendered, Disposable {
                 new FastMesh(new VertexBuf(posa), indb),
                 new FastMesh(new VertexBuf(posa, cola), indb),
         };
-    }
-
-    public void drawflat(GOut g, int mode) {
-        g.apply();
-        flats[mode].draw(g);
     }
 
     public void dispose() {

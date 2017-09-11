@@ -55,10 +55,6 @@ public class WItem extends Widget implements DTarget {
         this.item = item;
     }
 
-    public void drawmain(GOut g, GSprite spr) {
-        spr.draw(g);
-    }
-
     public static BufferedImage shorttip(List<ItemInfo> info) {
         return (ItemInfo.shorttip(info));
     }
@@ -212,98 +208,6 @@ public class WItem extends Widget implements DTarget {
             resize(sz);
             lspr = spr;
         }
-    }
-
-    public void draw(GOut g) {
-        GSprite spr = item.spr();
-        if (spr != null) {
-            Coord sz = spr.sz();
-            g.defstate();
-            if (olcol.get() != null)
-                g.usestate(new ColorMask(olcol.get()));
-            drawmain(g, spr);
-            g.defstate();
-            if (item.num >= 0) {
-                g.atext(Integer.toString(item.num), sz, 1, 1, Text.num10Fnd);
-            } else if (itemnum.get() != null) {
-                g.aimage(itemnum.get(), new Coord(sz.x, 0), 1, 0);
-            }
-
-            Double meter = item.meter > 0 ? item.meter / 100.0 : itemmeter.get();
-            if (Config.itemmeterbar && meter != null && meter > 0) {
-                g.chcolor(220, 60, 60, 255);
-                g.frect(Coord.z, new Coord((int) (sz.x / (100 / (meter * 100))), 4));
-                g.chcolor();
-            }
-
-            QBuff quality = item.quality();
-            if (Config.showquality) {
-                if (quality != null && quality.qtex != null) {
-                    Coord btm = new Coord(0, sz.y - 12);
-                    Tex t = Config.qualitywhole ? quality.qwtex : quality.qtex;
-                    if (Config.qualitybg) {
-                        g.chcolor(qualitybg);
-                        g.frect(btm, t.sz().add(1, -1));
-                        g.chcolor();
-                    }
-                    g.image(t, btm);
-                }
-            }
-
-            if (item.studytime > 0 && parent instanceof InventoryStudy) {
-                if (item.timelefttex == null)
-                    item.updatetimelefttex();
-                if (item.timelefttex != null)
-                    g.image(item.timelefttex, Coord.z);
-            } else if (item.meter > 0 && item.metertex != null) {
-                g.image(item.metertex, Coord.z);
-            }
-
-            ItemInfo.Contents cnt = item.getcontents();
-            if (cnt != null && cnt.content > 0)
-                drawamountbar(g, cnt.content, cnt.isseeds);
-
-            if (Config.showwearbars) {
-                try {
-                    for (ItemInfo info : item.info()) {
-                        if (info instanceof Wear) {
-                            double d = ((Wear) info).d;
-                            double m = ((Wear) info).m;
-                            double p = (m - d) / m;
-                            int h = (int) (p * (double) sz.y);
-                            g.chcolor(wearclr[p == 1.0 ? 3 : (int) (p / 0.25)]);
-                            g.frect(new Coord(sz.x - 3, sz.y - h), new Coord(3, h));
-                            g.chcolor();
-                            break;
-                        }
-                    }
-                } catch (Exception e) { // fail silently if info is not ready
-                }
-            }
-        } else {
-            g.image(missing.layer(Resource.imgc).tex(), Coord.z, sz);
-        }
-    }
-
-    private void drawamountbar(GOut g, double content, boolean isseeds) {
-        double capacity;
-        String name = item.getname();
-        if (name.contains("Waterskin"))
-            capacity = 3.0D;
-        else if (name.contains("Bucket"))
-            capacity = isseeds ? 1000D : 10.0D;
-        else if (name.contains("Waterflask"))
-            capacity = 2.0D;
-        else
-            return;
-
-        int h = (int) (content / capacity * sz.y) - 1;
-        if (h < 0)
-            return;
-
-        g.chcolor(famountclr);
-        g.frect(new Coord(sz.x - 4, sz.y - h - 1), new Coord(3, h));
-        g.chcolor();
     }
 
     public boolean mousedown(Coord c, int btn) {

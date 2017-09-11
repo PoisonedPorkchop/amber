@@ -94,8 +94,6 @@ public abstract class GSprite implements Drawn {
         throw (new Sprite.ResourceException("Does not know how to draw resource " + res.name, res));
     }
 
-    public abstract void draw(GOut g);
-
     public abstract Coord sz();
 
     public void tick(double dt) {

@@ -425,16 +425,6 @@ public class RenderList {
     }
 
     public boolean ignload = true;
-    protected void render(GOut g, Rendered r) {
-        try {
-            r.draw(g);
-        } catch(RLoad l) {
-            if(ignload)
-                return;
-            else
-                throw(l);
-        }
-    }
 
     private void instancify() {
         if(!cfg.pref.instancing.val)
@@ -478,32 +468,6 @@ public class RenderList {
     }
 
     public int drawn, instanced, instancified;
-    public void render(GOut g) {
-        for(GLState.Global gs : gstates)
-            gs.prerender(this, g);
-        drawn = instanced = instancified = 0;
-        int i = 0;
-        while((i < cur) && list[i].d) {
-            Slot s = list[i];
-            if(s.skip) {
-                i++;
-                continue;
-            }
-            g.st.set(s.os);
-            render(g, s.r);
-            if(s.disp != null)
-                s.disp.dispose();
-            if(s.instnum > 0) {
-                instanced++;
-                instancified += s.instnum;
-            } else {
-                drawn++;
-            }
-            i++;
-        }
-        for(GLState.Global gs : gstates)
-            gs.postrender(this, g);
-    }
 
     public void rewind() {
         if(curp != null)

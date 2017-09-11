@@ -34,34 +34,6 @@ public class DamageSprite extends Sprite implements PView.Render2D {
         this.gob = gob;
     }
 
-    public void draw2d(GOut g) {
-        Coord dmgsz = dmgtex.sz();
-        Coord armsz = armtex.sz();
-
-        int xoff = 0;
-        if (dmg > 0)
-            xoff = dmgsz.x / 2;
-        if (arm > 0)
-            xoff += armsz.x / 2;
-
-        Coord pos = gob.sc.add((int) (gob.sczu.x * 15f - xoff), (int) (gob.sczu.y * 15f - 40));
-
-        int armxoff = 0;
-        if (dmg > 0) {
-            g.chcolor(35, 35, 35, 192);
-            g.frect(pos.add(-1, 1 + ywinfix), dmgsz.add(2, -3 - ywinfix));
-            g.chcolor();
-            g.image(dmgtex, pos);
-            armxoff = dmgsz.x + 2;
-        }
-        if (arm > 0) {
-            g.chcolor(35, 35, 35, 192);
-            g.frect(pos.add(-1 + armxoff, 1 + ywinfix), armsz.add(2, -3 - ywinfix));
-            g.chcolor();
-            g.image(armtex, pos.add(armxoff, 0));
-        }
-    }
-
     public boolean setup(RenderList var1) {
         return true;
     }

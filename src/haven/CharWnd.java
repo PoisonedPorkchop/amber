@@ -150,21 +150,6 @@ public class CharWnd extends Window {
             return (buf);
         }
 
-        private void drawels(GOut g, List<El> els, int alpha) {
-            double x = 0;
-            int w = sz.x - (marg.x * 2);
-            for (El el : els) {
-                int l = (int) Math.floor((x / cap) * w);
-                int r = (int) Math.floor(((x += el.a) / cap) * w);
-                try {
-                    Color col = el.ev().col;
-                    g.chcolor(new Color(col.getRed(), col.getGreen(), col.getBlue(), alpha));
-                    g.frect(new Coord(marg.x + l, marg.y), new Coord(r - l, sz.y - (marg.y * 2)));
-                } catch (Loading e) {
-                }
-            }
-        }
-
         public void tick(double dt) {
             if (enew != null) {
                 try {
@@ -241,16 +226,6 @@ public class CharWnd extends Window {
             super(frame.sz());
         }
 
-        public void draw(GOut g) {
-            Coord isz = sz.sub(marg.mul(2));
-            g.chcolor(bg);
-            g.frect(marg, isz);
-            g.chcolor(fg);
-            g.frect(marg, new Coord((int) Math.round(isz.x * (glut - Math.floor(glut))), isz.y));
-            g.chcolor();
-            g.image(frame, Coord.z);
-        }
-
         public void update(Object... args) {
             int a = 0;
             this.glut = ((Number) args[a++]).doubleValue();
@@ -324,35 +299,6 @@ public class CharWnd extends Window {
 
         private WItem.ItemTip lasttip = null;
 
-        public void draw(GOut g) {
-            WItem.ItemTip tip = null;
-            if (ui.lasttip instanceof WItem.ItemTip)
-                tip = (WItem.ItemTip) ui.lasttip;
-            if (tip != lasttip) {
-                for (El el : els)
-                    el.hl = false;
-                FoodInfo finf;
-                try {
-                    finf = (tip == null) ? null : ItemInfo.find(FoodInfo.class, tip.item().info());
-                } catch (Loading l) {
-                    finf = null;
-                }
-                if (finf != null) {
-                    for (int i = 0; i < els.size(); i++) {
-                        El el = els.get(i);
-                        for (int o = 0; o < finf.types.length; o++) {
-                            if (finf.types[o] == i) {
-                                el.hl = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-                lasttip = tip;
-            }
-            super.draw(g);
-        }
-
         public static final Comparator<El> ecmp = new Comparator<El>() {
             public int compare(El a, El b) {
                 if (a.a < b.a)
@@ -367,27 +313,12 @@ public class CharWnd extends Window {
             super(w, h, El.h);
         }
 
-        protected void drawbg(GOut g) {
-        }
-
         protected El listitem(int i) {
             return (els.get(order[i]));
         }
 
         protected int listitems() {
             return (order.length);
-        }
-
-        protected void drawitem(GOut g, El el, int idx) {
-            g.chcolor(el.hl ? hilit : (((idx % 2) == 0) ? every : other));
-            g.frect(Coord.z, g.sz);
-            g.chcolor();
-            try {
-                g.image(el.tt(), Coord.z);
-            } catch (Loading e) {
-            }
-            Tex at = el.at();
-            g.image(at, new Coord(sz.x - at.sz().x - sb.sz.x, (El.h - at.sz().y) / 2));
         }
 
         private void order() {
@@ -449,31 +380,6 @@ public class CharWnd extends Window {
         public void tick(double dt) {
             if ((lvlt > 0.0) && ((lvlt -= dt) < 0))
                 lvlt = 0.0;
-        }
-
-        public void draw(GOut g) {
-            if (lvlt != 0.0)
-                g.chcolor(Utils.blendcol(bg, new Color(128, 255, 128, 128), lvlt));
-            else
-                g.chcolor(bg);
-            g.frect(Coord.z, sz);
-            g.chcolor();
-            Coord cn = new Coord(0, sz.y / 2);
-            g.aimage(img, cn.add(5, 0), 0, 0.5);
-            g.aimage(rnm.tex(), cn.add(img.sz().x + 10, 1), 0, 0.5);
-
-            cbv = attr.base;
-            ccv = attr.comp;
-            if (ccv > cbv) {
-                Text buffed = attrf.render(Integer.toString(ccv), buff);
-                g.aimage(buffed.tex(), cn.add(sz.x - 7, 1), 1, 0.5);
-            } else if (ccv < cbv) {
-                Text debuffed = attrf.render(Integer.toString(ccv), debuff);
-                g.aimage(debuffed.tex(), cn.add(sz.x - 7, 1), 1, 0.5);
-            }
-
-            Text base = attrf.render(Integer.toString(cbv), Color.WHITE);
-            g.aimage(base.tex(), cn.add(sz.x - 50, 1), 1, 0.5);
         }
 
         public void lvlup() {
@@ -593,12 +499,6 @@ public class CharWnd extends Window {
             super(oc, "0");
             setcolor(new Color(192, 192, 255));
         }
-
-        public void draw(GOut g) {
-            super.draw(g);
-            if (exp != cexp)
-                settext(Utils.thformat(cexp = exp));
-        }
     }
 
     public class EncLabel extends RLabel {
@@ -607,12 +507,6 @@ public class CharWnd extends Window {
         public EncLabel(Coord oc) {
             super(oc, "0");
             setcolor(new Color(255, 255, 192));
-        }
-
-        public void draw(GOut g) {
-            super.draw(g);
-            if (enc != cenc)
-                settext(Utils.thformat(cenc = enc));
         }
     }
 
@@ -702,17 +596,6 @@ public class CharWnd extends Window {
 
         public void settext(Indir<String> text) {
             this.text = text;
-        }
-
-        public void draw(GOut g) {
-            if (text != null) {
-                try {
-                    settext(text.get());
-                    text = null;
-                } catch (Loading l) {
-                }
-            }
-            super.draw(g);
         }
     }
 
@@ -975,26 +858,6 @@ public class CharWnd extends Window {
                 double a = 0.0;
                 Tex img, title, msg;
 
-                public void draw(GOut g) {
-                    if (img != null) {
-                        if (a < 0.2)
-                            g.chcolor(255, 255, 255, (int) (255 * Utils.smoothstep(a / 0.2)));
-                        else if (a > 0.8)
-                            g.chcolor(255, 255, 255, (int) (255 * Utils.smoothstep(1.0 - ((a - 0.8) / 0.2))));
-                        /*
-                        g.image(img, new Coord(0, (Math.max(img.sz().y, title.sz().y) - img.sz().y) / 2));
-                        g.image(title, new Coord(img.sz().x + 25, (Math.max(img.sz().y, title.sz().y) - title.sz().y) / 2));
-                        g.image(msg, new Coord((sz.x - qcmsgmp.sz().x) / 2, Math.max(img.sz().y, title.sz().y) + 25));
-                        */
-                        int y = 0;
-                        g.image(img, new Coord((sz.x - img.sz().x) / 2, y));
-                        y += img.sz().y + 15;
-                        g.image(title, new Coord((sz.x - title.sz().x) / 2, y));
-                        y += title.sz().y + 15;
-                        g.image(msg, new Coord((sz.x - msg.sz().x) / 2, y));
-                    }
-                }
-
                 public void tick(double dt) {
                     if (img == null) {
                         try {
@@ -1056,10 +919,6 @@ public class CharWnd extends Window {
                 buf.append("}");
                 text = ifnd.render(buf.toString(), parent.sz.x - 20);
                 resize(text.sz().add(15, 1));
-            }
-
-            public void draw(GOut g) {
-                g.image(text.tex(), new Coord(15, 0));
             }
         }
 
@@ -1204,27 +1063,6 @@ public class CharWnd extends Window {
                 }
                 sz.x += 3;
                 resize(sz);
-            }
-
-            public void draw(GOut g) {
-                int y = 0;
-                if (rtitle != null) {
-                    if (rootxlate(ui.mc).isect(Coord.z, rtitle.sz()))
-                        g.chcolor(192, 192, 255, 255);
-                    g.image(rtitle, new Coord(3, y));
-                    g.chcolor();
-                    y += rtitle.sz().y + 5;
-                }
-                for (Tex c : rcond) {
-                    g.image(c, new Coord(3, y));
-                    if (c == glowon) {
-                        double a = (1.0 - Math.pow(Math.cos(glowt * 2 * Math.PI), 2));
-                        g.chcolor(255, 255, 255, (int) (128 * a));
-                        g.image(glow, new Coord(0, y - 3));
-                        g.chcolor();
-                    }
-                    y += c.sz().y;
-                }
             }
 
             public boolean mousedown(Coord c, int btn) {
@@ -1400,12 +1238,6 @@ public class CharWnd extends Window {
             itemtooltip = Skill::tooltip;
         }
 
-        protected void drawitem(GOut g, Skill sk) {
-            if(sk.small == null)
-                sk.small = new TexI(convolvedown(sk.res.get().layer(Resource.imgc).img, new Coord(40, 40), iconfilter));
-            g.image(sk.small, Coord.z);
-        }
-
         protected void update() {
             super.update();
             loading = true;
@@ -1478,11 +1310,6 @@ public class CharWnd extends Window {
                 super(crtex(cr));
                 this.cr = cr;
                 this.tooltip = Text.render(cr.res.get().layer(Resource.tooltip).t);
-            }
-
-            public void draw(GOut g) {
-                super.draw(g);
-                g.image((cr == sel) ? credosfr : credoufr, Coord.z);
             }
 
             public boolean mousedown(Coord c, int button) {
@@ -1599,12 +1426,6 @@ public class CharWnd extends Window {
             itemtooltip = Experience::tooltip;
         }
 
-        protected void drawitem(GOut g, Experience exp) {
-            if(exp.small == null)
-                exp.small = new TexI(convolvedown(exp.res.get().layer(Resource.imgc).img, new Coord(40, 40), iconfilter));
-            g.image(exp.small, Coord.z);
-        }
-
         protected void update() {
             super.update();
             loading = true;
@@ -1661,28 +1482,6 @@ public class CharWnd extends Window {
 
         protected int listitems() {
             return (wounds.size());
-        }
-
-        protected void drawbg(GOut g) {
-        }
-
-        protected void drawitem(GOut g, Wound w, int idx) {
-            if ((wound != null) && (wound.woundid() == w.id))
-                drawsel(g);
-            g.chcolor((idx % 2 == 0) ? every : other);
-            g.frect(Coord.z, g.sz);
-            g.chcolor();
-            try {
-                if (w.small == null)
-                    w.small = new TexI(PUtils.convolvedown(w.res.get().layer(Resource.imgc).img, new Coord(itemh, itemh), iconfilter));
-                g.image(w.small, Coord.z);
-            } catch (Loading e) {
-                g.image(WItem.missing.layer(Resource.imgc).tex(), Coord.z, new Coord(itemh, itemh));
-            }
-            g.aimage(w.rnm.get().tex(), new Coord(itemh + 5, itemh / 2), 0, 0.5);
-            Text qd = w.rqd.get();
-            if (qd != null)
-                g.aimage(qd.tex(), new Coord(sz.x - 15, itemh / 2), 1.0, 0.5);
         }
 
         protected void itemclick(Wound item, int button) {
@@ -1761,25 +1560,6 @@ public class CharWnd extends Window {
 
         protected int listitems() {
             return (quests.size());
-        }
-
-        protected void drawbg(GOut g) {
-        }
-
-        protected void drawitem(GOut g, Quest q, int idx) {
-            if ((quest != null) && (quest.questid() == q.id))
-                drawsel(g);
-            g.chcolor((idx % 2 == 0) ? every : other);
-            g.frect(Coord.z, g.sz);
-            g.chcolor();
-            try {
-                if (q.small == null)
-                    q.small = new TexI(PUtils.convolvedown(q.res.get().layer(Resource.imgc).img, new Coord(itemh, itemh), iconfilter));
-                g.image(q.small, Coord.z);
-            } catch (Loading e) {
-                g.image(WItem.missing.layer(Resource.imgc).tex(), Coord.z, new Coord(itemh, itemh));
-            }
-            g.aimage(q.rnm.get().tex(), new Coord(itemh + 5, itemh / 2), 0, 0.5);
         }
 
         public void change(Quest q) {
@@ -1924,14 +1704,6 @@ public class CharWnd extends Window {
             sattr.add(new Label("Learning cost:"), new Coord(x + 15, y + 40));
             sattr.add(new RLabel(new Coord(rx, y + 40), "0") {
                 int cc;
-
-                public void draw(GOut g) {
-                    if (cc > exp)
-                        g.chcolor(debuff);
-                    super.draw(g);
-                    if (cc != scost)
-                        settext(Utils.thformat(cc = scost));
-                }
             });
             sattr.add(new Button(75, "Buy") {
                 public void click() {
@@ -2001,22 +1773,6 @@ public class CharWnd extends Window {
                 sktab.add(new RLabel(new Coord(bbtn.c.x - 10, clbl.c.y), "N/A") {
                     Integer cc = null;
                     int cexp;
-
-                    public void draw(GOut g) {
-                        if((cc != null) && (cc > exp))
-                            g.chcolor(debuff);
-                        super.draw(g);
-                        Integer cost = ((skg.sel == null) || skg.sel.has) ? null : skg.sel.cost;
-                        if(!Utils.eq(cost, cc) || (cexp != exp)) {
-                            if(cost == null) {
-                                settext("N/A");
-                            } else {
-                                settext(String.format("%,d / %,d LP", cost, exp));
-                            }
-                            cc = cost;
-                            cexp = exp;
-                        }
-                    }
                 });
             }
             Tabs.Tab credos = lists.add();

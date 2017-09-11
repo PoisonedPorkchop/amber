@@ -35,19 +35,6 @@ public class PartyMemberOutline extends Sprite {
     }
 
     @Override
-    public void draw(GOut g) {
-        g.state(mat);
-        g.apply();
-        this.posa.bind(g, false);
-        this.nrma.bind(g, false);
-        this.eidx.rewind();
-        g.gl.glLineWidth(4.0F);
-        g.gl.glDrawElements(GL.GL_LINE_LOOP, this.eidx.capacity(), GL.GL_UNSIGNED_SHORT, this.eidx);
-        this.posa.unbind(g);
-        this.nrma.unbind(g);
-    }
-
-    @Override
     public boolean setup(RenderList d) {
         d.prepo(Rendered.eyesort);
         d.prepo(Material.nofacecull);

@@ -77,15 +77,4 @@ public class IBox {
     public Coord bsz() {
         return (cisz());
     }
-
-    public void draw(GOut g, Coord tl, Coord sz) {
-        g.image(bt, tl.add(new Coord(ctl.sz().x, 0)), new Coord(sz.x - ctr.sz().x - ctl.sz().x, bt.sz().y));
-        g.image(bb, tl.add(new Coord(cbl.sz().x, sz.y - bb.sz().y)), new Coord(sz.x - cbr.sz().x - cbl.sz().x, bb.sz().y));
-        g.image(bl, tl.add(new Coord(0, ctl.sz().y)), new Coord(bl.sz().x, sz.y - cbl.sz().y - ctl.sz().y));
-        g.image(br, tl.add(new Coord(sz.x - br.sz().x, ctr.sz().y)), new Coord(br.sz().x, sz.y - cbr.sz().y - ctr.sz().y));
-        g.image(ctl, tl);
-        g.image(ctr, tl.add(sz.x - ctr.sz().x, 0));
-        g.image(cbl, tl.add(0, sz.y - cbl.sz().y));
-        g.image(cbr, new Coord(sz.x - cbr.sz().x + tl.x, sz.y - cbr.sz().y + tl.y));
-    }
 }

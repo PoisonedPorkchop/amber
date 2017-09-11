@@ -71,11 +71,6 @@ public class Frame extends Widget {
             return (c.sub(box.btloff()));
     }
 
-    public void draw(GOut g) {
-        super.draw(g);
-        box.draw(g, Coord.z, sz);
-    }
-
     public <T extends Widget> T addin(T child) {
 	child.resize(inner());
 	parent.add(child, this.c.add(box.btloff()));

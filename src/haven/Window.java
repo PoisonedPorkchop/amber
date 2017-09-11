@@ -172,34 +172,6 @@ public class Window extends Widget implements DTarget {
         g.image(br, tlo.add(wsz.sub(br.sz())));
     }
 
-    public void draw(GOut g) {
-        Coord bgc = new Coord();
-        for (bgc.y = ctl.y; bgc.y < ctl.y + csz.y; bgc.y += bg.sz().y) {
-            for (bgc.x = ctl.x; bgc.x < ctl.x + csz.x; bgc.x += bg.sz().x)
-                g.image(bg, bgc, ctl, csz);
-        }
-        bgc.x = ctl.x;
-        for (bgc.y = ctl.y; bgc.y < ctl.y + csz.y; bgc.y += bgl.sz().y)
-            g.image(bgl, bgc, ctl, csz);
-        bgc.x = ctl.x + csz.x - bgr.sz().x;
-        for (bgc.y = ctl.y; bgc.y < ctl.y + csz.y; bgc.y += bgr.sz().y)
-            g.image(bgr, bgc, ctl, csz);
-        cdraw(g.reclip(atl, asz));
-        drawframe(g);
-    /*
-    wbox.draw(g, wtl, wsz);
-	if(cap != null) {
-	    int w = cap.sz().x;
-	    int y = wtl.y - capo;
-	    g.image(cl, new Coord(wtl.x + (wsz.x / 2) - (w / 2) - cl.sz().x, y));
-	    g.image(cm, new Coord(wtl.x + (wsz.x / 2) - (w / 2), y), new Coord(w, cm.sz().y));
-	    g.image(cr, new Coord(wtl.x + (wsz.x / 2) + (w / 2), y));
-	    g.image(cap.tex(), new Coord(wtl.x + (wsz.x / 2) - (w / 2), y + capio));
-	}
-	*/
-        super.draw(g);
-    }
-
     public Coord contentsz() {
         Coord max = new Coord(0, 0);
         for (Widget wdg = child; wdg != null; wdg = wdg.next) {

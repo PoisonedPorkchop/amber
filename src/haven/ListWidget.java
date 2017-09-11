@@ -39,8 +39,6 @@ public abstract class ListWidget<T> extends Widget {
 
     protected abstract int listitems();
 
-    protected abstract void drawitem(GOut g, T item, int i);
-
     public int find(T item) {
         for (int i = 0; i < listitems(); i++) {
             if (listitem(i) == item)

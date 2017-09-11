@@ -236,12 +236,6 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
             g.chcolor();
         }
 
-        public void draw(GOut g) {
-            super.draw(g);
-            if (buddies.size() == 0)
-                g.atext("You are alone in the world", sz.div(2), 0.5, 0.5);
-        }
-
         public void change(Buddy b) {
             sel = b;
             if (b == null) {

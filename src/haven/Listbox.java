@@ -38,18 +38,6 @@ public abstract class Listbox<T> extends ListWidget<T> {
         this.sb = adda(new Scrollbar(sz.y, 0, 0), sz.x, 0, 1, 0);
     }
 
-    protected void drawsel(GOut g) {
-        g.chcolor(255, 255, 0, 128);
-        g.frect(Coord.z, g.sz);
-        g.chcolor();
-    }
-
-    protected void drawbg(GOut g) {
-        g.chcolor(Color.BLACK);
-        g.frect(Coord.z, sz);
-        g.chcolor();
-    }
-
     public boolean mousewheel(Coord c, int amount) {
         sb.ch(amount);
         return (true);

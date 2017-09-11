@@ -25,14 +25,6 @@ public class TreeStageSprite extends Sprite {
         update(val);
     }
 
-    public void draw(GOut g) {
-        float[] c = mv.load(camp.fin(Matrix4f.id)).mul1(loc.fin(Matrix4f.id)).homoc();
-        Coord sc = proj.get2dCoord(c, wndsz);
-        sc.x -= 8;
-        sc.y -= 20;
-        g.image(tex, sc);
-    }
-
     public boolean setup(RenderList rl) {
         rl.prepo(last);
         GLState.Buffer buf = rl.state();

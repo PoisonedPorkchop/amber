@@ -71,7 +71,6 @@ public class FastMesh implements FRendered, Rendered.Instanced, Disposable {
     }
 
     public static abstract class Compiled {
-        public abstract void draw(GOut g);
         public abstract void dispose();
         public void prepare(GOut g) {}
     }
@@ -148,21 +147,6 @@ public class FastMesh implements FRendered, Rendered.Instanced, Disposable {
     public class DLCompiler extends Compiler {
         public class DLCompiled extends Compiled {
             private DisplayList list;
-
-            public void draw(GOut g) {
-                BGL gl = g.gl;
-                if((list != null) && (list.cur != g.curgl)) {
-                    list.dispose();
-                    list = null;
-                }
-                if(list == null) {
-                    list = new DisplayList(g);
-                    gl.glNewList(list, GL2.GL_COMPILE);
-                    cdraw(g);
-                    gl.glEndList();
-                }
-                gl.glCallList(list);
-            }
 
             public void dispose() {
                 if(list != null) {
@@ -257,21 +241,6 @@ public class FastMesh implements FRendered, Rendered.Instanced, Disposable {
                     g.state(cur);
             }
 
-            public void draw(GOut g) {
-                BGL gl = g.gl;
-                g.st.apply(g, vstate, st);
-                gl.glDrawRangeElements(GL.GL_TRIANGLES, lo, hi, num * 3, GL.GL_UNSIGNED_SHORT, 0);
-            }
-
-            public boolean drawinst(GOut g, List<GLState.Buffer> inst) {
-                BGL gl = g.gl;
-                g.st.apply(g, vstate, st);
-                g.st.bindiarr(g, inst);
-                gl.glDrawElementsInstanced(GL.GL_TRIANGLES, num * 3, GL.GL_UNSIGNED_SHORT, 0, inst.size());
-                g.st.unbindiarr(g);
-                return(true);
-            }
-
             public void dispose() {
                 st.dispose();
             }
@@ -314,20 +283,6 @@ public class FastMesh implements FRendered, Rendered.Instanced, Disposable {
         return(pb);
     }
 
-    public void cdraw(GOut g) {
-        g.apply();
-        indb.rewind();
-        for(int i = 0; i < vert.bufs.length; i++) {
-            if(vert.bufs[i] instanceof VertexBuf.GLArray)
-                ((VertexBuf.GLArray)vert.bufs[i]).bind(g, false);
-        }
-        g.gl.glDrawRangeElements(GL.GL_TRIANGLES, lo, hi, num * 3, GL.GL_UNSIGNED_SHORT, indb);
-        for(int i = 0; i < vert.bufs.length; i++) {
-            if(vert.bufs[i] instanceof VertexBuf.GLArray)
-                ((VertexBuf.GLArray)vert.bufs[i]).unbind(g);
-        }
-    }
-
     private GLSettings.MeshMode curmode = null;
     private Compiler compiler(GLConfig gc) {
         if(compile()) {
@@ -354,28 +309,8 @@ public class FastMesh implements FRendered, Rendered.Instanced, Disposable {
         return(compiler);
     }
 
-    public void draw(GOut g) {
-        BGL gl = g.gl;
-        Compiler compiler = compiler(g.gc);
-        if(compiler != null) {
-            compiler.get(g).draw(g);
-        } else {
-            cdraw(g);
-        }
-        GOut.checkerr(gl);
-    }
-
     protected boolean compile() {
         return(true);
-    }
-
-    public boolean drawinst(GOut g, List<GLState.Buffer> st) {
-        Compiler compiler = compiler(g.gc);
-        if(!(compiler instanceof VAOCompiler))
-            return(false);
-        if(!g.st.inststate(st))
-            return(false);
-        return(((VAOCompiler.VAOCompiled)compiler.get(g)).drawinst(g, st));
     }
 
     /* XXX: One might start to question if it isn't about time to
@@ -419,24 +354,6 @@ public class FastMesh implements FRendered, Rendered.Instanced, Disposable {
             this.instances = instances;
         }
 
-        public void draw(GOut g) {
-            BGL gl = g.gl;
-            g.st.apply(g, vstate, ((VAOCompiler.VAOCompiled)compiler.get(g)).st);
-            Arrays ar = arrays.get(g.st.prog);
-            if(ar == null) {
-                arrays.put(g.st.prog, ar = new Arrays(g, g.st.prog));
-                if(arrays.size() > 10)
-                    System.err.println("warning: creating very many instance arrays for " + FastMesh.this);
-            }
-            ar.bind(g);
-            gl.glDrawElementsInstanced(GL.GL_TRIANGLES, num * 3, GL.GL_UNSIGNED_SHORT, 0, instances.size());
-            ar.unbind(g);
-        }
-
-        public void drawflat(GOut g) {
-            draw(g);
-        }
-
         public boolean setup(RenderList r) {
             throw(new RuntimeException("Instanced meshes are transformed into, not set up"));
         }
@@ -463,10 +380,7 @@ public class FastMesh implements FRendered, Rendered.Instanced, Disposable {
         vert.dispose();
     }
 
-    public void drawflat(GOut g) {
-        draw(g);
-        GOut.checkerr(g.gl);
-    }
+
 
     public boolean setup(RenderList r) {
         return(true);

@@ -40,28 +40,6 @@ public class Profwnd extends Window {
         this.tex = new TexIM(new Coord(prof.hist.length, h));
     }
 
-    public void cdraw(GOut g) {
-        double[] ttl = new double[prof.hist.length];
-        for (int i = 0; i < prof.hist.length; i++) {
-            if (prof.hist[i] != null)
-                ttl[i] = prof.hist[i].total;
-        }
-        Arrays.sort(ttl);
-        int ti = ttl.length;
-        for (int i = 0; i < ttl.length; i++) {
-            if (ttl[i] != 0) {
-                ti = ttl.length - ((ttl.length - i) / 10);
-                break;
-            }
-        }
-        if (ti < ttl.length)
-            mt = ttl[ti];
-        else
-            mt = 0.05;
-        prof.draw(tex, mt / h);
-        g.image(tex, Coord.z);
-    }
-
     public boolean type(char k, java.awt.event.KeyEvent ev) {
         if (k == 'd') {
             prof.dump(System.err);

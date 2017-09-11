@@ -57,54 +57,6 @@ public class TestView extends PView {
     }
 
     public static class Cube implements Rendered {
-        public void draw(GOut g) {
-            g.apply();
-            BGL gl = g.gl;
-
-            gl.glBegin(GL2.GL_QUADS);
-            gl.glNormal3f(0.0f, 0.0f, 1.0f);
-            gl.glColor3f(1.0f, 0.0f, 0.0f);
-            gl.glVertex3f(-1.0f, 1.0f, 1.0f);
-            gl.glVertex3f(-1.0f, -1.0f, 1.0f);
-            gl.glVertex3f(1.0f, -1.0f, 1.0f);
-            gl.glVertex3f(1.0f, 1.0f, 1.0f);
-
-            gl.glNormal3f(1.0f, 0.0f, 0.0f);
-            gl.glColor3f(0.0f, 1.0f, 0.0f);
-            gl.glVertex3f(1.0f, 1.0f, 1.0f);
-            gl.glVertex3f(1.0f, -1.0f, 1.0f);
-            gl.glVertex3f(1.0f, -1.0f, -1.0f);
-            gl.glVertex3f(1.0f, 1.0f, -1.0f);
-
-            gl.glNormal3f(-1.0f, 0.0f, 0.0f);
-            gl.glColor3f(0.0f, 0.0f, 1.0f);
-            gl.glVertex3f(-1.0f, 1.0f, 1.0f);
-            gl.glVertex3f(-1.0f, 1.0f, -1.0f);
-            gl.glVertex3f(-1.0f, -1.0f, -1.0f);
-            gl.glVertex3f(-1.0f, -1.0f, 1.0f);
-
-            gl.glNormal3f(0.0f, 1.0f, 0.0f);
-            gl.glColor3f(0.0f, 1.0f, 1.0f);
-            gl.glVertex3f(-1.0f, 1.0f, 1.0f);
-            gl.glVertex3f(1.0f, 1.0f, 1.0f);
-            gl.glVertex3f(1.0f, 1.0f, -1.0f);
-            gl.glVertex3f(-1.0f, 1.0f, -1.0f);
-
-            gl.glNormal3f(0.0f, -1.0f, 0.0f);
-            gl.glColor3f(1.0f, 0.0f, 1.0f);
-            gl.glVertex3f(-1.0f, -1.0f, 1.0f);
-            gl.glVertex3f(-1.0f, -1.0f, -1.0f);
-            gl.glVertex3f(1.0f, -1.0f, -1.0f);
-            gl.glVertex3f(1.0f, -1.0f, 1.0f);
-
-            gl.glNormal3f(0.0f, 0.0f, -1.0f);
-            gl.glColor3f(1.0f, 1.0f, 0.0f);
-            gl.glVertex3f(-1.0f, 1.0f, -1.0f);
-            gl.glVertex3f(1.0f, 1.0f, -1.0f);
-            gl.glVertex3f(1.0f, -1.0f, -1.0f);
-            gl.glVertex3f(-1.0f, -1.0f, -1.0f);
-            gl.glEnd();
-        }
 
         public boolean setup(RenderList rls) {
             rls.state().put(States.color, States.vertexcolor);

@@ -199,8 +199,6 @@ public abstract class PView extends Widget {
     }
 
     private final Rendered scene = new Rendered() {
-        public void draw(GOut g) {
-        }
 
         public boolean setup(RenderList rl) {
             PView.this.setup(rl);
@@ -212,81 +210,10 @@ public abstract class PView extends Widget {
         return (Color.BLACK);
     }
 
-    public void draw(GOut g) {
-        if ((g.sz.x < 1) || (g.sz.y < 1))
-            return;
-        if ((rls == null) || (rls.cfg != g.gc))
-            rls = new RenderList(g.gc);
-        CPUProfile.Frame curf = null;
-        if (Config.profile)
-            curf = prof.new Frame();
-        GLState.Buffer bk = g.st.copy();
-        GLState.Buffer def = basic(g);
-        if (g.gc.pref.fsaa.val)
-            States.fsaa.prep(def);
-        try {
-            lm.prep(def);
-            new Light.LightList().prep(def);
-            rls.setup(scene, def);
-            if (curf != null)
-                curf.tick("setup");
-            rls.fin();
-            if (curf != null)
-                curf.tick("sort");
-            GOut rg;
-            if (cstate.cur.fb != null) {
-                GLState.Buffer gb = g.basicstate();
-                HavenPanel.OrthoState.fixed(cstate.cur.fb.sz()).prep(gb);
-                cstate.cur.fb.prep(gb);
-                cstate.cur.fb.prep(def);
-                rg = new GOut(g.gl, g.curgl, g.gc, g.st, gb, cstate.cur.fb.sz());
-            } else {
-                rg = g;
-            }
-            rg.st.set(def);
-            Color cc = clearcolor();
-            if ((cc == null) && (cstate.cur.fb != null))
-                cc = new Color(0, 0, 0, 0);
-            rg.apply();
-            BGL gl = rg.gl;
-            if (cc == null) {
-                gl.glClear(GL.GL_DEPTH_BUFFER_BIT);
-            } else {
-                gl.glClearColor((float) cc.getRed() / 255f, (float) cc.getGreen() / 255f, (float) cc.getBlue() / 255f, (float) cc.getAlpha() / 255f);
-                gl.glClear(GL.GL_DEPTH_BUFFER_BIT | GL.GL_COLOR_BUFFER_BIT);
-            }
-            if (curf != null)
-                curf.tick("cls");
-            g.st.time = 0;
-            rls.render(rg);
-            if (cstate.cur.fb != null)
-                cstate.cur.resolve(g);
-            if (curf != null) {
-                curf.add("apply", g.st.time);
-                curf.tick("render", g.st.time);
-            }
-        } finally {
-            g.st.set(bk);
-        }
-        for (RenderList.Slot s : rls.slots()) {
-            if (!s.d)
-                break;
-            if (s.r instanceof Render2D)
-                ((Render2D) s.r).draw2d(g);
-        }
-        if (curf != null)
-            curf.tick("2d");
-        if (curf != null)
-            curf.fin();
-    }
-
     public interface Render2D extends Rendered {
-        public void draw2d(GOut g);
     }
 
     public static abstract class Draw2D implements Render2D {
-        public void draw(GOut g) {
-        }
 
         public boolean setup(RenderList r) {
             return (true);

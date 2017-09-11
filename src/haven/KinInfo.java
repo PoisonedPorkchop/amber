@@ -89,20 +89,6 @@ public class KinInfo extends GAttrib {
     }
 
     final PView.Draw2D fx = new PView.Draw2D() {
-        public void draw2d(GOut g) {
-            if (gob.sc != null) {
-                Coord sc = gob.sc.add(new Coord(gob.sczu.mul(15)));
-                if (sc.isect(Coord.z, g.sz) && Config.showkinnames) {
-                    KinInfo kininfo = gob.getattr(KinInfo.class);
-                    if (kininfo != null) {
-                        Tex t = rendered();
-                        g.chcolor(BuddyWnd.gc[kininfo.group]);
-                        g.aimage(t, sc, 0.5, 1.0);
-                        g.chcolor();
-                    }
-                }
-            }
-        }
     };
 
     public Object staticp() {

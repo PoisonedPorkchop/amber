@@ -366,13 +366,6 @@ public class GameUI extends ConsoleHost implements Console.Directory {
                     inv = null;
             }
 
-            public void draw(GOut g) {
-                if ((tab == null) && (inv != null))
-                    g.image(inv, Coord.z);
-                else
-                    super.draw(g);
-            }
-
             public void click() {
                 if (tab != null) {
                     tabs.showtab(tab);
@@ -620,26 +613,6 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     private static final Resource.Anim progt = Resource.local().loadwait("gfx/hud/prog").layer(Resource.animc);
     private Tex curprog = null;
     private int curprogf, curprogb;
-
-    private void drawprog(GOut g, double prog) {
-        int fr = Utils.clip((int) Math.floor(prog * progt.f.length), 0, progt.f.length - 2);
-        int bf = Utils.clip((int) (((prog * progt.f.length) - fr) * 255), 0, 255);
-        if ((curprog == null) || (curprogf != fr) || (curprogb != bf)) {
-            if (curprog != null)
-                curprog.dispose();
-            WritableRaster buf = PUtils.imgraster(progt.f[fr][0].sz);
-            PUtils.blit(buf, progt.f[fr][0].img.getRaster(), Coord.z);
-            PUtils.blendblit(buf, progt.f[fr + 1][0].img.getRaster(), Coord.z, bf);
-            curprog = new TexI(PUtils.rasterimg(buf));
-            curprogf = fr;
-            curprogb = bf;
-        }
-        Coord hgc = new Coord(sz.x / 2, (sz.y * 4) / 10);
-        g.aimage(curprog, hgc, 0.5, 0.5);
-
-        if (Config.showprogressperc)
-            g.atextstroked((int) (prog * 100) + "%", hgc, 0.5, 2.5, Color.WHITE, Color.BLACK, Text.num12boldFnd);
-    }
 
     public void tick(double dt) {
         super.tick(dt);
@@ -1157,16 +1130,6 @@ public class GameUI extends ConsoleHost implements Console.Directory {
                         chat.sresize(0);
                     }
                     Utils.setprefb("chatvis", chat.targeth != 0);
-                }
-
-                public void draw(GOut g) {
-                    super.draw(g);
-                    Color urg = ChatUI.urgcols[chat.urgency];
-                    if (urg != null) {
-                        GOut g2 = g.reclipl(new Coord(-2, -2), g.sz.add(4, 4));
-                        g2.chcolor(urg.getRed(), urg.getGreen(), urg.getBlue(), 128);
-                        g2.image(glow, Coord.z);
-                    }
                 }
             }, sz, 1, 1);
         }

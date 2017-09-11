@@ -135,9 +135,6 @@ public abstract class Sprite implements Rendered {
         throw (new ResourceException("Does not know how to draw resource " + res.name, res));
     }
 
-    public void draw(GOut g) {
-    }
-
     public abstract boolean setup(RenderList d);
 
     public boolean tick(int dt) {

@@ -65,7 +65,7 @@ public class UI {
     }
 
     public interface AfterDraw {
-        void draw(GOut g);
+
     }
 
     private class WidgetConsole extends Console {
@@ -135,15 +135,6 @@ public class UI {
         long now = System.currentTimeMillis();
         root.tick((now - lasttick) / 1000.0);
         lasttick = now;
-    }
-
-    public void draw(GOut g) {
-        root.draw(g);
-        synchronized (afterdraws) {
-            for (AfterDraw ad : afterdraws)
-                ad.draw(g);
-            afterdraws.clear();
-        }
     }
 
     public void newwidget(int id, String type, int parent, Object[] pargs, Object... cargs) throws InterruptedException {

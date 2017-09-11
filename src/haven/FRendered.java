@@ -27,5 +27,4 @@
 package haven;
 
 public interface FRendered extends Rendered {
-    public void drawflat(GOut g);
 }

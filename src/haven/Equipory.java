@@ -96,11 +96,6 @@ public class Equipory extends Widget implements DTarget {
                 return (false);
             }
 
-            public void draw(GOut g) {
-                g.image(bg, Coord.z);
-                super.draw(g);
-            }
-
             Outlines outlines = new Outlines(true);
 
             protected void setup(RenderList rl) {

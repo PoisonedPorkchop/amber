@@ -11,16 +11,6 @@ public class BuffToggle extends Buff {
         this.res = res;
     }
 
-    @Override
-    public void draw(GOut g) {
-        g.image(frame, Coord.z);
-        try {
-            Tex img = res.layer(Resource.imgc).tex();
-            g.image(img, imgoff);
-        } catch (Loading e) {
-        }
-    }
-
     private Text shorttip;
 
     @Override
