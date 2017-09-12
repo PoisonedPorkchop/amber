@@ -1,15 +1,4 @@
-import haven.Buff;
-import haven.Coord;
-import haven.Glob;
-import haven.Indir;
-import haven.ItemInfo;
-import haven.Loading;
-import haven.Resource;
-import haven.RichText;
-import haven.Tex;
-import haven.TexI;
-import haven.Text;
-import haven.Widget;
+import haven.*;
 import haven.ItemInfo.ResOwner;
 import haven.Resource.Pagina;
 
@@ -62,8 +51,6 @@ public class RealmBuff extends Buff implements ResOwner {
                 if (var5 != null) {
                     var4 = ItemInfo.catimgs(0, new BufferedImage[]{var4, RichText.render("\n" + Resource.getLocString(Resource.BUNDLE_LABEL, var5.text), 200, new Object[0]).img});
                 }
-
-                this.rtip = new TexI(var4);
             }
 
             return this.rtip;

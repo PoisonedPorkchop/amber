@@ -68,10 +68,6 @@ public class Spec implements Owner, SpriteOwner {
         return this.cinfo;
     }
 
-    public Tex longtip() {
-        return new TexI(ItemInfo.longtip(this.info()));
-    }
-
     public String name() {
         GSprite var1 = this.spr();
         Name var2 = (Name)ItemInfo.find(Name.class, this.info());

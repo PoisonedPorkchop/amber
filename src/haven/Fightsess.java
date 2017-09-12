@@ -120,7 +120,6 @@ public class Fightsess extends Widget {
         Sprite spr = cfx.get(id);
         if(spr == null)
             cfx.put(id, spr = Sprite.create(null, fx, Message.nil));
-        map.drawadd(gob.loc.apply(spr));
         curfx.add(spr);
     }
 

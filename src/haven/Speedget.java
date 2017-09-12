@@ -67,26 +67,6 @@ public class Speedget extends Widget {
         this.max = max;
     }
 
-    public void draw(GOut g) {
-        if (Config.runonlogin && !runonloginset && max > 1) {
-            set(2);
-            runonloginset = true;
-        }
-
-        int x = 0;
-        for (int i = 0; i < 4; i++) {
-            Tex t;
-            if (i == cur)
-                t = imgs[i][2];
-            else if (i > max)
-                t = imgs[i][0];
-            else
-                t = imgs[i][1];
-            g.image(t, new Coord(x, 0));
-            x += t.sz().x;
-        }
-    }
-
     public void uimsg(String msg, Object... args) {
         if (msg == "cur")
             cur = (Integer) args[0];

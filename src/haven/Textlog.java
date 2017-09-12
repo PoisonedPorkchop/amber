@@ -47,35 +47,6 @@ public class Textlog extends Widget {
         }
     }
 
-    public void draw(GOut g) {
-        Coord dc = new Coord();
-        for (dc.y = 0; dc.y < sz.y; dc.y += texpap.sz().y) {
-            for (dc.x = 0; dc.x < sz.x; dc.x += texpap.sz().x) {
-                g.image(texpap, dc);
-            }
-        }
-        g.chcolor();
-        int y = -cury;
-        synchronized (lines) {
-            for (Text line : lines) {
-                int dy1 = sz.y + y;
-                int dy2 = dy1 + line.sz().y;
-                if ((dy2 > 0) && (dy1 < sz.y))
-                    g.image(line.tex(), new Coord(margin, dy1));
-                y += line.sz().y;
-            }
-        }
-        if (maxy > sz.y) {
-            int fx = sz.x - sflarp.sz().x;
-            int cx = fx + (sflarp.sz().x / 2) - (schain.sz().x / 2);
-            for (y = 0; y < sz.y; y += schain.sz().y - 1)
-                g.image(schain, new Coord(cx, y));
-            double a = (double) (cury - sz.y) / (double) (maxy - sz.y);
-            int fy = (int) ((sz.y - sflarp.sz().y) * a);
-            g.image(sflarp, new Coord(fx, fy));
-        }
-    }
-
     public Textlog(Coord sz) {
         super(sz);
         lines = new LinkedList<Text>();

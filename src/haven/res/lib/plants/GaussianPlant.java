@@ -27,13 +27,11 @@ public class GaussianPlant implements Factory {
         CSprite cs = new CSprite(owner, res);
         if (Config.simpleforage) {
             MeshRes mesh = (MeshRes)allmeshes.get(0);
-            cs.addpart(0, 0, mesh.mat.get(), mesh.m);
         } else {
             Random rnd = owner.mkrandoom();
             int scount = rnd.nextInt(this.numh - this.numl + 1) + this.numl;
             for (int i = 0; i < scount; ++i) {
                 MeshRes var9 = (MeshRes) allmeshes.get(rnd.nextInt(allmeshes.size()));
-                cs.addpart((float) rnd.nextGaussian() * this.r, (float) rnd.nextGaussian() * this.r, var9.mat.get(), var9.m);
             }
         }
 

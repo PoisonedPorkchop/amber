@@ -460,12 +460,8 @@ public class Session {
                                 }
                                 res = getres(resid);
                             }
-                            if (gob != null)
-                                oc.overlay(gob, olid, prs, res, sdt);
                         } else if (type == OD_HEALTH) {
                             int hp = msg.uint8();
-                            if (gob != null)
-                                oc.health(gob, hp);
                         } else if (type == OD_BUDDY) {
                             String name = msg.string();
                             if (name.length() > 0) {
@@ -553,8 +549,6 @@ public class Session {
                 synchronized (uimsgs) {
                     uimsgs.add(msg);
                 }
-            } else if (msg.type == RMessage.RMSG_MAPIV) {
-                glob.map.invalblob(msg);
             } else if (msg.type == RMessage.RMSG_GLOBLOB) {
                 glob.blob(msg);
             } else if (msg.type == RMessage.RMSG_RESID) {

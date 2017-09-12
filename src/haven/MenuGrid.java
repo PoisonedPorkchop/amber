@@ -31,12 +31,10 @@ import haven.automation.*;
 import haven.mod.Mod;
 import haven.mod.event.CustomMenuButtonPressEvent;
 
-import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.font.TextAttribute;
 import java.awt.image.BufferedImage;
 import java.util.*;
-import java.util.List;
 
 public class MenuGrid extends Widget {
     public final static Coord bgsz = Inventory.invsq.sz().add(-1, -1);
@@ -83,8 +81,6 @@ public class MenuGrid extends Widget {
                         public Tex tex() {
                             if(pag.res() == null)
                                 return(null);
-                            if(c == null)
-                                c = new TexI(PUtils.monochromize(pag.res().layer(Resource.imgc).img, Color.LIGHT_GRAY));
                             return(c);
                         }
                     });
@@ -285,7 +281,6 @@ public class MenuGrid extends Widget {
     private Tex glowmask(Pagina pag) {
         Tex ret = glowmasks.get(pag);
         if (ret == null) {
-            ret = new TexI(PUtils.glowmask(PUtils.glowmask(pag.res().layer(Resource.imgc).img.getRaster()), 4, new Color(32, 255, 32)));
             glowmasks.put(pag, ret);
         }
         return (ret);
@@ -305,7 +300,6 @@ public class MenuGrid extends Widget {
             boolean ttl = (now - hoverstart) > 500;
             if ((pag != curttp) || (ttl != curttl)) {
                 try {
-                    curtt = new TexI(rendertt(pag, ttl));
                 } catch (Loading l) {
                     return (null);
                 }

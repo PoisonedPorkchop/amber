@@ -156,18 +156,6 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
             this.group = group;
         }
 
-        public void draw(GOut g) {
-            for (int i = 0; i < gc.length; i++) {
-                if (i == group) {
-                    g.chcolor();
-                    g.frect(new Coord(i * 20, 0), new Coord(19, 19));
-                }
-                g.chcolor(gc[i]);
-                g.frect(new Coord(2 + (i * 20), 2), new Coord(15, 15));
-            }
-            g.chcolor();
-        }
-
         public boolean mousedown(Coord c, int button) {
             if ((c.y >= 2) && (c.y < 17)) {
                 int g = (c.x - 2) / 20;
@@ -218,22 +206,6 @@ public class BuddyWnd extends Widget implements Iterable<BuddyWnd.Buddy> {
                 }
             }
             return num;
-        }
-
-        protected void drawbg(GOut g) {
-            g.chcolor(0, 0, 0, 128);
-            g.frect(Coord.z, sz);
-            g.chcolor();
-        }
-
-        public void drawitem(GOut g, Buddy b, int idx) {
-            if (b.online == 1)
-                g.image(online, Coord.z);
-            else if (b.online == 0)
-                g.image(offline, Coord.z);
-            g.chcolor(gc[b.group]);
-            g.aimage(b.rname().tex(), new Coord(25, 10), 0, 0.5);
-            g.chcolor();
         }
 
         public void change(Buddy b) {

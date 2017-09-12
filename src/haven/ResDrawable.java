@@ -26,8 +26,6 @@
 
 package haven;
 
-import java.awt.Color;
-
 public class ResDrawable extends Drawable {
     public final Indir<Resource> res;
     public Sprite spr = null;
@@ -57,15 +55,6 @@ public class ResDrawable extends Drawable {
             gob.determineType(res.name);
     }
 
-    public void setup(RenderList rl) {
-        try {
-            init();
-        } catch (Loading e) {
-            return;
-        }
-        rl.add(spr, null);
-    }
-
     public void ctick(int dt) {
         if (spr == null) {
             delay += dt;
@@ -87,9 +76,5 @@ public class ResDrawable extends Drawable {
     public Skeleton.Pose getpose() {
         init();
         return (Skeleton.getpose(spr));
-    }
-
-    public Object staticp() {
-        return((spr != null)?spr.staticp():null);
     }
 }

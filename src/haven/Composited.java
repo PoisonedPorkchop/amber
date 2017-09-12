@@ -26,17 +26,15 @@
 
 package haven;
 
-import java.util.*;
-
+import haven.MapView.ClickInfo;
 import haven.Skeleton.Pose;
 import haven.Skeleton.PoseMod;
-import haven.MapView.ClickInfo;
 
-public class Composited implements Rendered, MapView.Clickable {
+import java.util.*;
+
+public class Composited {
     public final Skeleton skel;
     public final Pose pose;
-    private final PoseMorph morph;
-    public Collection<Model> mod = new LinkedList<Model>();
     public Collection<Equ> equ = new LinkedList<Equ>();
     public Poses poses = new Poses();
     public List<MD> nmod = null, cmod = new LinkedList<MD>();
@@ -126,66 +124,6 @@ public class Composited implements Rendered, MapView.Clickable {
     public Composited(Skeleton skel) {
         this.skel = skel;
         this.pose = skel.new Pose(skel.bindpose);
-        this.morph = new PoseMorph(pose);
-    }
-
-    private static final Rendered.Order modorder = new Rendered.Order<Model.Layer>() {
-        public int mainz() {
-            return (1);
-        }
-
-        private final Rendered.RComparator<Model.Layer> cmp = new Rendered.RComparator<Model.Layer>() {
-            public int compare(Model.Layer a, Model.Layer b, GLState.Buffer sa, GLState.Buffer sb) {
-                if (a.z1 != b.z1)
-                    return (a.z1 - b.z1);
-                return (a.z2 - b.z2);
-            }
-        };
-
-        public Rendered.RComparator<Model.Layer> cmp() {
-            return (cmp);
-        }
-    };
-
-    public class Model implements Rendered {
-        public final MorphedMesh m;
-        public final int id;
-        int z = 0, lz = 0;
-
-        public class Layer implements FRendered {
-            private final Material mat;
-            private final int z1, z2;
-
-            private Layer(Material mat, int z1, int z2) {
-                this.mat = mat;
-                this.z1 = z1;
-                this.z2 = z2;
-            }
-
-            public boolean setup(RenderList r) {
-                r.prepo(modorder);
-                r.prepo(mat);
-                return (true);
-            }
-        }
-
-        public final List<Layer> lay = new ArrayList<Layer>();
-
-        private Model(FastMesh m, int id) {
-            this.m = new MorphedMesh(m, morph);
-            this.id = id;
-        }
-
-        private void addlay(Material mat) {
-            lay.add(new Layer(mat, z, lz++));
-        }
-
-        public boolean setup(RenderList r) {
-            m.setup(r);
-            for (Layer lay : this.lay)
-                r.add(lay, null);
-            return (false);
-        }
     }
 
     public class SpriteEqu extends Equ {
@@ -196,32 +134,12 @@ public class Composited implements Rendered, MapView.Clickable {
             this.spr = Sprite.create(eqowner, ed.res.res.get(), ed.res.sdt.clone());
         }
 
-        public boolean setup(RenderList rl) {
-            rl.add(spr, null);
-            return (false);
-        }
-
         public void tick(int dt) {
             spr.tick(dt);
         }
     }
 
-    public class LightEqu extends Equ {
-        private final Light l;
-
-        private LightEqu(ED ed) {
-            super(ed);
-            this.l = ed.res.res.get().layer(Light.Res.class).make();
-        }
-
-        public boolean setup(RenderList rl) {
-            rl.add(l, null);
-            return (false);
-        }
-    }
-
-    public abstract class Equ implements Rendered {
-        private final GLState et;
+    public abstract class Equ{
         public final ED desc;
         public final int id;
         private boolean matched;
@@ -229,28 +147,6 @@ public class Composited implements Rendered, MapView.Clickable {
         private Equ(ED ed) {
             this.desc = ed.clone();
             this.id = desc.id;
-            GLState bt = null;
-            if (bt == null) {
-                Skeleton.BoneOffset bo = ed.res.res.get().layer(Skeleton.BoneOffset.class, ed.at);
-                if (bo != null)
-                    bt = bo.forpose(pose);
-            }
-            if ((bt == null) && (skel instanceof Skeleton.ResourceSkeleton)) {
-                Skeleton.BoneOffset bo = ((Skeleton.ResourceSkeleton) skel).res.layer(Skeleton.BoneOffset.class, ed.at);
-                if (bo != null)
-                    bt = bo.forpose(pose);
-            }
-            if (bt == null) {
-                Skeleton.Bone bone = skel.bones.get(ed.at);
-                if (bone != null)
-                    bt = pose.bonetrans(bone.idx);
-            }
-            if (bt == null)
-                throw (new RuntimeException("Transformation " + ed.at + " for equipment " + ed.res + " on skeleton " + skel + " could not be resolved"));
-            if ((ed.off.x != 0.0f) || (ed.off.y != 0.0f) || (ed.off.z != 0.0f))
-                this.et = GLState.compose(bt, Location.xlate(ed.off));
-            else
-                this.et = bt;
         }
 
         public void tick(int dt) {
@@ -261,7 +157,6 @@ public class Composited implements Rendered, MapView.Clickable {
         public Indir<Resource> mod;
         public List<ResData> tex;
         public int id = -1;
-        private Model real;
 
         public MD(Indir<Resource> mod, List<ResData> tex) {
             this.mod = mod;
@@ -384,36 +279,6 @@ public class Composited implements Rendered, MapView.Clickable {
         }
     }
 
-    private void nmod(boolean nocatch) {
-        for (Iterator<MD> i = nmod.iterator(); i.hasNext(); ) {
-            MD md = i.next();
-            try {
-                if (md.real == null) {
-                    FastMesh.MeshRes mr = md.mod.get().layer(FastMesh.MeshRes.class);
-                    if (mr == null)
-                        throw (new Sprite.ResourceException("Model resource contains no mesh", md.mod.get()));
-                    md.real = new Model(mr.m, md.id);
-            /* This is really ugly, but I can't really think of
-             * anything less ugly right now. */
-                    if (md.mod.get().name.equals("gfx/borka/male") || md.mod.get().name.equals("gfx/borka/female"))
-                        md.real.z = -1;
-                    this.mod.add(md.real);
-                }
-                for (Iterator<ResData> o = md.tex.iterator(); o.hasNext(); ) {
-                    ResData res = o.next();
-                    md.real.addlay(Material.fromres((eqowner == null) ? null : eqowner.glob(), res.res.get(), new MessageBuf(res.sdt)));
-                    o.remove();
-                }
-                i.remove();
-            } catch (Loading e) {
-                if (nocatch)
-                    throw (e);
-            }
-        }
-        if (nmod.isEmpty())
-            nmod = null;
-    }
-
     private void nequ(boolean nocatch) {
         outer:
         for (Iterator<ED> i = nequ.iterator(); i.hasNext(); ) {
@@ -425,8 +290,7 @@ public class Composited implements Rendered, MapView.Clickable {
                         equ.matched = true;
                         i.remove();
                         continue outer;
-                    } else if ((equ instanceof SpriteEqu) && (((SpriteEqu) equ).spr instanceof Gob.Overlay.CUpd) && equ.desc.equals2(ed)) {
-                        ((Gob.Overlay.CUpd) ((SpriteEqu) equ).spr).update(ed.res.sdt.clone());
+                    } else if ((equ instanceof SpriteEqu) && equ.desc.equals2(ed)) {
                         equ.desc.res.sdt = ed.res.sdt;
                         equ.matched = true;
                         i.remove();
@@ -436,8 +300,6 @@ public class Composited implements Rendered, MapView.Clickable {
                 Equ ne;
                 if (ed.t == 0)
                     ne = new SpriteEqu(ed);
-                else if (ed.t == 1)
-                    ne = new LightEqu(ed);
                 else
                     throw (new RuntimeException("Invalid composite equ-type: " + ed.t));
                 ne.matched = true;
@@ -459,8 +321,6 @@ public class Composited implements Rendered, MapView.Clickable {
     }
 
     public void changes(boolean nocatch) {
-        if (nmod != null)
-            nmod(nocatch);
         if (nequ != null)
             nequ(nocatch);
     }
@@ -473,37 +333,10 @@ public class Composited implements Rendered, MapView.Clickable {
         CompositeClick(ClickInfo prev, Integer id) {
             super(prev, id);
         }
-
-        public ClickInfo include(Rendered r) {
-            int id = (this.id == null) ? 0 : this.id;
-            if (r instanceof Model) {
-                Model mod = (Model) r;
-                if (mod.id >= 0)
-                    return (new CompositeClick(this, 0x01000000 | ((mod.id & 0xff) << 8)));
-            } else if (r instanceof Equ) {
-                Equ equ = (Equ) r;
-                if (equ.id >= 0)
-                    return (new CompositeClick(this, 0x02000000 | ((equ.id & 0xff) << 16)));
-            } else if (r instanceof FastMesh.ResourceMesh) {
-                FastMesh.ResourceMesh rm = (FastMesh.ResourceMesh) r;
-                if ((id & 0xff000000) == 2)
-                    return (new CompositeClick(this, id & 0xffff0000 | (rm.id & 0xffff)));
-            }
-            return (this);
-        }
     }
 
-    public ClickInfo clickinfo(Rendered self, ClickInfo prev) {
+    public ClickInfo clickinfo(ClickInfo prev) {
         return (new CompositeClick(prev, null));
-    }
-
-    public boolean setup(RenderList rl) {
-        changes();
-        for (Model mod : this.mod)
-            rl.add(mod, null);
-        for (Equ equ : this.equ)
-            rl.add(equ, equ.et);
-        return (false);
     }
 
     public void tick(int dt) {
@@ -521,7 +354,6 @@ public class Composited implements Rendered, MapView.Clickable {
     public void chmod(List<MD> mod) {
         if (mod.equals(cmod))
             return;
-        this.mod = new LinkedList<Model>();
         nmod = new LinkedList<MD>();
         for (MD md : mod)
             nmod.add(md.clone());

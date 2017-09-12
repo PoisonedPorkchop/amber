@@ -26,10 +26,6 @@
 
 package haven.glsl;
 
-import haven.GLState.Slot;
-import haven.GOut;
-import haven.GLProgram.VarID;
-
 public class Uniform extends Variable.Global {
     public Uniform(Type type, Symbol name) {
         super(type, name);
@@ -58,24 +54,5 @@ public class Uniform extends Variable.Global {
             ctx.vardefs.add(new Def());
         if (type == Type.SAMPLER2DMS)
             ctx.exts.add("GL_ARB_texture_multisample");
-    }
-
-    public static abstract class AutoApply extends Uniform {
-        public final Slot[] deps;
-
-        public AutoApply(Type type, Symbol name, Slot... deps) {
-            super(type, name);
-            this.deps = deps;
-        }
-
-        public AutoApply(Type type, String infix, Slot... deps) {
-            super(type, infix);
-            this.deps = deps;
-        }
-
-        public AutoApply(Type type, Slot... deps) {
-            super(type);
-            this.deps = deps;
-        }
     }
 }

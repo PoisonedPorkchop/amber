@@ -26,8 +26,12 @@
 
 package haven;
 
-import java.util.*;
-import javax.media.opengl.*;
+import javax.media.opengl.GL2;
+import javax.media.opengl.GL3;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 public class GPUProfile extends Profile {
     private Collection<Frame> waiting = new LinkedList<Frame>();
@@ -50,7 +54,6 @@ public class GPUProfile extends Profile {
             int[] buf = new int[1];
             gl.glGenQueries(1, buf, 0);
             gl.glQueryCounter(buf[0], GL3.GL_TIMESTAMP);
-            GOut.checkerr(gl);
             queries.add(buf[0]);
         }
 

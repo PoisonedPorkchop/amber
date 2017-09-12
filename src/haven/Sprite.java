@@ -26,12 +26,12 @@
 
 package haven;
 
-import java.awt.image.BufferedImage;
-import java.awt.Graphics;
-import java.util.*;
 import java.lang.reflect.Constructor;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
 
-public abstract class Sprite implements Rendered {
+public abstract class Sprite {
     public static final int GOB_HEALTH_ID = -1001;
     public static final int GROWTH_STAGE_ID = -1002;
     public final Resource res;
@@ -42,7 +42,6 @@ public abstract class Sprite implements Rendered {
         factories.add(SpriteLink.sfact);
         factories.add(SkelSprite.fact);
         factories.add(AnimSprite.fact);
-        factories.add(StaticSprite.fact);
         factories.add(AudioSprite.fact);
     }
 
@@ -134,8 +133,6 @@ public abstract class Sprite implements Rendered {
         }
         throw (new ResourceException("Does not know how to draw resource " + res.name, res));
     }
-
-    public abstract boolean setup(RenderList d);
 
     public boolean tick(int dt) {
         return (false);

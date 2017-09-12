@@ -538,40 +538,6 @@ public class ChatUI extends Widget {
             chat.parent.setfocus(chat);
         }
 
-        private void drawsel(GOut g, Message msg, int y) {
-            RichText rt = (RichText) msg.text();
-            boolean sel = msg != selstart.msg;
-            for (RichText.Part part = rt.parts; part != null; part = part.next) {
-                if (!(part instanceof RichText.TextPart))
-                    continue;
-                RichText.TextPart tp = (RichText.TextPart) part;
-                if (tp.start == tp.end)
-                    continue;
-                TextHitInfo a, b;
-                if (sel) {
-                    a = TextHitInfo.leading(0);
-                } else if (tp == selstart.part) {
-                    a = selstart.ch;
-                    sel = true;
-                } else {
-                    continue;
-                }
-                if (tp == selend.part) {
-                    sel = false;
-                    b = selend.ch;
-                } else {
-                    b = TextHitInfo.trailing(tp.end - tp.start - 1);
-                }
-                Coord ul = new Coord(tp.x + (int) tp.advance(0, a.getInsertionIndex()), tp.y + y);
-                Coord sz = new Coord((int) tp.advance(a.getInsertionIndex(), b.getInsertionIndex()), tp.height());
-                g.chcolor(0, 0, 255, 255);
-                g.frect(ul, sz);
-                g.chcolor();
-                if (!sel)
-                    break;
-            }
-        }
-
         public void uimsg(String name, Object... args) {
             if (name == "sel") {
                 select();
@@ -1052,34 +1018,11 @@ public class ChatUI extends Widget {
             }
         }
 
-        protected ArrayList<Channel> getChannels()
-        {
+        protected ArrayList<Channel> getChannels() {
             ArrayList<Channel> channels = new ArrayList<>();
-            for(DarkChannel channel : chls)
+            for (DarkChannel channel : chls)
                 channels.add(channel.chan);
             return channels;
-        }
-
-        public void draw(GOut g) {
-            int i = s;
-            int y = 0;
-            synchronized (chls) {
-                while (i < chls.size()) {
-                    DarkChannel ch = chls.get(i);
-                    if (ch.chan == sel)
-                        g.image(chanseld, new Coord(0, y));
-                    g.chcolor(255, 255, 255, 255);
-                    if ((ch.rname == null) || !ch.rname.text.equals(ch.chan.name()) || (ch.urgency != ch.chan.urgency))
-                        ch.rname = nf[ch.urgency = ch.chan.urgency].render(ch.chan.name());
-                    g.aimage(ch.rname.tex(), new Coord(sz.x / 2, y + 8), 0.5, 0.5);
-                    g.image(chandiv, new Coord(0, y + 18));
-                    y += 28;
-                    if (y >= sz.y)
-                        break;
-                    i++;
-                }
-            }
-            g.chcolor();
         }
 
         public boolean up() {
@@ -1176,36 +1119,6 @@ public class ChatUI extends Widget {
 
     private Text.Line rqline = null;
     private int rqpre;
-
-    public void drawsmall(GOut g, Coord br, int h) {
-        Coord c;
-        if (qline != null) {
-            if ((rqline == null) || !rqline.text.equals(qline.line)) {
-                String pre = String.format("%s> ", qline.chan.name());
-                rqline = qfnd.render(pre + qline.line);
-                rqpre = pre.length();
-            }
-            c = br.sub(0, 20);
-            g.image(rqline.tex(), c);
-            int lx = rqline.advance(qline.point + rqpre);
-        } else {
-            c = br.sub(0, 5);
-        }
-        long now = System.currentTimeMillis();
-        synchronized (notifs) {
-            for (Iterator<Notification> i = notifs.iterator(); i.hasNext(); ) {
-                Notification n = i.next();
-                if (now - n.time > 5000) {
-                    i.remove();
-                    continue;
-                }
-                if ((c.y -= n.msg.sz().y) < br.y - h)
-                    break;
-                g.image(n.chnm.tex(), c, br.sub(0, h), br.add(selw - 10, 0));
-                g.image(n.msg.tex(), c.add(selw, 0));
-            }
-        }
-    }
 
     private static final Tex bulc = Resource.loadtex("gfx/hud/chat-lc");
     private static final Tex burc = Resource.loadtex("gfx/hud/chat-rc");

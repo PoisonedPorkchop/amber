@@ -26,17 +26,19 @@
 
 package haven;
 
-import com.jogamp.opengl.util.awt.Screenshot;
-
-import javax.media.opengl.*;
-import javax.media.opengl.awt.GLCanvas;
+import javax.media.opengl.GLCapabilities;
+import javax.media.opengl.GLCapabilitiesChooser;
+import javax.media.opengl.GLProfile;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.Map;
 import java.util.Queue;
+import java.util.TreeMap;
 
 public class HavenPanel implements Runnable, Console.Directory {
     UI ui;
@@ -54,12 +56,7 @@ public class HavenPanel implements Runnable, Console.Directory {
     private MouseEvent mousemv = null;
     public CPUProfile uprof = new CPUProfile(300), rprof = new CPUProfile(300);
     public GPUProfile gprof = new GPUProfile(300);
-    public static final GLState.Slot<GLState> global = new GLState.Slot<GLState>(GLState.Slot.Type.SYS, GLState.class);
-    public static final GLState.Slot<GLState> proj2d = new GLState.Slot<GLState>(GLState.Slot.Type.SYS, GLState.class, global);
-    private GLState gstate, rtstate, ostate;
     private Throwable uncaught = null;
-    private GLState.Applier state = null;
-    private GLConfig glconf = null;
     public static boolean needtotakescreenshot;
     public static boolean isATI;
     private final boolean gldebug = false;
@@ -92,30 +89,6 @@ public class HavenPanel implements Runnable, Console.Directory {
         final haven.error.ErrorHandler h = haven.error.ErrorHandler.find();
     }
 
-    public static abstract class OrthoState extends GLState {
-        protected abstract Coord sz();
-
-        public void apply(GOut g) {
-            Coord sz = sz();
-            g.st.proj = Projection.makeortho(new Matrix4f(), 0, sz.x, sz.y, 0, -1, 1);
-        }
-
-        public void unapply(GOut g) {
-        }
-
-        public void prep(Buffer buf) {
-            buf.put(proj2d, this);
-        }
-
-        public static OrthoState fixed(final Coord sz) {
-            return (new OrthoState() {
-                protected Coord sz() {
-                    return (sz);
-                }
-            });
-        }
-    }
-
     public void init() {
         newui(null);
         inited = true;
@@ -129,8 +102,6 @@ public class HavenPanel implements Runnable, Console.Directory {
         ui.root.grprof = rprof;
         ui.root.ggprof = gprof;
         ui.cons.add(this);
-        if (glconf != null)
-            ui.cons.add(glconf);
         lui = ui;
         return (ui);
     }
@@ -145,52 +116,16 @@ public class HavenPanel implements Runnable, Console.Directory {
     }
 
     private static class Frame {
-        BufferBGL buf;
         CPUProfile.Frame pf;
         CurrentGL on;
         long doneat;
 
-        Frame(BufferBGL buf, CurrentGL on) {
-            this.buf = buf;
+        Frame(CurrentGL on) {
             this.on = on;
         }
     }
 
     private Frame[] curdraw = {null};
-
-    void redraw(GL2 gl) {
-        if (uncaught != null)
-            throw (new RuntimeException("Exception occurred during init but was somehow discarded", uncaught));
-        if ((state == null) || (state.cgl.gl != gl))
-            state = new GLState.Applier(new CurrentGL(gl, glconf));
-
-        Frame f;
-        synchronized (curdraw) {
-            f = curdraw[0];
-            curdraw[0] = null;
-        }
-        if ((f != null) && (f.on.gl == gl)) {
-            GPUProfile.Frame curgf = null;
-            if (Config.profilegpu)
-                curgf = gprof.new Frame((GL3) gl);
-            if (f.pf != null)
-                f.pf.tick("awt");
-            f.buf.run(gl);
-            GOut.checkerr(gl);
-            if (f.pf != null)
-                f.pf.tick("gl");
-            if (curgf != null) {
-                curgf.tick("draw");
-                curgf.fin();
-            }
-
-            if (glconf.pref.dirty) {
-                glconf.pref.save();
-                glconf.pref.dirty = false;
-            }
-            f.doneat = System.currentTimeMillis();
-        }
-    }
 
     void dispatch() {
         synchronized (events) {
@@ -281,10 +216,6 @@ public class HavenPanel implements Runnable, Console.Directory {
         try {
             Thread drawthread = new HackThread(drawfun, "Render thread");
             drawthread.start();
-            synchronized (drawfun) {
-                while (state == null)
-                    drawfun.wait();
-            }
             try {
                 long now, then;
                 long frames[] = new long[128];
@@ -307,21 +238,15 @@ public class HavenPanel implements Runnable, Console.Directory {
                     }
                     if (curf != null)
                         curf.tick("dsp");
-
-                    BufferBGL buf = new BufferBGL();
-                    GLState.Applier state = this.state;
                     if (curf != null)
                         curf.tick("draw");
                     synchronized (drawfun) {
                         now = System.currentTimeMillis();
                         while (bufdraw != null)
                             drawfun.wait();
-                        bufdraw = new Frame(buf, state.cgl);
                         drawfun.notifyAll();
                         fwaited += System.currentTimeMillis() - now;
                     }
-
-                    ui.audio.cycle();
                     if (curf != null)
                         curf.tick("aux");
 
@@ -383,4 +308,5 @@ public class HavenPanel implements Runnable, Console.Directory {
     public Map<String, Console.Command> findcmds() {
         return (cmdmap);
     }
+
 }

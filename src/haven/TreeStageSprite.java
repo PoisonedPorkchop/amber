@@ -9,10 +9,7 @@ public class TreeStageSprite extends Sprite {
     public int val;
     private Tex tex;
     private static Matrix4f mv = new Matrix4f();
-    private Projection proj;
     private Coord wndsz;
-    private Location.Chain loc;
-    private Camera camp;
 
     static {
         for (int i = 10; i < 100; i++) {
@@ -25,22 +22,8 @@ public class TreeStageSprite extends Sprite {
         update(val);
     }
 
-    public boolean setup(RenderList rl) {
-        rl.prepo(last);
-        GLState.Buffer buf = rl.state();
-        proj = buf.get(PView.proj);
-        wndsz = buf.get(PView.wnd).sz();
-        loc = buf.get(PView.loc);
-        camp = buf.get(PView.cam);
-        return true;
-    }
-
     public void update(int val) {
         this.val = val;
         tex = treestg[val - 10];
-    }
-
-    public Object staticp() {
-        return CONSTANS;
     }
 }

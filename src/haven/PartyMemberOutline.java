@@ -1,15 +1,10 @@
 package haven;
 
-import java.awt.Color;
+import java.awt.*;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
-import javax.media.opengl.GL;
-
 public class PartyMemberOutline extends Sprite {
-    private final GLState mat;
-    private final VertexBuf.VertexArray posa;
-    private final VertexBuf.NormalArray nrma;
     private final ShortBuffer eidx;
     private Coord2d lc;
 
@@ -28,19 +23,7 @@ public class PartyMemberOutline extends Sprite {
             nrma.put(j * 3, cos).put(j * 3 + 1, sin).put(j * 3 + 2, 0.0F);
             eidx.put(j, (short) j);
         }
-        this.posa = new VertexBuf.VertexArray(posa);
-        this.nrma = new VertexBuf.NormalArray(nrma);
         this.eidx = eidx;
-        this.mat = new States.ColState(color);
-    }
-
-    @Override
-    public boolean setup(RenderList d) {
-        d.prepo(Rendered.eyesort);
-        d.prepo(Material.nofacecull);
-        Location.goback(d.state(), "gobx");
-        d.state().put(States.color, null);
-        return true;
     }
 
     @Override
@@ -54,14 +37,5 @@ public class PartyMemberOutline extends Sprite {
     }
 
     private void setz(Glob glob, Coord2d c) {
-        FloatBuffer posa = this.posa.data;
-        try {
-            double z = glob.map.getcz(c);
-            for (int j = 0; j < this.posa.size(); j++) {
-                float tz = (float)(glob.map.getcz(c.x + posa.get(j * 3), c.y - posa.get(j * 3 + 1)) - z);
-                posa.put(j * 3 + 2, tz + 0.1f);
-            }
-        } catch (Loading e) {
-        }
     }
 }

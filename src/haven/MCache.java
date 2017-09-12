@@ -120,7 +120,6 @@ public class MCache {
         private class Cut {
             MapMesh mesh;
             Defer.Future<MapMesh> dmesh;
-            Rendered[] ols;
         }
 
         private class Flavobj extends Gob {
@@ -208,32 +207,11 @@ public class MCache {
                     MapMesh old = cut.mesh;
                     cut.mesh = cut.dmesh.get();
                     cut.dmesh = null;
-                    cut.ols = null;
                     if (old != null)
                         old.dispose();
                 }
             }
             return (cut.mesh);
-        }
-
-        public Rendered getolcut(int ol, Coord cc) {
-            int nseq = MCache.this.olseq;
-            if (this.olseq != nseq) {
-                for (int i = 0; i < cutn.x * cutn.y; i++) {
-                    if (cuts[i].ols != null) {
-                        for (Rendered r : cuts[i].ols) {
-                            if (r instanceof Disposable)
-                                ((Disposable) r).dispose();
-                        }
-                    }
-                    cuts[i].ols = null;
-                }
-                this.olseq = nseq;
-            }
-            Cut cut = geticut(cc);
-            if (cut.ols == null)
-                cut.ols = getcut(cc).makeols();
-            return (cut.ols[ol]);
         }
 
         private void buildcut(final Coord cc) {
@@ -289,21 +267,6 @@ public class MCache {
                 Grid ng = grids.get(gc.add(ic));
                 if (ng != null)
                     ng.ivneigh(ic.inv());
-            }
-        }
-
-        public void dispose() {
-            for (Cut cut : cuts) {
-                if (cut.dmesh != null)
-                    cut.dmesh.cancel();
-                if (cut.mesh != null)
-                    cut.mesh.dispose();
-                if (cut.ols != null) {
-                    for (Rendered r : cut.ols) {
-                        if (r instanceof Disposable)
-                            ((Disposable) r).dispose();
-                    }
-                }
             }
         }
 
@@ -393,19 +356,6 @@ public class MCache {
         }
     }
 
-    public void invalblob(Message msg) {
-        int type = msg.uint8();
-        if (type == 0) {
-            invalidate(msg.coord());
-        } else if (type == 1) {
-            Coord ul = msg.coord();
-            Coord lr = msg.coord();
-            trim(ul, lr);
-        } else if (type == 2) {
-            trimall();
-        }
-    }
-
     private Grid cached = null;
 
     public Grid getgrid(Coord gc) {
@@ -479,12 +429,6 @@ public class MCache {
     public Collection<Gob> getfo(Coord cc) {
         synchronized (grids) {
             return (getgrid(cc.div(cutn)).getfo(cc.mod(cutn)));
-        }
-    }
-
-    public Rendered getolcut(int ol, Coord cc) {
-        synchronized (grids) {
-            return (getgrid(cc.div(cutn)).getolcut(ol, cc.mod(cutn)));
         }
     }
 
@@ -602,40 +546,6 @@ public class MCache {
                 tiles[i] = new SoftReference<Tiler>(tile);
             }
             return (tile);
-        }
-    }
-
-    public void trimall() {
-        synchronized (grids) {
-            synchronized (req) {
-                for (Grid g : grids.values())
-                    g.dispose();
-                grids.clear();
-                req.clear();
-                cached = null;
-            }
-        }
-    }
-
-    public void trim(Coord ul, Coord lr) {
-        synchronized(grids) {
-            synchronized(req) {
-                for(Iterator<Map.Entry<Coord, Grid>> i = grids.entrySet().iterator(); i.hasNext();) {
-                    Map.Entry<Coord, Grid> e = i.next();
-                    Coord gc = e.getKey();
-                    Grid g = e.getValue();
-                    if((gc.x < ul.x) || (gc.y < ul.y) || (gc.x > lr.x) || (gc.y > lr.y)) {
-                        g.dispose();
-                        i.remove();
-                    }
-                }
-                for(Iterator<Coord> i = req.keySet().iterator(); i.hasNext();) {
-                    Coord gc = i.next();
-                    if((gc.x < ul.x) || (gc.y < ul.y) || (gc.x > lr.x) || (gc.y > lr.y))
-                        i.remove();
-                }
-                cached = null;
-            }
         }
     }
 

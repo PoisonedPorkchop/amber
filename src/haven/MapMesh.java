@@ -26,22 +26,16 @@
 
 package haven;
 
+import java.nio.ShortBuffer;
+import java.util.*;
+
 import static haven.MCache.tilesz;
 
-import java.util.*;
-import java.nio.FloatBuffer;
-import java.nio.ShortBuffer;
-
-import haven.Surface.Vertex;
-import haven.Surface.MeshVertex;
-
-public class MapMesh implements Rendered, Disposable {
+public class MapMesh implements Disposable {
     public final Coord ul, sz;
     public final MCache map;
     private final long rnd;
-    private Map<Tex, GLState[]> texmap = new HashMap<Tex, GLState[]>();
     private Map<DataID, Object> data = new LinkedHashMap<DataID, Object>();
-    private List<Rendered> extras = new ArrayList<Rendered>();
     private FastMesh[] flats;
     private List<Disposable> dparts = new ArrayList<Disposable>();
 
@@ -69,33 +63,6 @@ public class MapMesh implements Rendered, Disposable {
         } catch (NoSuchMethodException e) {
         }
         throw (new Error("No proper data-ID constructor found"));
-    }
-
-    public static interface ConsHooks {
-        public void sfin();
-
-        public void calcnrm();
-
-        public void postcalcnrm(Random rnd);
-
-        public boolean clean();
-    }
-
-    public static class Hooks implements ConsHooks {
-        public void sfin() {
-        }
-
-        ;
-
-        public void calcnrm() {
-        }
-
-        public void postcalcnrm(Random rnd) {
-        }
-
-        public boolean clean() {
-            return (false);
-        }
     }
 
     @SuppressWarnings("unchecked")
@@ -126,7 +93,7 @@ public class MapMesh implements Rendered, Disposable {
         }
     }
 
-    public class MapSurface extends haven.Surface implements ConsHooks {
+    public class MapSurface extends haven.Surface {
         public final Scan vs = new Scan(new Coord(-1, -1), sz.add(3, 3));
         public final Scan ts = new Scan(Coord.z, sz);
         public final Vertex[] surf = new Vertex[vs.l];
@@ -174,43 +141,6 @@ public class MapMesh implements Rendered, Disposable {
     }
 
     public static final DataID<MapSurface> gnd = makeid(MapSurface.class);
-
-    public static class MLOrder extends Order<Rendered> {
-        public final int z;
-
-        public MLOrder(int z, int subz) {
-            this.z = (z << 8) + subz;
-        }
-
-        public MLOrder(int z) {
-            this(z, 0);
-        }
-
-        public int mainz() {
-            return (1000);
-        }
-
-        public boolean equals(Object x) {
-            return ((x instanceof MLOrder) && (((MLOrder) x).z == this.z));
-        }
-
-        public int hashCode() {
-            return (z);
-        }
-
-        private final static RComparator<Rendered> cmp = new RComparator<Rendered>() {
-            public int compare(Rendered a, Rendered b, GLState.Buffer sa, GLState.Buffer sb) {
-                return (((MLOrder) sa.get(order)).z - ((MLOrder) sb.get(order)).z);
-            }
-        };
-
-        public RComparator<Rendered> cmp() {
-            return (cmp);
-        }
-    }
-
-    public static Order premap = new Order.Default(990);
-    public static Order postmap = new Order.Default(1010);
 
     private MapMesh(MCache map, Coord ul, Coord sz, Random rnd) {
         this.map = map;
@@ -271,60 +201,7 @@ public class MapMesh implements Rendered, Disposable {
                 Tiler t = m.map.tiler(i);
                 if (t == null)
                     continue;
-                t.trans(m, rnd, ground, lc, gc, 255 - i, bm, cm);
             }
-        }
-    }
-
-    public static class Model extends MeshBuf implements ConsHooks {
-        public final MapMesh m;
-        public final GLState mat;
-
-        public Model(MapMesh m, GLState mat) {
-            this.m = m;
-            this.mat = mat;
-        }
-
-        public void sfin() {
-        }
-
-        public void calcnrm() {
-        }
-
-        public boolean clean() {
-            return (false);
-        }
-
-        public void postcalcnrm(Random rnd) {
-            FastMesh mesh = mkmesh();
-            m.extras.add(mat.apply(mesh));
-            m.dparts.add(mesh);
-        }
-
-        public static class MatKey implements DataID<Model> {
-            public final GLState mat;
-            private final int hash;
-
-            public MatKey(GLState mat) {
-                this.mat = mat;
-                this.hash = mat.hashCode() * 37;
-            }
-
-            public int hashCode() {
-                return (hash);
-            }
-
-            public boolean equals(Object x) {
-                return ((x instanceof MatKey) && mat.equals(((MatKey) x).mat));
-            }
-
-            public Model make(MapMesh m) {
-                return (new Model(m, mat));
-            }
-        }
-
-        public static Model get(MapMesh m, GLState mat) {
-            return (m.data(new MatKey(mat)));
         }
     }
 
@@ -341,27 +218,14 @@ public class MapMesh implements Rendered, Disposable {
                 rnd.setSeed(ns);
             }
         }
-        for (Object obj : m.data.values()) {
-            if (obj instanceof ConsHooks)
-                ((ConsHooks) obj).sfin();
-        }
         for (c.y = 0; c.y < sz.y; c.y++) {
             for (c.x = 0; c.x < sz.x; c.x++) {
                 Coord gc = c.add(ul);
                 long ns = rnd.nextLong();
-                mc.tiler(mc.gettile(gc)).lay(m, rnd, c, gc);
                 if (!Config.disabletiletrans)
                     dotrans(m, rnd, c, gc);
                 rnd.setSeed(ns);
             }
-        }
-        for (Object obj : m.data.values()) {
-            if (obj instanceof ConsHooks)
-                ((ConsHooks) obj).calcnrm();
-        }
-        for (Object obj : m.data.values()) {
-            if (obj instanceof ConsHooks)
-                ((ConsHooks) obj).postcalcnrm(rnd);
         }
 
         m.consflat();
@@ -370,10 +234,7 @@ public class MapMesh implements Rendered, Disposable {
         return (m);
     }
 
-    private static States.DepthOffset gmoff = new States.DepthOffset(-1, -1);
-
-    public static class GroundMod implements Rendered, Disposable {
-        private static final Order gmorder = new Order.Default(1001);
+    public static class GroundMod implements Disposable {
         public final Coord2d cc;
         public final FastMesh mesh;
 
@@ -402,74 +263,11 @@ public class MapMesh implements Rendered, Disposable {
                 brt = tbrt;
             }
 
-            Tiler.MCons cons = new Tiler.MCons() {
-                final MeshBuf.Tex ta = buf.layer(MeshBuf.tex);
-                final Map<Vertex, MeshVertex> cv = new HashMap<Vertex, MeshVertex>();
-
-                public void faces(MapMesh m, Tiler.MPart d) {
-                    Coord3f[] texc = new Coord3f[d.v.length];
-                    for (int i = 0; i < d.v.length; i++) {
-                        texc[i] = new Coord3f((float)(((m.ul.x + d.lc.x + d.tcx[i]) * tilesz.x) - cc.x),
-                                (float)(((m.ul.y + d.lc.y + d.tcy[i]) * tilesz.y) - cc.y),
-                                0);
-                        texc[i] = new Coord3f(co * texc[i].x + si * texc[i].y,
-                                co * texc[i].y - si * texc[i].x,
-                                0);
-                        texc[i].x = (texc[i].x - ul.x) / (br.x - ul.x);
-                        texc[i].y = (texc[i].y - ul.y) / (br.y - ul.y);
-                    }
-
-                    boolean[] vf = new boolean[d.f.length / 3];
-                    boolean[] vv = new boolean[d.v.length];
-                    for (int i = 0, o = 0; i < vf.length; i++, o += 3) {
-                        boolean f = true;
-                        int vs = 0, hs = 0;
-                        for (int u = 0; u < 3; u++) {
-                            int vi = d.f[o + u];
-                            int ch = (texc[vi].x < 0) ? -1 : ((texc[vi].x > 1) ? 1 : 0);
-                            int cv = (texc[vi].y < 0) ? -1 : ((texc[vi].y > 1) ? 1 : 0);
-                            boolean diff = false;
-                            if (f) {
-                                hs = ch;
-                                vs = cv;
-                                f = false;
-                            } else {
-                                diff = (hs != ch) || (vs != cv);
-                            }
-                            if (diff || ((ch == 0) && (cv == 0))) {
-                                vf[i] = true;
-                                for (int p = 0; p < 3; p++)
-                                    vv[d.f[o + p]] = true;
-                                break;
-                            }
-                        }
-                    }
-
-                    MeshVertex[] mv = new MeshVertex[d.v.length];
-                    for (int i = 0; i < d.v.length; i++) {
-                        if (!vv[i])
-                            continue;
-                        if ((mv[i] = cv.get(d.v[i])) == null) {
-                            cv.put(d.v[i], mv[i] = new MeshVertex(buf, d.v[i]));
-                            mv[i].pos = mv[i].pos.add((float)((m.ul.x * tilesz.x) - cc.x), (float)(cc.y - (m.ul.y * tilesz.y)), -cz);
-                            ta.set(mv[i], texc[i]);
-                        }
-                    }
-
-                    for (int i = 0, o = 0; i < vf.length; i++, o += 3) {
-                        if (!vf[i])
-                            continue;
-                        buf.new Face(mv[d.f[o]], mv[d.f[o + 1]], mv[d.f[o + 2]]);
-                    }
-                }
-            };
-
             Coord t = new Coord();
             for (t.y = ult.y; t.y < brt.y; t.y++) {
                 for (t.x = ult.x; t.x < brt.x; t.x++) {
                     MapMesh cut = map.getcut(t.div(MCache.cutsz));
                     Tiler tile = map.tiler(map.gettile(t));
-                    tile.lay(cut, t.sub(cut.ul), t, cons, false);
                 }
             }
             mesh = buf.mkmesh();
@@ -478,103 +276,17 @@ public class MapMesh implements Rendered, Disposable {
         public void dispose() {
             mesh.dispose();
         }
-
-        public boolean setup(RenderList rl) {
-            rl.prepc(gmorder);
-            rl.prepc(gmoff);
-            rl.add(mesh, null);
-            return (false);
-        }
-    }
-
-    private static class OLOrder extends MLOrder {
-        OLOrder(int z) {
-            super(z);
-        }
-
-        public int mainz() {
-            return (1002);
-        }
-    }
-
-    public Rendered[] makeols() {
-        final MeshBuf buf = new MeshBuf();
-        final MapSurface ms = data(gnd);
-        final MeshBuf.Vertex[] vl = new MeshBuf.Vertex[ms.vl.length];
-        final haven.Surface.Normals sn = ms.data(haven.Surface.nrm);
-        class Buf implements Tiler.MCons {
-            int[] fl = new int[16];
-            int fn = 0;
-
-            public void faces(MapMesh m, Tiler.MPart d) {
-                for (Vertex v : d.v) {
-                    if (vl[v.vi] == null)
-                        vl[v.vi] = buf.new Vertex(v, sn.get(v));
-                }
-                while (fn + d.f.length > fl.length)
-                    fl = Utils.extend(fl, fl.length * 2);
-                for (int fi : d.f)
-                    fl[fn++] = d.v[fi].vi;
-            }
-        }
-        Coord t = new Coord();
-        int[][] ol = new int[sz.x][sz.y];
-        for (t.y = 0; t.y < sz.y; t.y++) {
-            for (t.x = 0; t.x < sz.x; t.x++) {
-                ol[t.x][t.y] = map.getol(ul.add(t));
-            }
-        }
-        Buf[] bufs = new Buf[32];
-        for (int i = 0; i < bufs.length; i++) {
-            bufs[i] = new Buf();
-            for (t.y = 0; t.y < sz.y; t.y++) {
-                for (t.x = 0; t.x < sz.x; t.x++) {
-                    if ((ol[t.x][t.y] & (1 << i)) != 0) {
-                        Coord gc = t.add(ul);
-                        map.tiler(map.gettile(gc)).lay(this, t, gc, bufs[i], false);
-                    }
-                }
-            }
-        }
-        Rendered[] ret = new Rendered[32];
-        for (int i = 0; i < bufs.length; i++) {
-            if (bufs[i].fn > 0) {
-                int[] fl = bufs[i].fl;
-                int fn = bufs[i].fn;
-                buf.clearfaces();
-                for (int o = 0; o < fn; o += 3)
-                    buf.new Face(vl[fl[o]], vl[fl[o + 1]], vl[fl[o + 2]]);
-                final FastMesh mesh = buf.mkmesh();
-                final int z = i;
-                class OL implements Rendered, Disposable {
-
-                    public void dispose() {
-                        mesh.dispose();
-                    }
-
-                    public boolean setup(RenderList rl) {
-                        rl.prepo(new OLOrder(z));
-                        return (true);
-                    }
-                }
-                ret[i] = new OL();
-            }
-        }
-        return (ret);
     }
 
     private void clean() {
-        texmap = null;
         int on = data.size();
         for (Iterator<Map.Entry<DataID, Object>> i = data.entrySet().iterator(); i.hasNext(); ) {
             Object d = i.next().getValue();
-            if (!(d instanceof ConsHooks) || !((ConsHooks) d).clean())
-                i.remove();
         }
     }
 
     private void consflat() {
-        class Buf implements Tiler.MCons {
+        class Buf {
             int vn = 0, in = 0, vl = sz.x * sz.y * 4;
             float[] pos = new float[vl * 3];
             float[] col = new float[vl * 4];
@@ -609,7 +321,6 @@ public class MapMesh implements Rendered, Disposable {
         for (c.y = 0; c.y < sz.y; c.y++) {
             for (c.x = 0; c.x < sz.x; c.x++) {
                 Coord gc = c.add(ul);
-                map.tiler(map.gettile(gc)).lay(this, c, gc, buf, true);
             }
         }
         float[] pos = buf.pos, col = buf.col;
@@ -617,23 +328,13 @@ public class MapMesh implements Rendered, Disposable {
         if (pos.length != buf.vn * 3) pos = Utils.extend(pos, buf.vn * 3);
         if (col.length != buf.vn * 4) col = Utils.extend(col, buf.vn * 4);
         if (ind.length != buf.in) ind = Utils.extend(ind, buf.in);
-        VertexBuf.VertexArray posa = new VertexBuf.VertexArray(FloatBuffer.wrap(pos));
-        VertexBuf.ColorArray cola = new VertexBuf.ColorArray(FloatBuffer.wrap(col));
         ShortBuffer indb = ShortBuffer.wrap(ind);
         flats = new FastMesh[]{
-                new FastMesh(new VertexBuf(posa), indb),
-                new FastMesh(new VertexBuf(posa, cola), indb),
         };
     }
 
     public void dispose() {
         for (Disposable p : dparts)
             p.dispose();
-    }
-
-    public boolean setup(RenderList rl) {
-        for (Rendered e : extras)
-            rl.add(e, null);
-        return (true);
     }
 }

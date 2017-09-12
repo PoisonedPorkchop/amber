@@ -29,7 +29,6 @@ package haven.glsl;
 import java.util.*;
 
 public class ProgramContext {
-    public final VertexContext vctx;
     public final FragmentContext fctx;
     public final Set<Uniform> uniforms = new HashSet<Uniform>();
     public final Set<Attribute> attribs = new HashSet<Attribute>();
@@ -44,7 +43,6 @@ public class ProgramContext {
     public static final Variable gl_FrontMaterial = new Variable.Implicit(Struct.gl_MaterialParameters, new Symbol.Fix("gl_FrontMaterial"));
 
     public ProgramContext() {
-        vctx = new VertexContext(this);
         fctx = new FragmentContext(this);
     }
 

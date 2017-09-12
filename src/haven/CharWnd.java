@@ -27,7 +27,6 @@
 package haven;
 
 import haven.resutil.Curiosity;
-import haven.resutil.FoodInfo;
 
 import java.awt.*;
 import java.awt.font.TextAttribute;
@@ -166,7 +165,6 @@ public class CharWnd extends Window {
                     GameUI gui = getparent(GameUI.class);
                     if (gui != null)
                         gui.msg(Resource.getLocString(Resource.BUNDLE_MSG, "You gained ") + Loading.waitfor(trev).layer(Event.class).nm, Color.WHITE);
-                    trol = new TexI(mktrol(etr, trev));
                     trtm = System.currentTimeMillis();
                     trev = null;
                 } catch (Loading l) {
@@ -209,7 +207,6 @@ public class CharWnd extends Window {
                     sum += el.a;
                 }
                 cur = ItemInfo.catimgs(0, cur, Text.render(String.format(Resource.getLocString(Resource.BUNDLE_LABEL, "Total: %s/%s"), Utils.odformat2(sum, 2), Utils.odformat(cap, 2))).img);
-                rtip = new TexI(cur);
             }
             return (rtip);
         }
@@ -283,7 +280,6 @@ public class CharWnd extends Window {
                     g.drawImage(convolvedown(img, new Coord(h, h), tflt), 0, 0, null);
                     g.drawImage(rnm.img, h + 5, ((h - rnm.sz().y) / 2) + 1, null);
                     g.dispose();
-                    tt = new TexI(buf);
                 }
                 return (tt);
             }
@@ -1103,7 +1099,6 @@ public class CharWnd extends Window {
                 for (int i = 0; i < cond.length; i++) {
                     Condition c = cond[i];
                     BufferedImage text = ct(c).img;
-                    rcond[i] = new TexI(rasterimg(blurmask2(text.getRaster(), 1, 1, Color.BLACK)));
                 }
                 if (glowon != null) {
                     for (int i = 0; i < this.rcond.length; i++) {
@@ -1124,7 +1119,6 @@ public class CharWnd extends Window {
             }
 
             void update(Condition c) {
-                glow = new TexI(rasterimg(blurmask2(ct(c).img.getRaster(), 3, 2, stcol[c.done])));
                 for (int i = 0; i < ccond.length; i++) {
                     if (ccond[i] == c) {
                         glowon = rcond[i];
@@ -1267,8 +1261,6 @@ public class CharWnd extends Window {
 
     public class CredoGrid extends Scrollport {
         public final Coord crsz = new Coord(70, 88);
-        public final Tex credoufr = new TexI(convolvedown(Resource.loadimg("gfx/hud/chr/yrkirframe"), crsz, iconfilter));
-        public final Tex credosfr = new TexI(convolvedown(Resource.loadimg("gfx/hud/chr/yrkirsframe"), crsz, iconfilter));
         public final Text.Foundry prsf = Text.std;
         public List<Credo> ncr = Collections.emptyList(), ccr = Collections.emptyList();
         public Credo pcr = null;
@@ -1298,8 +1290,6 @@ public class CharWnd extends Window {
         }
 
         private Tex crtex(Credo cr) {
-            if(cr.small == null)
-                cr.small = new TexI(convolvedown(cr.res.get().layer(Resource.imgc).img, crsz, iconfilter));
             return(cr.small);
         }
 

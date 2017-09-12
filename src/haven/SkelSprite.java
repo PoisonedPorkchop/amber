@@ -26,17 +26,16 @@
 
 package haven;
 
-import java.util.*;
-
+import haven.MorphedMesh.Morpher;
 import haven.Skeleton.Pose;
 import haven.Skeleton.PoseMod;
-import haven.MorphedMesh.Morpher;
 
-public class SkelSprite extends Sprite implements Gob.Overlay.CUpd, Skeleton.HasPose {
-    public static final GLState
-            rigid = new Material.Colors(java.awt.Color.GREEN),
-            morphed = new Material.Colors(java.awt.Color.RED),
-            unboned = new Material.Colors(java.awt.Color.YELLOW);
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+
+public class SkelSprite extends Sprite implements Skeleton.HasPose {
     public static boolean bonedb = false;
     public static final float ipollen = 0.3f;
     public final Skeleton skel;
@@ -48,7 +47,6 @@ public class SkelSprite extends Sprite implements Gob.Overlay.CUpd, Skeleton.Has
     private Pose oldpose;
     private float ipold;
     private boolean stat = true;
-    private Rendered[] parts;
 
     public static final Factory fact = new Factory() {
         public Sprite create(Owner owner, Resource res, Message sdt) {
@@ -64,60 +62,10 @@ public class SkelSprite extends Sprite implements Gob.Overlay.CUpd, Skeleton.Has
         pose = skel.new Pose(skel.bindpose);
         pmorph = new PoseMorph(pose);
         int fl = sdt.eom() ? 0xffff0000 : decnum(sdt);
-        chposes(fl, true);
-        chparts(fl);
     }
 
     /* XXX: It's ugly to snoop inside a wrapping, but I can't think of
      * a better way to apply morphing to renderlinks right now. */
-    private Rendered animwrap(GLState.Wrapping wrap) {
-        if (!(wrap.r instanceof FastMesh))
-            return (wrap);
-        FastMesh m = (FastMesh) wrap.r;
-        for (MeshAnim.Anim anim : manims) {
-            if (anim.desc().animp(m)) {
-                Rendered ret = wrap.st().apply(new MorphedMesh(m, mmorph));
-                if (bonedb)
-                    ret = morphed.apply(ret);
-                return (ret);
-            }
-        }
-        Rendered ret;
-        if (PoseMorph.boned(m)) {
-            String bnm = PoseMorph.boneidp(m);
-            if (bnm == null) {
-                ret = wrap.st().apply(new MorphedMesh(m, pmorph));
-                if (bonedb)
-                    ret = morphed.apply(ret);
-            } else {
-                ret = pose.bonetrans2(skel.bones.get(bnm).idx).apply(wrap);
-                if (bonedb)
-                    ret = rigid.apply(ret);
-            }
-        } else {
-            ret = wrap;
-            if (bonedb)
-                ret = unboned.apply(ret);
-        }
-        return (ret);
-    }
-
-    private void chparts(int mask) {
-        Collection<Rendered> rl = new LinkedList<Rendered>();
-        for (FastMesh.MeshRes mr : res.layers(FastMesh.MeshRes.class)) {
-            if ((mr.mat != null) && ((mr.id < 0) || (((1 << mr.id) & mask) != 0)))
-                rl.add(animwrap(mr.mat.get().apply(mr.m)));
-        }
-        for (RenderLink.Res lr : res.layers(RenderLink.Res.class)) {
-            if ((lr.id < 0) || (((1 << lr.id) & mask) != 0)) {
-                Rendered r = lr.l.make();
-                if (r instanceof GLState.Wrapping)
-                    r = animwrap((GLState.Wrapping) r);
-                rl.add(r);
-            }
-        }
-        this.parts = rl.toArray(new Rendered[0]);
-    }
 
     private void rebuild() {
         pose.reset();
@@ -137,7 +85,6 @@ public class SkelSprite extends Sprite implements Gob.Overlay.CUpd, Skeleton.Has
                 anims.add(ar.make());
         }
         this.manims = anims.toArray(new MeshAnim.Anim[0]);
-        this.mmorph = MorphedMesh.combine(this.manims);
     }
 
     private Map<Skeleton.ResPose, PoseMod> modids = new HashMap<Skeleton.ResPose, PoseMod>();
@@ -173,16 +120,6 @@ public class SkelSprite extends Sprite implements Gob.Overlay.CUpd, Skeleton.Has
     }
 
     public void update(Message sdt) {
-        int fl = sdt.eom() ? 0xffff0000 : decnum(sdt);
-        chposes(fl, false);
-        chparts(fl);
-    }
-
-    public boolean setup(RenderList rl) {
-        for (Rendered p : parts)
-            rl.add(p, null);
-    /* rl.add(pose.debug, null); */
-        return (false);
     }
 
     public boolean tick(int idt) {

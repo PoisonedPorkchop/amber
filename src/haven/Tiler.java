@@ -50,7 +50,6 @@ public abstract class Tiler {
         public Surface.Vertex[] v;
         public float[] tcx, tcy;
         public int[] f;
-        public GLState mat = null;
 
         public MPart(Coord lc, Coord gc, Surface.Vertex[] v, float[] tcx, float[] tcy, int[] f) {
             this.lc = lc;
@@ -112,29 +111,12 @@ public abstract class Tiler {
             }
         }
 
-        public GLState mcomb(GLState mat) {
-            return ((this.mat == null) ? mat : (GLState.compose(mat, this.mat)));
-        }
-
         public static final float[] ctcx = {0, 0, 1, 1}, ctcy = {0, 1, 1, 0};
         public static final int[] rdiag = {0, 1, 2, 0, 2, 3}, ldiag = {0, 1, 3, 1, 2, 3};
 
         public static MPart splitquad(Coord lc, Coord gc, Surface.Vertex[] corners, boolean diag) {
             return (new MPart(lc, gc, corners, ctcx, ctcy, diag ? ldiag : rdiag));
         }
-    }
-
-    public static interface MCons {
-        public void faces(MapMesh m, MPart desc);
-
-        public static final MCons nil = new MCons() {
-            public void faces(MapMesh m, MPart desc) {
-            }
-        };
-    }
-
-    public static interface CTrans {
-        public MCons tcons(int z, int bmask, int cmask);
     }
 
     public static interface VertFactory {
@@ -145,59 +127,6 @@ public abstract class Tiler {
                 return (new MeshVertex(buf, d.v[i]));
             }
         };
-    }
-
-    public static class SModel extends MapMesh.Model {
-        private final VertFactory f;
-        private final MeshVertex[] map;
-
-        public SModel(MapMesh m, GLState mat, VertFactory f) {
-            super(m, mat);
-            this.f = f;
-            this.map = new MeshVertex[m.data(MapMesh.gnd).vl.length];
-        }
-
-        public MeshVertex get(MPart d, int i) {
-            MeshVertex ret;
-            if ((ret = map[d.v[i].vi]) == null)
-                ret = map[d.v[i].vi] = f.make(this, d, i);
-            return (ret);
-        }
-
-        public MeshVertex[] get(MPart d) {
-            MeshVertex[] ret = new MeshVertex[d.v.length];
-            for (int i = 0; i < d.v.length; i++)
-                ret[i] = get(d, i);
-            return (ret);
-        }
-
-        public static class Key implements MapMesh.DataID<SModel> {
-            public final GLState mat;
-            public final VertFactory f;
-            private final int hash;
-
-            public Key(GLState mat, VertFactory f) {
-                this.mat = mat;
-                this.f = f;
-                this.hash = (mat.hashCode() * 31) + f.hashCode();
-            }
-
-            public int hashCode() {
-                return (hash);
-            }
-
-            public boolean equals(Object x) {
-                return ((x instanceof Key) && mat.equals(((Key) x).mat) && f.equals(((Key) x).f));
-            }
-
-            public SModel make(MapMesh m) {
-                return (new SModel(m, mat, f));
-            }
-        }
-
-        public static SModel get(MapMesh m, GLState mat, VertFactory f) {
-            return (m.data(new Key(mat, f)));
-        }
     }
 
     public static void flatmodel(MapMesh m, Coord lc) {
@@ -221,19 +150,6 @@ public abstract class Tiler {
 
     public void model(MapMesh m, Random rnd, Coord lc, Coord gc) {
         flatmodel(m, lc);
-    }
-
-    public void lay(MapMesh m, Coord lc, Coord gc, MCons cons, boolean cover) {
-        MapMesh.MapSurface s = m.data(m.gnd);
-        cons.faces(m, MPart.splitquad(lc, gc, s.fortilea(lc), s.split[s.ts.o(lc)]));
-    }
-
-    public abstract void lay(MapMesh m, Random rnd, Coord lc, Coord gc);
-
-    public abstract void trans(MapMesh m, Random rnd, Tiler gt, Coord lc, Coord gc, int z, int bmask, int cmask);
-
-    public GLState drawstate(Glob glob, GLConfig cfg, Coord3f c) {
-        return (null);
     }
 
     public static class FactMaker implements Resource.PublishedCode.Instancer {

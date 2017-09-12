@@ -41,8 +41,4 @@ public abstract class GAttrib {
 
     public void dispose() {
     }
-
-    public Object staticp() {
-	return(Rendered.CONSTANS);
-    }
 }

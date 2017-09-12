@@ -210,28 +210,6 @@ public class FightWnd extends Widget {
             return num;
         }
 
-        protected void drawbg(GOut g) {
-        }
-
-        protected void drawitem(GOut g, Action act, int idx) {
-            g.chcolor((idx % 2 == 0) ? CharWnd.every : CharWnd.other);
-            g.frect(Coord.z, g.sz);
-            g.chcolor();
-            try {
-                if (act.ri == null)
-                    act.ri = new TexI(PUtils.convolvedown(act.res.get().layer(Resource.imgc).img, new Coord(itemh, itemh), CharWnd.iconfilter));
-                g.image(act.ri, Coord.z);
-            } catch (Loading l) {
-                g.image(WItem.missing.layer(Resource.imgc).tex(), Coord.z, new Coord(itemh, itemh));
-            }
-            int ty = (itemh - act.rnm.sz().y) / 2;
-            g.image(act.rnm.tex(), new Coord(itemh + 2, ty));
-
-            if (act.ra == null)
-                act.ra = Text.num12boldFnd.render(String.valueOf(act.a));
-            g.aimage(act.ra.tex(), new Coord(sz.x - 15, ty), 1.0, 0.0);
-        }
-
         public void change(final Action act) {
             if (act != null)
                 info.settext(new Indir<String>() {
@@ -356,61 +334,6 @@ public class FightWnd extends Widget {
                     keysftex[i] = keystex[i];
                 else
                     keysftex[i] = Text.render(FightWnd.keysf[i - 5]).tex();
-            }
-        }
-
-        public void draw(GOut g) {
-            int pcy = invsq.sz().y + 4;
-
-            int[] reo;
-            if (anim) {
-                reo = new int[order.length];
-                for (int i = 0, a = 0, b = order.length - 1; i < order.length; i++) {
-                    if (animoff[i] == null)
-                        reo[a++] = i;
-                    else
-                        reo[b--] = i;
-                }
-            }
-
-            for(int i = 0; i < order.length; i++) {
-                Coord c = itemc(i);
-                g.image(invsq, c);
-                Action act = order[i];
-                try {
-                    if(act != null) {
-                        Coord ic = c.add(1, 1);
-                        if (animoff[i] != null)
-                            ic = ic.add(animoff[i].mul(Math.pow(1.0 - animpr[i], 3)));
-
-                        g.image(act.res.get().layer(Resource.imgc).tex(), ic);
-
-                        if (act.ru == null)
-                            act.ru = Text.num12boldFnd.render(String.format("%d/%d", act.u, act.a));
-
-                        g.image(act.ru.tex(), c.add(invsq.sz().x / 2 - act.ru.sz().x / 2, pcy));
-                        g.chcolor();
-
-                        g.image(sub[subp == i ? 1 : 0], c.add(subOffX, subOffY));
-                        g.image(add[addp == i ? 1 : 0], c.add(addOffX, subOffY));
-                    }
-                } catch(Loading l) {}
-                g.chcolor(156, 180, 158, 255);
-                g.aimage(Config.combatkeys == 0 ? keystex[i] : keysftex[i], c.add(invsq.sz().sub(2, 0)), 1, 1);
-                g.chcolor();
-            }
-
-            g.image(count, new Coord(370, pcy));
-
-            if((drag != null) && (dp == null)) {
-                try {
-                    final Tex dt = drag.res.get().layer(Resource.imgc).tex();
-                    ui.drawafter(new UI.AfterDraw() {
-                        public void draw(GOut g) {
-                            g.image(dt, ui.mc.add(dt.sz().div(2).inv()));
-                        }
-                    });
-                } catch(Loading l) {}
             }
         }
 

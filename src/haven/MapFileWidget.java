@@ -153,7 +153,6 @@ public class MapFileWidget extends Widget {
             if(grid != cgrid) {
                 if(img != null)
                     img.cancel();
-                img = Defer.later(() -> new TexI(grid.render(sc.mul(cmaps.div(scalef())))));
                 cgrid = grid;
             }
             return((img == null)?null:img.get());
@@ -181,33 +180,6 @@ public class MapFileWidget extends Widget {
             this.tip = Text.render(m.nm);
             if(marker instanceof PMarker)
                 this.hit = Area.sized(flagcc.inv(), flagbg.sz);
-        }
-
-        public void draw(GOut g, Coord c) {
-            if(m instanceof PMarker) {
-                Coord ul = c.sub(flagcc);
-                g.chcolor(((PMarker)m).color);
-                g.image(flagfg, ul);
-                g.chcolor();
-                g.image(flagbg, ul);
-            } else if(m instanceof SMarker) {
-                SMarker sm = (SMarker)m;
-                try {
-                    if(cc == null) {
-                        Resource res = MapFile.loadsaved(Resource.remote(), sm.res);
-                        img = res.layer(Resource.imgc);
-                        Resource.Neg neg = res.layer(Resource.negc);
-                        cc = (neg != null)?neg.cc:img.sz.div(2);
-                        if(hit == null)
-                            hit = Area.sized(cc.inv(), img.sz);
-                    }
-                } catch(Loading l) {
-                } catch(Exception e) {
-                    cc = Coord.z;
-                }
-                if(img != null)
-                    g.image(img, c.sub(cc));
-            }
         }
     }
 
@@ -252,43 +224,6 @@ public class MapFileWidget extends Widget {
         if((curloc == null) || (curloc.seg != loc.seg))
             return(null);
         return(loc.tc.add(sz.div(2)).sub(curloc.tc));
-    }
-
-    public void draw(GOut g) {
-        Location loc = this.curloc;
-        if(loc == null)
-            return;
-        Coord hsz = sz.div(2);
-        redisplay(loc);
-        if(file.lock.readLock().tryLock()) {
-            try {
-                for(Coord c : dext) {
-                    if(display[dext.ri(c)] == null)
-                        display[dext.ri(c)] = new DisplayGrid(loc.seg, c, loc.seg.grid(c));
-                }
-            } finally {
-                file.lock.readLock().unlock();
-            }
-        }
-        for(Coord c : dext) {
-            Tex img;
-            try {
-                DisplayGrid disp = display[dext.ri(c)];
-                if((disp == null) || ((img = disp.img()) == null))
-                    continue;
-            } catch(Loading l) {
-                continue;
-            }
-            Coord ul = hsz.add(c.mul(cmaps.div(scalef()))).sub(loc.tc);
-            g.image(img, ul, cmaps.div(scalef()));
-        }
-        if((markers == null) || (file.markerseq != markerseq))
-            remark(loc, dext);
-        if(markers != null) {
-            for(DisplayMarker mark : markers) {
-                mark.draw(g, hsz.sub(loc.tc).add(mark.m.tc.div(scalef())));
-            }
-        }
     }
 
     public void dumpTiles() {

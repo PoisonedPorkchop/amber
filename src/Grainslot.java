@@ -1,14 +1,4 @@
-import haven.Button;
-import haven.Coord;
-import haven.DTarget;
-import haven.GOut;
-import haven.Indir;
-import haven.Inventory;
-import haven.Label;
-import haven.Loading;
-import haven.Resource;
-import haven.Tex;
-import haven.Widget;
+import haven.*;
 
 public class Grainslot extends Widget implements DTarget {
     public final Label lbl;
@@ -25,21 +15,6 @@ public class Grainslot extends Widget implements DTarget {
 
     public static Widget mkwidget(Widget var0, Object... var1) {
         return new Grainslot();
-    }
-
-    public void draw(GOut var1) {
-        int var2 = (this.sz.y - Inventory.invsq.sz().y) / 2;
-        var1.image(Inventory.invsq, new Coord(var2, var2));
-        if (this.icon != null) {
-            try {
-                if (this.iconc == null) {
-                    this.iconc = this.icon.get().layer(Resource.imgc).tex();
-                }
-
-                var1.image(this.iconc, new Coord(var2 + 1, var2 + 1));
-            } catch (Loading var4) {
-            }
-        }
     }
 
     public boolean mousedown(Coord var1, int var2) {

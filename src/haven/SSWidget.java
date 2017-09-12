@@ -39,10 +39,6 @@ public class SSWidget extends Widget {
         surf = new TexIM(sz);
     }
 
-    public void draw(GOut g) {
-        g.image(surf, Coord.z);
-    }
-
     public Graphics graphics() {
         Graphics g = surf.graphics();
         return (g);

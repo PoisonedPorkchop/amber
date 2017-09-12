@@ -96,26 +96,6 @@ public class Polity extends Widget {
 
         private int aseq = -1;
         private Tex rauth = null;
-
-        public void draw(GOut g) {
-            synchronized (Polity.this) {
-                g.chcolor(0, 0, 0, 255);
-                g.frect(new Coord(0, 0), new Coord(sz.x, sz.y));
-                g.chcolor(128, 0, 0, 255);
-                g.frect(new Coord(1, 1), new Coord(((sz.x - 2) * auth) / ((acap == 0) ? 1 : acap), sz.y - 2));
-                g.chcolor();
-                if ((rauth != null) && (aseq != Polity.this.aseq)) {
-                    rauth.dispose();
-                    rauth = null;
-                    aseq = Polity.this.aseq;
-                }
-                if (rauth == null) {
-                    Color col = offline ? Color.RED : Color.WHITE;
-                    rauth = new TexI(Utils.outline2(Text.render(String.format("%s/%s", auth, acap), col).img, Utils.contrast(col)));
-                }
-                g.aimage(rauth, sz.div(2), 0.5, 0.5);
-            }
-        }
     }
 
     public void uimsg(String msg, Object... args) {

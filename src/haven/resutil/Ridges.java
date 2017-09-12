@@ -26,19 +26,17 @@
 
 package haven.resutil;
 
-import java.util.*;
-
 import haven.*;
 import haven.MapMesh.Scan;
-import haven.MapMesh.Model;
 import haven.Surface.Vertex;
 import haven.Tiler.MPart;
-import haven.Tiler.SModel;
-import haven.Tiler.VertFactory;
-import haven.Surface.MeshVertex;
+
+import java.util.Arrays;
+import java.util.Random;
+
 import static haven.Utils.clip;
 
-public class Ridges extends MapMesh.Hooks {
+public class Ridges {
     public static final MapMesh.DataID<Ridges> id = MapMesh.makeid(Ridges.class);
     public static final int segh = 8;
     public final MapMesh m;
@@ -648,66 +646,17 @@ public class Ridges extends MapMesh.Hooks {
         }
     }
 
-    static final Tiler.MCons testcons = new Tiler.MCons() {
-        GLState mat = GLState.compose(new Material.Colors(new java.awt.Color(255, 255, 255)), States.vertexcolor, Light.deflight);
-
-        public void faces(MapMesh m, MPart mdesc) {
-            RPart desc = (RPart) mdesc;
-            Model mod = Model.get(m, mat);
-            MeshBuf.Col col = mod.layer(MeshBuf.col);
-            MeshVertex[] v = new MeshVertex[desc.v.length];
-            for (int i = 0; i < desc.v.length; i++) {
-                v[i] = new MeshVertex(mod, desc.v[i]);
-                col.set(v[i], new java.awt.Color((int) (255 * desc.rcx[i]), (int) (255 * desc.rcy[i]), 0));
-            }
-            int[] f = desc.f;
-            for (int i = 0; i < f.length; i += 3)
-                mod.new Face(v[f[i]], v[f[i + 1]], v[f[i + 2]]);
-        }
-    };
-
-    public static class TexCons implements Tiler.MCons {
-        public final GLState mat;
-        public final float texh;
-
-        public TexCons(GLState mat, float texh) {
-            this.mat = mat;
-            this.texh = texh;
-        }
-
-        public void faces(MapMesh m, MPart mdesc) {
-            RPart desc = (RPart) mdesc;
-            Model mod = Model.get(m, mat);
-            MeshBuf.Tex tex = mod.layer(MeshBuf.tex);
-            int[] trn = new int[desc.rh.length];
-            float zf = 1.0f / texh;
-            for (int i = 0; i < trn.length; i++)
-                trn[i] = Math.max((int) ((desc.rh[i] + (texh * 0.5f)) * zf), 1);
-            MeshVertex[] v = new MeshVertex[desc.v.length];
-            for (int i = 0; i < desc.v.length; i++) {
-                v[i] = new MeshVertex(mod, desc.v[i]);
-        /* tex.set(v[i], new Coord3f(desc.rcx[i], desc.v[i].z * zf, 0)); */
-                tex.set(v[i], new Coord3f(desc.rcx[i], desc.rcy[i] * trn[desc.rn[i]], 0));
-            }
-            int[] f = desc.f;
-            for (int i = 0; i < f.length; i += 3)
-                mod.new Face(v[f[i]], v[f[i + 1]], v[f[i + 2]]);
-        }
-    }
-
-    public boolean laygnd(Coord tc, Tiler.MCons cons) {
+    public boolean laygnd(Coord tc) {
         MPart gnd = this.gnd[ms.ts.o(tc)];
         if (gnd == null)
             return (false);
-        cons.faces(m, gnd);
         return (true);
     }
 
-    public boolean layridge(Coord tc, Tiler.MCons cons) {
+    public boolean layridge(Coord tc) {
         MPart ridge = this.ridge[ms.ts.o(tc)];
         if (ridge == null)
             return (false);
-        cons.faces(m, ridge);
         return (true);
     }
 

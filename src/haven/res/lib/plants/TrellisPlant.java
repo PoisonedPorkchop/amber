@@ -39,7 +39,6 @@ public class TrellisPlant implements Factory {
             CSprite cs = new CSprite(owner, res);
             if (Config.simplecrops) {
                 MeshRes mesh = (MeshRes)meshes.get(0);
-                cs.addpart(0, 0, mesh.mat.get(), mesh.m);
             } else {
                 double var4 = -((Gob)owner).a;
                 float var6 = (float)Math.cos(var4);
@@ -50,7 +49,6 @@ public class TrellisPlant implements Factory {
 
                 for(int var14 = 0; var14 < this.num; ++var14) {
                     MeshRes mesh = (MeshRes)meshes.get(var16.nextInt(meshes.size()));
-                    cs.addpart(var13 * var7, var13 * var6, mesh.mat.get(), mesh.m);
                     var13 += var12;
                 }
             }

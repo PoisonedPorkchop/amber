@@ -26,20 +26,21 @@
 
 package haven;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
-import java.awt.image.DataBufferByte;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
-import java.awt.Graphics2D;
 
 public class TexIM extends TexI {
     WritableRaster buf;
     Graphics2D cg = null;
     Throwable cgc;
+    Coord tdim;
 
     public TexIM(Coord sz) {
         super(sz);
+        tdim = new Coord(nextp2(sz.x), nextp2(sz.y));
         clear();
     }
 
@@ -53,7 +54,6 @@ public class TexIM extends TexI {
     public void update() {
         cg.dispose();
         cg = null;
-        dispose();
     }
 
     public void clear() {

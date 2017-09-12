@@ -27,14 +27,15 @@
 package haven.rs;
 
 import haven.*;
-
-import java.util.*;
-import java.io.*;
-import java.awt.Color;
-import java.awt.image.BufferedImage;
-
 import haven.Composited.ED;
 import haven.Composited.MD;
+
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 public class AvaRender {
     public static Composited compose(Resource base, List<MD> mod, List<ED> equ) {
@@ -53,14 +54,10 @@ public class AvaRender {
 
     public static BufferedImage render(Coord sz, Indir<Resource> base, String camnm, List<MD> mod, List<ED> equ) throws InterruptedException {
         Composited tcomp;
-        Camera tcam;
         while (true) {
             try {
                 Skeleton.BoneOffset camoff = base.get().layer(Skeleton.BoneOffset.class, camnm);
                 tcomp = compose(base.get(), mod, equ);
-                GLState.Buffer buf = new GLState.Buffer(null);
-                camoff.forpose(tcomp.pose).prep(buf);
-                tcam = new LocationCam(buf.get(PView.loc));
                 break;
             } catch (Loading ev) {
                 ev.waitfor();

@@ -26,12 +26,9 @@
 
 package haven;
 
-import haven.resutil.BPRadSprite;
-
-import java.awt.*;
 import java.util.*;
 
-public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered {
+public class Gob implements Sprite.Owner, Skeleton.ModOwner{
     public Coord2d rc;
     public Coord sc;
     public Coord3f sczu;
@@ -41,27 +38,10 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered {
     public int frame;
     public final Glob glob;
     Map<Class<? extends GAttrib>, GAttrib> attr = new HashMap<Class<? extends GAttrib>, GAttrib>();
-    public Collection<Overlay> ols = new LinkedList<Overlay>() {
-        public boolean add(Overlay item) {
-	        /* XXX: Remove me once local code is changed to use addol(). */
-            if(glob.oc.getgob(id) != null) {
-                // FIXME: extend ols with a method for adding sprites without triggering changed.
-                if (item.id != Sprite.GROWTH_STAGE_ID && item != animalradius)
-                    glob.oc.changed(Gob.this);
-            }
-            return(super.add(item));
-        }
-    };
 
     private final Collection<ResAttr.Cell<?>> rdata = new LinkedList<ResAttr.Cell<?>>();
     private final Collection<ResAttr.Load> lrdata = new LinkedList<ResAttr.Load>();
     private int cropstgmaxval = 0;
-    private Overlay gobpath = null;
-    private Overlay bowvector = null;
-    private static final Material.Colors dframeEmpty = new Material.Colors(new Color(87, 204, 73, 255));
-    private static final Material.Colors dframeDone = new Material.Colors(new Color(209, 42, 42, 255));
-    private static final Material.Colors potDOne = new Material.Colors(new Color(0, 0, 0, 255));
-    private static final Gob.Overlay animalradius = new Gob.Overlay(new BPRadSprite(100.0F, -10.0F, BPRadSprite.smatDanger));
     public Boolean knocked = null;  // knocked will be null if pose update request hasn't been received yet
     public Type type = null;
 
@@ -81,59 +61,6 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered {
             if (g == null)
                 return false;
             return (value & g.value) != 0;
-        }
-    }
-
-    public static class Overlay implements Rendered {
-        public Indir<Resource> res;
-        public MessageBuf sdt;
-        public Sprite spr;
-        public int id;
-        public boolean delign = false;
-
-        public Overlay(int id, Indir<Resource> res, Message sdt) {
-            this.id = id;
-            this.res = res;
-            this.sdt = new MessageBuf(sdt);
-            spr = null;
-        }
-
-        public Overlay(Sprite spr) {
-            this.id = -1;
-            this.res = null;
-            this.sdt = null;
-            this.spr = spr;
-        }
-
-        public Overlay(int id, Sprite spr) {
-            this.id = id;
-            this.res = null;
-            this.sdt = null;
-            this.spr = spr;
-        }
-
-        public static interface CDel {
-            public void delete();
-        }
-
-        public static interface CUpd {
-            public void update(Message sdt);
-        }
-
-        public static interface SetupMod {
-            public void setupgob(GLState.Buffer buf);
-
-            public void setupmain(RenderList rl);
-        }
-
-        public boolean setup(RenderList rl) {
-            if (spr != null)
-                rl.add(spr, null);
-            return (false);
-        }
-
-        public Object staticp() {
-            return((spr == null)?null:spr.staticp());
         }
     }
 
@@ -210,7 +137,6 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered {
         this.rc = c;
         this.id = id;
         this.frame = frame;
-        loc.tick();
     }
 
     public Gob(Glob glob, Coord2d c) {
@@ -224,38 +150,11 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered {
     public void ctick(int dt) {
         for (GAttrib a : attr.values())
             a.ctick(dt);
-        for (Iterator<Overlay> i = ols.iterator(); i.hasNext(); ) {
-            Overlay ol = i.next();
-            if (ol.spr == null) {
-                try {
-                    ol.spr = Sprite.create(this, ol.res.get(), ol.sdt.clone());
-                } catch (Loading e) {
-                }
-            } else {
-                boolean done = ol.spr.tick(dt);
-                if ((!ol.delign || (ol.spr instanceof Overlay.CDel)) && done)
-                    i.remove();
-            }
-        }
-        if (virtual && ols.isEmpty())
+        if (virtual)
             glob.oc.remove(id);
     }
 
     /* Intended for local code. Server changes are handled via OCache. */
-    public void addol(Overlay ol) {
-        ols.add(ol);
-    }
-    public void addol(Sprite ol) {
-        addol(new Overlay(ol));
-    }
-
-    public Overlay findol(int id) {
-        for (Overlay ol : ols) {
-            if (ol.id == id)
-                return (ol);
-        }
-        return (null);
-    }
 
     public void tick() {
         for (GAttrib a : attr.values())
@@ -310,14 +209,12 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered {
         Class<? extends GAttrib> ac = attrclass(a.getClass());
         attr.put(ac, a);
 
-        if (Config.showplayerpaths && gobpath == null && a instanceof LinMove) {
+        if (Config.showplayerpaths && a instanceof LinMove) {
             Gob pl = glob.oc.getgob(MapView.plgob);
             if (pl != null) {
                 Following follow = pl.getattr(Following.class);
                 if (pl == this ||
                         (follow != null && follow.tgt() == this)) {
-                    gobpath = new Overlay(new GobPath(this));
-                    ols.add(gobpath);
                 }
             }
         }
@@ -332,11 +229,6 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered {
 
     public void delattr(Class<? extends GAttrib> c) {
         attr.remove(attrclass(c));
-        if (attrclass(c) == Moving.class && gobpath != null) {
-            ols.remove(gobpath);
-            gobpath = null;
-            MapView.pllastcc = null;
-        }
     }
 
     private Class<? extends ResAttr> rattrclass(Class<? extends ResAttr> cl) {
@@ -484,189 +376,8 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered {
             type = Type.OTHER;
     }
 
-    public boolean setup(RenderList rl) {
-        loc.tick();
-        for (Overlay ol : ols)
-            rl.add(ol, null);
-        for (Overlay ol : ols) {
-            if (ol.spr instanceof Overlay.SetupMod)
-                ((Overlay.SetupMod) ol.spr).setupmain(rl);
-        }
-        final GobHealth hlt = getattr(GobHealth.class);
-        if (hlt != null)
-            rl.prepc(hlt.getfx());
-
-        if (MapView.markedGobs.contains(id))
-            rl.prepc(MapView.markedFx);
-
-        if (Config.showdframestatus && type == Type.DFRAME) {
-            boolean done = true;
-            boolean empty = true;
-            for (Overlay ol : ols) {
-                try {
-                    Indir<Resource> olires = ol.res;
-                    if (olires != null) {
-                        empty = false;
-                        Resource olres = olires.get();
-                        if (olres != null) {
-                            if (olres.name.endsWith("-blood") || olres.name.endsWith("-windweed")) {
-                                done = false;
-                                break;
-                            }
-                        }
-                    }
-                } catch (Loading l) {
-                }
-            }
-            if (done && !empty)
-                rl.prepc(dframeDone);
-            else if (empty)
-                rl.prepc(dframeEmpty);
-        }
-
-        if (Config.highlightpots && type == Type.GARDENPOT && ols.size() == 2)
-            rl.prepc(potDOne);
-
-        GobHighlight highlight = getattr(GobHighlight.class);
-        if (highlight != null) {
-            if (highlight.cycle <= 0)
-                delattr(GobHighlight.class);
-            else
-                rl.prepc(highlight.getfx());
-        }
-
-        Drawable d = getattr(Drawable.class);
-        if (d != null) {
-            if (Config.hidegobs && (type == Type.TREE || type == Type.BUSH)) {
-                GobHitbox.BBox bbox = GobHitbox.getBBox(this, true);
-                if (bbox != null) {
-                    rl.add(new Overlay(new GobHitbox(this, bbox.a, bbox.b, true)), null);
-                }
-            } else {
-                d.setup(rl);
-            }
-
-            if (Config.showboundingboxes) {
-                GobHitbox.BBox bbox = GobHitbox.getBBox(this, true);
-                if (bbox != null)
-                    rl.add(new Overlay(new GobHitbox(this, bbox.a, bbox.b, false)), null);
-            }
-
-            if (Config.showplantgrowstage) {
-                if (Type.PLANT.has(type)) {
-                    int stage = getattr(ResDrawable.class).sdt.peekrbuf(0);
-                    if (cropstgmaxval == 0) {
-                        for (FastMesh.MeshRes layer : getres().layers(FastMesh.MeshRes.class)) {
-                            int stg = layer.id / 10;
-                            if (stg > cropstgmaxval)
-                                cropstgmaxval = stg;
-                        }
-                    }
-                    Overlay ol = findol(Sprite.GROWTH_STAGE_ID);
-                    if (ol == null && (stage == cropstgmaxval || stage > 0 && stage < 6)) {
-                        addol(new Gob.Overlay(Sprite.GROWTH_STAGE_ID, new PlantStageSprite(stage, cropstgmaxval, type == Type.MULTISTAGE_PLANT)));
-                    } else if (stage <= 0 || (stage != cropstgmaxval && stage >= 6)) {
-                        ols.remove(ol);
-                    } else if (((PlantStageSprite) ol.spr).stg != stage) {
-                        ((PlantStageSprite) ol.spr).update(stage, cropstgmaxval);
-                    }
-                }
-
-                if (type == Type.TREE || type == Type.BUSH) {
-                    ResDrawable rd = getattr(ResDrawable.class);
-                    if (rd != null && !rd.sdt.eom()) {
-                        final int stage = rd.sdt.peekrbuf(0);
-                        if (stage >= 0 && stage < 100) {
-                            Overlay ol = findol(Sprite.GROWTH_STAGE_ID);
-                            if (ol == null) {
-                                addol(new Gob.Overlay(Sprite.GROWTH_STAGE_ID, new TreeStageSprite(stage)));
-                            } else if (((TreeStageSprite)ol.spr).val != stage) {
-                                ((TreeStageSprite)ol.spr).update(stage);
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (Config.showanimalrad && Type.MOB.has(type)) {
-                boolean hasradius = ols.contains(animalradius);
-                if ((knocked == null || knocked == Boolean.FALSE) && !hasradius)
-                    ols.add(animalradius);
-                else if (knocked == Boolean.TRUE && hasradius)
-                    ols.remove(animalradius);
-            }
-
-            if (Config.showarchvector && type == Type.PLAYER && d instanceof Composite) {
-                boolean targetting = false;
-
-                Gob followGob = null;
-                Moving moving = getattr(Moving.class);
-                if (moving != null && moving instanceof Following)
-                    followGob = ((Following)moving).tgt();
-
-                for (Composited.ED ed : ((Composite) d).comp.cequ) {
-                    try {
-                        Resource res = ed.res.res.get();
-                        if (res != null && res.name.endsWith("huntersbow") && ed.res.sdt.peekrbuf(0) == 5) {
-                            targetting = true;
-                            if (bowvector == null) {
-                                bowvector = new Overlay(new GobArcheryVector(this, followGob));
-                                ols.add(bowvector);
-                            }
-                            break;
-                        }
-                    } catch (Loading l) {
-                    }
-                }
-
-                if (!targetting && bowvector != null) {
-                    ols.remove(bowvector);
-                    bowvector = null;
-                }
-            }
-        }
-        Speaking sp = getattr(Speaking.class);
-        KinInfo ki = getattr(KinInfo.class);
-        if (ki != null)
-            rl.add(ki.fx, null);
-        return (false);
-    }
-
     private static final Object DYNAMIC = new Object();
     private Object seq = null;
-    public Object staticp() {
-        if(seq == null) {
-            int rs = 0;
-            for(GAttrib attr : attr.values()) {
-                Object as = attr.staticp();
-                if(as == Rendered.CONSTANS) {
-                } else if(as instanceof Static) {
-                } else if(as == SemiStatic.class) {
-                    rs = Math.max(rs, 1);
-                } else {
-                    rs = 2;
-                    break;
-                }
-            }
-            for(Overlay ol : ols) {
-                Object os = ol.staticp();
-                if(os == Rendered.CONSTANS) {
-                } else if(os instanceof Static) {
-                } else if(os == SemiStatic.class) {
-                    rs = Math.max(rs, 1);
-                } else {
-                    rs = 2;
-                    break;
-                }
-            }
-            switch(rs) {
-                case 0: seq = new Static(); break;
-                case 1: seq = new SemiStatic(); break;
-                default: seq = null; break;
-            }
-        }
-        return((seq == DYNAMIC)?null:seq);
-    }
 
     void changed() {
         seq = null;
@@ -694,69 +405,6 @@ public class Gob implements Sprite.Owner, Skeleton.ModOwner, Rendered {
             return (0);
         return (m.getv());
     }
-
-    public final GLState olmod = new GLState() {
-        public void apply(GOut g) {
-        }
-
-        public void unapply(GOut g) {
-        }
-
-        public void prep(Buffer buf) {
-            for (Overlay ol : ols) {
-                if (ol.spr instanceof Overlay.SetupMod) {
-                    ((Overlay.SetupMod) ol.spr).setupgob(buf);
-                }
-            }
-        }
-    };
-
-    public class Save extends GLState.Abstract {
-        public Matrix4f cam = new Matrix4f(), wxf = new Matrix4f(),
-                mv = new Matrix4f();
-        public Projection proj = null;
-        boolean debug = false;
-
-        public void prep(Buffer buf) {
-            mv.load(cam.load(buf.get(PView.cam).fin(Matrix4f.id))).mul1(wxf.load(buf.get(PView.loc).fin(Matrix4f.id)));
-            Projection proj = buf.get(PView.proj);
-            PView.RenderState wnd = buf.get(PView.wnd);
-            Coord3f s = proj.toscreen(mv.mul4(Coord3f.o), wnd.sz());
-            Gob.this.sc = new Coord(s);
-            Gob.this.sczu = proj.toscreen(mv.mul4(Coord3f.zu), wnd.sz()).sub(s);
-            this.proj = proj;
-        }
-    }
-
-    public final Save save = new Save();
-
-    public class GobLocation extends GLState.Abstract {
-        private Coord3f c = null;
-        private double a = 0.0;
-        private Matrix4f update = null;
-        private final Location xl = new Location(Matrix4f.id, "gobx"), rot = new Location(Matrix4f.id, "gob");
-
-        public void tick() {
-            try {
-                Coord3f c = getc();
-                c.y = -c.y;
-                if (Config.disableelev)
-                    c.z = 0;
-                if ((this.c == null) || !c.equals(this.c))
-                    xl.update(Transform.makexlate(new Matrix4f(), this.c = c));
-                if (this.a != Gob.this.a)
-                    rot.update(Transform.makerot(new Matrix4f(), Coord3f.zu, (float) -(this.a = Gob.this.a)));
-            } catch (Loading l) {
-            }
-        }
-
-        public void prep(Buffer buf) {
-            xl.prep(buf);
-            rot.prep(buf);
-        }
-    }
-
-    public final GobLocation loc = new GobLocation();
 
     public boolean isplayer() {
         return MapView.plgob == id;

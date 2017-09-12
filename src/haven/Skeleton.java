@@ -264,75 +264,6 @@ public class Skeleton {
             }
         }
 
-        public Location bonetrans(final int bone) {
-            return (new Location(Matrix4f.identity()) {
-                private int cseq = -1;
-
-                public Matrix4f fin(Matrix4f p) {
-                    if (cseq != seq) {
-                        Matrix4f xf = Transform.makexlate(new Matrix4f(), new Coord3f(gpos[bone][0], gpos[bone][1], gpos[bone][2]));
-                        if (grot[bone][0] < 0.999999) {
-                            float ang = (float) (Math.acos(grot[bone][0]) * 2.0);
-                            xf = xf.mul1(Transform.makerot(new Matrix4f(), new Coord3f(grot[bone][1], grot[bone][2], grot[bone][3]).norm(), ang));
-                        }
-                        update(xf);
-                        cseq = seq;
-                    }
-                    return (super.fin(p));
-                }
-            });
-        }
-
-        public Location bonetrans2(final int bone) {
-            return (new Location(Matrix4f.identity()) {
-                private int cseq = -1;
-                private float[] pos = new float[3], rot = new float[4];
-
-                public Matrix4f fin(Matrix4f p) {
-                    if (cseq != seq) {
-                        rot = qqmul(rot, grot[bone], qinv(rot, bindpose.grot[bone]));
-                        pos = vvadd(pos, gpos[bone], vqrot(pos, vinv(pos, bindpose.gpos[bone]), rot));
-                        Matrix4f xf = Transform.makexlate(new Matrix4f(), new Coord3f(pos[0], pos[1], pos[2]));
-                        if (rot[0] < 0.999999) {
-                            float ang = (float) (Math.acos(rot[0]) * 2.0);
-                            xf = xf.mul1(Transform.makerot(new Matrix4f(), new Coord3f(rot[1], rot[2], rot[3]).norm(), ang));
-                        }
-                        update(xf);
-                        cseq = seq;
-                    }
-                    return (super.fin(p));
-                }
-            });
-        }
-
-        public class BoneAlign extends Location {
-            private final Coord3f ref;
-            private final int orig, tgt;
-            private int cseq = -1;
-
-            public BoneAlign(Coord3f ref, Bone orig, Bone tgt) {
-                super(Matrix4f.identity());
-                this.ref = ref;
-                this.orig = orig.idx;
-                this.tgt = tgt.idx;
-            }
-
-            public Matrix4f fin(Matrix4f p) {
-                if (cseq != seq) {
-                    Coord3f cur = new Coord3f(gpos[tgt][0] - gpos[orig][0], gpos[tgt][1] - gpos[orig][1], gpos[tgt][2] - gpos[orig][2]).norm();
-                    Coord3f axis = cur.cmul(ref).norm();
-                    float ang = (float) Math.acos(cur.dmul(ref));
-		    /*
-		    System.err.println(cur + ", " + ref + ", " + axis + ", " + ang);
-		    */
-                    update(Transform.makexlate(new Matrix4f(), new Coord3f(gpos[orig][0], gpos[orig][1], gpos[orig][2]))
-                            .mul1(Transform.makerot(new Matrix4f(), axis, -ang)));
-                    cseq = seq;
-                }
-                return (super.fin(p));
-            }
-        }
-
         public void boneoff(int bone, float[] offtrans) {
 	    /* It would be nice if these "new float"s get
 	     * stack-allocated. */
@@ -363,14 +294,6 @@ public class Skeleton {
             offtrans[9] = yz + xw;
         }
 
-        public final Rendered debug = new Rendered() {
-
-            public boolean setup(RenderList rl) {
-                rl.prepo(States.vertexcolor);
-                rl.prepo(States.xray);
-                return (true);
-            }
-        };
     }
 
     public interface HasPose {
@@ -825,13 +748,11 @@ public class Skeleton {
         public static class SpawnSprite extends Event {
             public final Indir<Resource> res;
             public final byte[] sdt;
-            public final Location loc;
 
-            public SpawnSprite(float time, Indir<Resource> res, byte[] sdt, Location loc) {
+            public SpawnSprite(float time, Indir<Resource> res, byte[] sdt) {
                 super(time);
                 this.res = res;
                 this.sdt = (sdt == null) ? new byte[0] : sdt;
-                this.loc = loc;
             }
 
             public void trigger(Gob gob) {
@@ -845,14 +766,7 @@ public class Skeleton {
                     public Coord3f getc() {
                         return (new Coord3f(fc));
                     }
-
-                    public boolean setup(RenderList rl) {
-                        if (SpawnSprite.this.loc != null)
-                            rl.prepc(SpawnSprite.this.loc);
-                        return (super.setup(rl));
-                    }
                 };
-                n.ols.add(new Gob.Overlay(-1, res, new MessageBuf(sdt)));
             }
         }
 
@@ -905,7 +819,7 @@ public class Skeleton {
                         int resver = buf.uint16();
                         byte[] sdt = buf.bytes(buf.uint8());
                         Indir<Resource> res = getres().pool.load(resnm, resver);
-                        events[i] = new FxTrack.SpawnSprite(tm, res, sdt, null);
+                        events[i] = new FxTrack.SpawnSprite(tm, res, sdt);
                         break;
                     case 1:
                         String id = buf.string();
@@ -1010,64 +924,9 @@ public class Skeleton {
         private static final HatingJava[] opcodes = new HatingJava[256];
 
         static {
-            opcodes[0] = new HatingJava() {
-                public Command make(Message buf) {
-                    final float x = (float) buf.cpfloat();
-                    final float y = (float) buf.cpfloat();
-                    final float z = (float) buf.cpfloat();
-                    return (new Command() {
-                        public GLState make(Pose pose) {
-                            return (Location.xlate(new Coord3f(x, y, z)));
-                        }
-                    });
-                }
-            };
-            opcodes[1] = new HatingJava() {
-                public Command make(Message buf) {
-                    final float ang = (float) buf.cpfloat();
-                    final float ax = (float) buf.cpfloat();
-                    final float ay = (float) buf.cpfloat();
-                    final float az = (float) buf.cpfloat();
-                    return (new Command() {
-                        public GLState make(Pose pose) {
-                            return (Location.rot(new Coord3f(ax, ay, az), ang));
-                        }
-                    });
-                }
-            };
-            opcodes[2] = new HatingJava() {
-                public Command make(Message buf) {
-                    final String bonenm = buf.string();
-                    return (new Command() {
-                        public GLState make(Pose pose) {
-                            Bone bone = pose.skel().bones.get(bonenm);
-                            return (pose.bonetrans(bone.idx));
-                        }
-                    });
-                }
-            };
-            opcodes[3] = new HatingJava() {
-                public Command make(Message buf) {
-                    float rx1 = (float) buf.cpfloat();
-                    float ry1 = (float) buf.cpfloat();
-                    float rz1 = (float) buf.cpfloat();
-                    float l = (float) Math.sqrt((rx1 * rx1) + (ry1 * ry1) + (rz1 * rz1));
-                    final Coord3f ref = new Coord3f(rx1 / l, ry1 / l, rz1 / l);
-                    final String orignm = buf.string();
-                    final String tgtnm = buf.string();
-                    return (new Command() {
-                        public GLState make(Pose pose) {
-                            Bone orig = pose.skel().bones.get(orignm);
-                            Bone tgt = pose.skel().bones.get(tgtnm);
-                            return (pose.new BoneAlign(ref, orig, tgt));
-                        }
-                    });
-                }
-            };
         }
 
         public interface Command {
-            public GLState make(Pose pose);
         }
 
         public interface HatingJava {
@@ -1088,13 +947,6 @@ public class Skeleton {
         }
 
         public void init() {
-        }
-
-        public GLState forpose(Pose pose) {
-            GLState[] ls = new GLState[prog.length];
-            for (int i = 0; i < prog.length; i++)
-                ls[i] = prog[i].make(pose);
-            return (GLState.compose(ls));
         }
     }
 }

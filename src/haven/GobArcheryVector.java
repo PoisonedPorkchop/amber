@@ -1,6 +1,5 @@
 package haven;
 
-import javax.media.opengl.GL2;
 import java.awt.*;
 
 public class GobArcheryVector extends Sprite {
@@ -13,14 +12,5 @@ public class GobArcheryVector extends Sprite {
     public GobArcheryVector(Gob pl, Gob followGob) {
         super(pl, null);
         this.followGob = followGob;
-    }
-
-    public boolean setup(RenderList rl) {
-        Gob gob = (Gob) owner;
-        Location.goback(rl.state(), "gobx");
-        rl.prepo(States.xray);
-        clr = gob.isplayer() || gob.isFriend() ? friend : foe;
-        rl.prepo(States.vertexcolor);
-        return true;
     }
 }

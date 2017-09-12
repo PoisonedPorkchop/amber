@@ -30,7 +30,7 @@ import java.util.*;
 import haven.Audio.CS;
 import haven.Audio.VolAdjust;
 
-public class ClipAmbiance implements Rendered {
+public class ClipAmbiance {
     public final Desc desc;
     public double bvol;
     private Glob glob = null;
@@ -40,9 +40,8 @@ public class ClipAmbiance implements Rendered {
         this.bvol = desc.bvol;
     }
 
-    public static class Glob implements ActAudio.Global {
+    public static class Glob {
         public final Desc desc;
-        public final ActAudio list;
         private boolean dead = false;
         private Desc[] chans = {null};
         private VolAdjust[][] cur = {null};
@@ -51,9 +50,8 @@ public class ClipAmbiance implements Rendered {
         private double vacc, cvol;
         private double lastupd = System.currentTimeMillis() / 1000.0;
 
-        public Glob(Desc desc, ActAudio list) {
+        public Glob(Desc desc) {
             this.desc = desc;
-            this.list = list;
         }
 
         public int hashCode() {
@@ -143,35 +141,6 @@ public class ClipAmbiance implements Rendered {
             }
         }
 
-        public boolean cycle(ActAudio list) {
-            double now = System.currentTimeMillis() / 1000.0;
-            double td = Math.max(now - lastupd, 0.0);
-            trim();
-            addmin();
-            addsome(td);
-            if(vacc < cvol)
-                cvol = Math.max(cvol - (td * 0.5), 0.0);
-            else if(vacc > cvol)
-                cvol = Math.min(cvol + (td * 0.5), 1.0);
-            if((ns == 0) && (cvol < 0.005)) {
-                dead = true;
-                return(true);
-            }
-            vacc = 0.0;
-            ns = 0;
-            for(int i = 0; i < n.length; i++)
-                n[i] = 0;
-            lastupd = now;
-            for(int i = 0; (i < cur.length) && (cur[i] != null); i++) {
-                for(VolAdjust clip : cur[i]) {
-                    if(clip == null) continue;
-                    clip.vol = cvol;
-                    list.amb.add(clip);
-                }
-            }
-            return(false);
-        }
-
         public void add(Desc ch, double vol) {
             int i;
             for(i = 0; i < chans.length; i++) {
@@ -193,34 +162,6 @@ public class ClipAmbiance implements Rendered {
             n[i]++;
             ns++;
         }
-    }
-
-    private class Instanced implements Rendered {
-        final float[] lb;
-
-        Instanced(float[] lb) {
-            this.lb = lb;
-        }
-
-        public boolean setup(RenderList rl) {
-            return(true);
-        }
-    }
-
-    public Rendered instanced(GLConfig gc, List<GLState.Buffer> instances) {
-        float[] compacted = new float[instances.size() * 3];
-        int i = 0;
-        for(GLState.Buffer st : instances) {
-            Matrix4f wxf = PView.locxf(st);
-            compacted[i++] = wxf.m[12];
-            compacted[i++] = wxf.m[13];
-            compacted[i++] = wxf.m[14];
-        }
-        return(new Instanced(compacted));
-    }
-
-    public boolean setup(RenderList rl) {
-        return(true);
     }
 
     @Resource.LayerName("clamb")

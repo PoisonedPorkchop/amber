@@ -92,18 +92,6 @@ public class OCache implements Iterable<Gob> {
             for (Gob g : copy) {
                 g.ctick(dt);
                 if (Config.showdmgop || Config.showdmgmy) {
-                    Gob.Overlay dmgol = g.findol(DamageSprite.ID);
-                    if (dmgol != null)
-                        g.ols.remove(dmgol);
-                    if (isfight) {
-                        DamageSprite dmgspr = gobdmgs.get(g.id);
-                        if (dmgspr != null) {
-                            if (dmgspr.owner == g)
-                                g.ols.add(new Gob.Overlay(DamageSprite.ID, dmgspr));
-                            else
-                                g.ols.add(new Gob.Overlay(DamageSprite.ID, new DamageSprite(dmgspr.dmg, dmgspr.arm, g)));
-                        }
-                    }
                 }
             }
         }
@@ -178,8 +166,7 @@ public class OCache implements Iterable<Gob> {
         MessageBuf sdt = new MessageBuf(dat);
         Drawable dr = g.getattr(Drawable.class);
         ResDrawable d = (dr instanceof ResDrawable) ? (ResDrawable) dr : null;
-        if ((d != null) && (d.res == res) && !d.sdt.equals(sdt) && (d.spr != null) && (d.spr instanceof Gob.Overlay.CUpd)) {
-            ((Gob.Overlay.CUpd) d.spr).update(sdt);
+        if ((d != null) && (d.res == res) && !d.sdt.equals(sdt) && (d.spr != null) ) {
             d.sdt = sdt;
         } else if ((d == null) || (d.res != res) || !d.sdt.equals(sdt)) {
             g.setattr(new ResDrawable(g, res, sdt));
@@ -304,7 +291,6 @@ public class OCache implements Iterable<Gob> {
                     flw.xfres = xfres;
                     flw.xfname = xfname;
                     flw.lxfb = null;
-                    flw.xf = null;
                 }
             }
         }
@@ -323,35 +309,6 @@ public class OCache implements Iterable<Gob> {
         } else {
             homo.tc = tc;
             homo.v = v;
-        }
-        changed(g);
-    }
-
-    public synchronized void overlay(Gob g, int olid, boolean prs, Indir<Resource> resid, Message sdt) {
-        Gob.Overlay ol = g.findol(olid);
-        if (resid != null) {
-            sdt = new MessageBuf(sdt);
-            if (ol == null) {
-                g.ols.add(ol = new Gob.Overlay(olid, resid, sdt));
-                if (sdt.rt == 7 && isfight && (Config.showdmgop && !g.isplayer() || Config.showdmgmy && g.isplayer()))
-                    setdmgoverlay(g, resid, new MessageBuf(sdt));
-            } else if (!ol.sdt.equals(sdt)) {
-                if (ol.spr instanceof Gob.Overlay.CUpd) {
-                    ol.sdt = new MessageBuf(sdt);
-                    ((Gob.Overlay.CUpd) ol.spr).update(ol.sdt);
-                } else {
-                    g.ols.remove(ol);
-                    g.ols.add(ol = new Gob.Overlay(olid, resid, sdt));
-                    if (sdt.rt == 7 && isfight && (Config.showdmgop && !g.isplayer() || Config.showdmgmy && g.isplayer()))
-                        setdmgoverlay(g, resid, new MessageBuf(sdt));
-                }
-            }
-            ol.delign = prs;
-        } else {
-            if ((ol != null) && (ol.spr instanceof Gob.Overlay.CDel))
-                ((Gob.Overlay.CDel) ol.spr).delete();
-            else
-                g.ols.remove(ol);
         }
         changed(g);
     }
@@ -391,25 +348,6 @@ public class OCache implements Iterable<Gob> {
         synchronized (gobdmgs) {
             gobdmgs.remove(gobid);
         }
-    }
-
-    public synchronized void health(Gob g, int hp) {
-        g.setattr(new GobHealth(g, hp));
-
-        if (Config.showgobhp) {
-            Gob.Overlay ol = g.findol(Sprite.GOB_HEALTH_ID);
-            if (hp < 4) {
-                if (ol == null)
-                    g.addol(new Gob.Overlay(Sprite.GOB_HEALTH_ID, new GobHealthSprite(hp)));
-                else if (((GobHealthSprite) ol.spr).val != hp)
-                    ((GobHealthSprite) ol.spr).update(hp);
-            } else {
-                if (ol != null)
-                    g.ols.remove(ol);
-            }
-        }
-
-        changed(g);
     }
 
     public synchronized void buddy(Gob g, String name, int group, int type) {

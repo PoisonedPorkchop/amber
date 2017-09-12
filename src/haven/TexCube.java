@@ -26,16 +26,9 @@
 
 package haven;
 
-import haven.TexGL.TexOb;
-
-import javax.media.opengl.GL;
 import java.awt.image.BufferedImage;
-import java.nio.ByteBuffer;
-
-import static haven.GOut.checkerr;
 
 public class TexCube {
-    protected TexOb t = null;
     private Object idmon = new Object();
     protected int tdim;
     protected final BufferedImage back;
@@ -59,41 +52,9 @@ public class TexCube {
             {0, 1},            // -Z
     };
 
-    protected void fill(GOut g) {
-        BGL gl = g.gl;
-        Coord dim = new Coord(tdim, tdim);
-        for (int i = 0; i < order.length; i++) {
-            ByteBuffer data = ByteBuffer.wrap(TexI.convert(back, dim, new Coord(order[i][0] * tdim, order[i][1] * tdim), dim));
-            gl.glTexImage2D(GL.GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL.GL_RGBA, tdim, tdim, 0, GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, data);
-        }
-    }
-
-    private void create(GOut g) {
-        BGL gl = g.gl;
-        t = new TexOb(g);
-        gl.glBindTexture(GL.GL_TEXTURE_CUBE_MAP, t);
-        gl.glTexParameteri(GL.GL_TEXTURE_CUBE_MAP, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST);
-        gl.glTexParameteri(GL.GL_TEXTURE_CUBE_MAP, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST);
-        fill(g);
-        checkerr(gl);
-    }
-
-    public TexOb glid(GOut g) {
-        synchronized (idmon) {
-            if ((t != null) && (t.cur != g.curgl))
-                dispose();
-            if (t == null)
-                create(g);
-            return (t);
-        }
-    }
-
     public void dispose() {
         synchronized (idmon) {
-            if (t != null) {
-                t.dispose();
-                t = null;
-            }
+
         }
     }
 }

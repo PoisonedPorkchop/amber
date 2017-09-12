@@ -26,9 +26,10 @@
 
 package haven;
 
-import java.util.*;
-
 import haven.Audio.CS;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class AudioSprite {
     public static Resource.Audio randoom(Resource res, String id) {
@@ -67,7 +68,6 @@ public class AudioSprite {
     };
 
     public static class ClipSprite extends Sprite {
-        public final ActAudio.PosClip clip;
         private boolean done = false;
 
         public ClipSprite(Owner owner, Resource res, Resource.Audio clip) {
@@ -80,18 +80,6 @@ public class AudioSprite {
                 stream = new Audio.VolAdjust(stream, 0.2);
             else if (Config.sfxquernvol != 1.0 && "sfx/terobjs/quern".equals(res.name))
                 stream = new Audio.VolAdjust(stream, Config.sfxquernvol);
-
-            this.clip = new ActAudio.PosClip(new Audio.Monitor(stream) {
-                protected void eof() {
-                    super.eof();
-                    done = true;
-                }
-            });
-        }
-
-        public boolean setup(RenderList r) {
-            r.add(clip, null);
-            return (false);
         }
 
         public boolean tick(int dt) {
@@ -105,14 +93,9 @@ public class AudioSprite {
              * in glsl.MiscLib.maploc. Solve pl0x. */
             return (done);
         }
-
-        public Object staticp() {
-            return(CONSTANS);
-        }
     }
 
-    public static class RepeatSprite extends Sprite implements Gob.Overlay.CDel {
-        private ActAudio.PosClip clip;
+    public static class RepeatSprite extends Sprite {
         private final Resource.Audio end;
 
         public RepeatSprite(Owner owner, Resource res, final Resource.Audio beg, final Resource.Audio clip, Resource.Audio end) {
@@ -129,59 +112,17 @@ public class AudioSprite {
                     return (clip.stream());
                 }
             };
-            this.clip = new ActAudio.PosClip(rep);
-        }
-
-        public boolean setup(RenderList r) {
-            if (clip != null)
-                r.add(clip, null);
-            return (false);
-        }
-
-        public boolean tick(int dt) {
-            return (clip == null);
-        }
-
-        public void delete() {
-            if (end != null)
-                clip = new ActAudio.PosClip(new Audio.Monitor(end.stream()) {
-                    protected void eof() {
-                        super.eof();
-                        RepeatSprite.this.clip = null;
-                    }
-                });
-            else
-                clip = null;
-        }
-
-        public Object staticp() {
-            return(CONSTANS);
         }
     }
 
     public static class Ambience extends Sprite {
-        public final Rendered amb;
 
         public Ambience(Owner owner, Resource res) {
             super(owner, res);
             ClipAmbiance.Desc clamb = res.layer(ClipAmbiance.Desc.class);
             if (clamb != null) {
-                this.amb = clamb.spr;
             } else {
-                if (Config.sfxfirevol != 1.0 && "sfx/fire".equals(res.name))
-                    this.amb = new ActAudio.Ambience(res, Config.sfxfirevol);
-                else
-                    this.amb = new ActAudio.Ambience(res);
             }
-        }
-
-        public boolean setup(RenderList r) {
-            r.add(amb, null);
-            return (false);
-        }
-
-        public Object staticp() {
-            return(CONSTANS);
         }
     }
 }

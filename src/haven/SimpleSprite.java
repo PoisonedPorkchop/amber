@@ -26,8 +26,6 @@
 
 package haven;
 
-import java.awt.Graphics;
-
 public class SimpleSprite {
     public final Resource.Image img;
     public final Coord cc;
@@ -57,15 +55,6 @@ public class SimpleSprite {
 
     public SimpleSprite(Resource res) {
         this(res, -1);
-    }
-
-    public final void draw(GOut g, Coord cc) {
-        g.image(img.tex(), cc.add(ul()));
-    }
-
-    public final void draw(Graphics g, Coord cc) {
-        Coord c = cc.add(ul());
-        g.drawImage(img.img, c.x, c.y, null);
     }
 
     public final Coord ul() {

@@ -27,15 +27,13 @@
 package haven;
 
 import haven.automation.WItemDestroyCallback;
-import haven.res.ui.tt.Wear;
-import haven.res.ui.tt.q.qbuff.QBuff;
 
-import java.awt.Color;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
-import java.util.function.*;
+import java.util.List;
+import java.util.function.Function;
 
 import static haven.Inventory.sqsz;
 
@@ -85,7 +83,7 @@ public class WItem extends Widget implements DTarget {
         }
 
         public Tex get() {
-            return (tex);
+            return null;
         }
     }
 

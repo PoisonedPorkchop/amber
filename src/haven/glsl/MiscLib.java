@@ -26,78 +26,11 @@
 
 package haven.glsl;
 
-import haven.*;
-import haven.GLProgram.VarID;
-
 import static haven.glsl.Cons.*;
-import static haven.glsl.Function.PDir.*;
-import static haven.glsl.Type.*;
-
-import haven.glsl.ValBlock.Value;
+import static haven.glsl.Function.PDir.IN;
+import static haven.glsl.Type.VEC4;
 
 public abstract class MiscLib {
-    private static final AutoVarying frageyen = new AutoVarying(VEC3, "s_eyen") {
-        protected Expression root(VertexContext vctx) {
-            return (vctx.eyen.depref());
-        }
-    };
-
-    public static Value frageyen(final FragmentContext fctx) {
-        return (fctx.mainvals.ext(frageyen, new ValBlock.Factory() {
-            public Value make(ValBlock vals) {
-                Value ret = vals.new Value(VEC3, new Symbol.Gen("eyen")) {
-                    public Expression root() {
-                        return (frageyen.ref());
-                    }
-                };
-                ret.mod(in -> normalize(in), 0);
-                return (ret);
-            }
-        }));
-    }
-
-    public static final AutoVarying fragobjv = new AutoVarying(VEC3, "s_objv") {
-        protected Expression root(VertexContext vctx) {
-            return (pick(vctx.objv.depref(), "xyz"));
-        }
-    };
-    public static final AutoVarying fragmapv = new AutoVarying(VEC3, "s_mapv") {
-        protected Expression root(VertexContext vctx) {
-            return (pick(vctx.mapv.depref(), "xyz"));
-        }
-    };
-    public static final AutoVarying frageyev = new AutoVarying(VEC3, "s_eyev") {
-        protected Expression root(VertexContext vctx) {
-            return (pick(vctx.eyev.depref(), "xyz"));
-        }
-    };
-    private static final Object vertedir_id = new Object();
-
-    public static Value vertedir(final VertexContext vctx) {
-        return (vctx.mainvals.ext(vertedir_id, new ValBlock.Factory() {
-            public Value make(ValBlock vals) {
-                return (vals.new Value(VEC3, new Symbol.Gen("edir")) {
-                    public Expression root() {
-                        return (neg(normalize(pick(vctx.eyev.depref(), "xyz"))));
-                    }
-                });
-            }
-        }));
-    }
-
-    private static final Object fragedir_id = new Object();
-
-    public static Value fragedir(final FragmentContext fctx) {
-        return (fctx.mainvals.ext(fragedir_id, new ValBlock.Factory() {
-            public Value make(ValBlock vals) {
-                return (vals.new Value(VEC3, new Symbol.Gen("edir")) {
-                    public Expression root() {
-                        return (neg(normalize(frageyev.ref())));
-                    }
-                });
-            }
-        }));
-    }
 
     public static final Function colblend = new Function.Def(VEC4) {{
         Expression base = param(IN, VEC4).ref();

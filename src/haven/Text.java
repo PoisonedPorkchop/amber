@@ -412,8 +412,6 @@ public class Text {
     }
 
     public Tex tex() {
-        if (tex == null)
-            tex = new TexI(img);
         return (tex);
     }
 

@@ -1,15 +1,11 @@
 package haven.res.ui.barterbox;
 
 import haven.*;
-import haven.Button;
 import haven.GSprite.Owner;
 import haven.ItemInfo.SpriteOwner;
-import haven.Label;
-import haven.Resource.Image;
 import haven.Resource.Pagina;
 import haven.res.ui.tt.q.qbuff.QBuff;
 
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.Random;
@@ -43,7 +39,6 @@ public class Shopbox extends Widget implements SpriteOwner, Owner {
     private TextEntry pnume;
     private TextEntry pqe;
     public final boolean admin;
-    public final AttrCache<Tex> itemnum = new One(this);
     private List<ItemInfo> cinfo;
     private Tex longtip = null;
     private Tex pricetip = null;
@@ -110,8 +105,6 @@ public class Shopbox extends Widget implements SpriteOwner, Owner {
                     if (var5 != null) {
                         var4 = ItemInfo.catimgs(0, new BufferedImage[]{var4, RichText.render("\n" + var5.text, 200, new Object[0]).img});
                     }
-
-                    this.longtip = new TexI(var4);
                 }
 
                 return this.longtip;
@@ -121,7 +114,6 @@ public class Shopbox extends Widget implements SpriteOwner, Owner {
         } else if (var1.isect(pricec, Inventory.sqsz) && this.price != null) {
             try {
                 if (this.pricetip == null) {
-                    this.pricetip = this.price.longtip();
                 }
 
                 return this.pricetip;
@@ -297,17 +289,5 @@ public class Shopbox extends Widget implements SpriteOwner, Owner {
         }
 
         protected abstract T find(List<ItemInfo> var1);
-    }
-
-
-    class One extends AttrCache<Tex> {
-        One(Shopbox var1) {
-            super(var1);
-        }
-
-        protected Tex find(List<ItemInfo> var1) {
-            GItem.NumberInfo var2 = ItemInfo.find(GItem.NumberInfo.class, var1);
-            return var2 == null ? null : new TexI(Utils.outline2(Text.render(Integer.toString(var2.itemnum()), Color.WHITE).img, Utils.contrast(Color.WHITE)));
-        }
     }
 }

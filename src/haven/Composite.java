@@ -26,11 +26,12 @@
 
 package haven;
 
-import java.util.*;
-import java.lang.reflect.*;
-
 import haven.Skeleton.Pose;
 import haven.Skeleton.PoseMod;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 import static haven.Composited.ED;
 import static haven.Composited.MD;
@@ -64,15 +65,6 @@ public class Composite extends Drawable {
             if (gob.type == Gob.Type.PLAYER && gob.attr.containsKey(GobHealth.class))
                 gob.type = Gob.Type.OTHER;
         }
-    }
-
-    public void setup(RenderList rl) {
-        try {
-            init();
-        } catch (Loading e) {
-            return;
-        }
-        rl.add(comp, null);
     }
 
     private List<PoseMod> loadposes(Collection<ResData> rl, Skeleton skel, boolean old) {

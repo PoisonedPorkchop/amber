@@ -44,10 +44,6 @@ public class Label extends Widget {
         }
     }
 
-    public void draw(GOut g) {
-        g.image(text.tex(), Coord.z);
-    }
-
     public Label(String text, int w, Text.Foundry f) {
         super(Coord.z);
         this.f = f;

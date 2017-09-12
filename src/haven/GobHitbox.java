@@ -1,37 +1,24 @@
 package haven;
 
 import javax.media.opengl.GL2;
-import java.awt.*;
 
 public class GobHitbox extends Sprite {
-    public static States.ColState fillclrstate = new States.ColState(Utils.hex2rgb(Config.treeboxclr));
-    private static final States.ColState bbclrstate = new States.ColState(new Color(255, 255, 255, 255));
     private Coordf a, b, c, d;
     private int mode;
-    private States.ColState clrstate;
 
     public GobHitbox(Gob gob, Coord ac, Coord bc, boolean fill) {
         super(gob, null);
 
         if (fill) {
             mode =  GL2.GL_QUADS;
-            clrstate = fillclrstate;
         } else {
             mode =  GL2.GL_LINE_LOOP;
-            clrstate = bbclrstate;
         }
 
         a = new Coordf(ac.x, ac.y);
         b = new Coordf(ac.x, bc.y);
         c = new Coordf(bc.x, bc.y);
         d = new Coordf(bc.x, ac.y);
-    }
-
-    public boolean setup(RenderList rl) {
-        rl.prepo(clrstate);
-        if (mode ==  GL2.GL_LINE_LOOP)
-            rl.prepo(States.xray);
-        return true;
     }
 
     public static class BBox {

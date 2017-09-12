@@ -26,9 +26,7 @@
 
 package haven;
 
-import java.awt.Graphics2D;
-import java.awt.Color;
-import java.util.*;
+import java.awt.*;
 
 public abstract class Profile {
     public static final Color[] cols;
@@ -83,10 +81,8 @@ public abstract class Profile {
     }
 
     public void draw(TexIM tex, double scale) {
-        int h = tex.sz().y;
         Graphics2D g = tex.graphics();
         g.setBackground(new Color(0, 0, 0, 0));
-        g.clearRect(0, 0, tex.sz().x, h);
         for (int i = 0; i < hist.length; i++) {
             Frame f = hist[i];
             if (f == null)
@@ -94,8 +90,6 @@ public abstract class Profile {
             double a = 0;
             for (int o = 0; o < f.prt.length; o++) {
                 double c = a + f.prt[o];
-                g.setColor(cols[o + 1]);
-                g.drawLine(i, (int) (h - (a / scale)), i, (int) (h - (c / scale)));
                 a = c;
             }
         }

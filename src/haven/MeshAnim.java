@@ -26,11 +26,12 @@
 
 package haven;
 
-import java.util.*;
-import java.nio.*;
-
 import haven.MorphedMesh.Morpher;
-import haven.MorphedMesh.MorphedBuf;
+
+import java.nio.FloatBuffer;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
 
 public class MeshAnim {
     public final Frame[] frames;
@@ -56,22 +57,7 @@ public class MeshAnim {
 
     public boolean animp(FastMesh mesh) {
         int min = -1, max = -1;
-        for (int i = 0; i < mesh.num * 3; i++) {
-            int vi = mesh.indb.get(i);
-            if (min < 0) {
-                min = max = vi;
-            } else {
-                if (vi < min)
-                    min = vi;
-                else if (vi > max)
-                    max = vi;
-            }
-        }
         boolean[] used = new boolean[max + 1 - min];
-        for (int i = 0; i < mesh.num * 3; i++) {
-            int vi = mesh.indb.get(i);
-            used[vi - min] = true;
-        }
         for (Frame f : frames) {
             for (int i = 0; i < f.idx.length; i++) {
                 int vi = f.idx[i];
@@ -91,7 +77,7 @@ public class MeshAnim {
 
         public abstract boolean tick(float dt);
 
-        public Morpher create(final MorphedBuf vb) {
+        public Morpher create() {
             return (new Morpher() {
                 int lseq = -1;
 

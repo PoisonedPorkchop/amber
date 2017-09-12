@@ -48,16 +48,10 @@ public abstract class Tex {
 
     public abstract float tcy(int y);
 
-    public abstract GLState draw();
-
-    public abstract GLState clip();
-
     public void dispose() {
     }
 
     public static final Tex empty = new Tex(Coord.z) {
-        public void render(GOut g, Coord c, Coord ul, Coord br, Coord sz) {
-        }
 
         public float tcx(int x) {
             return (0);
@@ -65,14 +59,6 @@ public abstract class Tex {
 
         public float tcy(int y) {
             return (0);
-        }
-
-        public GLState draw() {
-            return (null);
-        }
-
-        public GLState clip() {
-            return (null);
         }
     };
 }

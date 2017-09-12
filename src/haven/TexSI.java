@@ -43,12 +43,4 @@ public class TexSI extends Tex {
     public float tcy(int y) {
         return (parent.tcy(y + ul.y));
     }
-
-    public GLState draw() {
-        return (parent.draw());
-    }
-
-    public GLState clip() {
-        return (parent.clip());
-    }
 }

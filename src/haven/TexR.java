@@ -26,17 +26,16 @@
 
 package haven;
 
-import java.util.*;
-import java.awt.Graphics;
-import java.awt.image.*;
-import java.io.*;
 import javax.imageio.ImageIO;
-import java.awt.color.ColorSpace;
-import java.nio.ByteBuffer;
-import javax.media.opengl.*;
-import java.security.*;
-
-import haven.Defer.Future;
+import javax.media.opengl.GL;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.Raster;
+import java.awt.image.WritableRaster;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 
 @Resource.LayerName("tex")
 public class TexR extends Resource.Layer implements Resource.IDLayer<Integer> {
@@ -90,8 +89,6 @@ public class TexR extends Resource.Layer implements Resource.IDLayer<Integer> {
             magfilter = GL.GL_LINEAR;
         if (minfilter == -1)
             minfilter = (tex.mipmap == null) ? GL.GL_LINEAR : GL.GL_LINEAR_MIPMAP_LINEAR;
-        tex.magfilter(magfilter);
-        tex.minfilter(minfilter);
     }
 
     private class Real extends TexL {
@@ -139,14 +136,6 @@ public class TexR extends Resource.Layer implements Resource.IDLayer<Integer> {
             }
         }
 
-        protected void fill(GOut g) {
-            try {
-                super.fill(g);
-            } catch (Loading l) {
-                throw (new RenderList.RLoad(l));
-            }
-        }
-
         public String toString() {
             return ("TexR(" + getres().name + ", " + id + ")");
         }
@@ -154,11 +143,18 @@ public class TexR extends Resource.Layer implements Resource.IDLayer<Integer> {
         public String loadname() {
             return ("texture in " + getres().name);
         }
+
+        @Override
+        public float tcx(int x) {
+            return 0;
+        }
+
+        @Override
+        public float tcy(int y) {
+            return 0;
+        }
     }
 
-    public TexGL tex() {
-        return (tex);
-    }
 
     public Integer layerid() {
         return (id);

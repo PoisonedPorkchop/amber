@@ -26,8 +26,6 @@
 
 package haven;
 
-import java.awt.Color;
-
 public class Buff extends Widget {
     public static final Text.Foundry nfnd = new Text.Foundry(Text.dfont, 12);   // FIXME: size. where is this used???
     public static final Tex frame = Resource.loadtex("gfx/hud/buffs/frame");
@@ -60,8 +58,6 @@ public class Buff extends Widget {
     }
 
     private Tex nmeter() {
-        if (ntext == null)
-            ntext = new TexI(Utils.outline2(nfnd.render(Integer.toString(nmeter), Color.WHITE).img, Color.BLACK));
         return (ntext);
     }
 

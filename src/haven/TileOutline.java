@@ -1,24 +1,20 @@
 package haven;
 
-import javax.media.opengl.GL2;
 import java.nio.BufferOverflowException;
 import java.nio.FloatBuffer;
 
 import static haven.MCache.tilesz;
 
-public class TileOutline implements Rendered {
+public class TileOutline {
     private final MCache map;
     private final FloatBuffer[] vertexBuffers;
     private final int area;
-    private final States.ColState color;
-    private Location location;
     private Coord ul;
     private int curIndex;
 
     public TileOutline(MCache map) {
         this.map = map;
         this.area = (MCache.cutsz.x * 5) * (MCache.cutsz.y * 5);
-        this.color = new States.ColState(255, 255, 255, 64);
         // double-buffer to prevent flickering
         vertexBuffers = new FloatBuffer[2];
         vertexBuffers[0] = Utils.mkfbuf(this.area * 3 * 4);
@@ -26,19 +22,9 @@ public class TileOutline implements Rendered {
         curIndex = 0;
     }
 
-    @Override
-    public boolean setup(RenderList rl) {
-        rl.prepo(location);
-        rl.prepo(States.ndepthtest);
-        rl.prepo(last);
-        rl.prepo(color);
-        return true;
-    }
-
     public void update(Coord ul) {
         try {
             this.ul = ul;
-            this.location = Location.xlate(new Coord3f((float) (ul.x * tilesz.x), (float) (-ul.y * tilesz.y), 0.0F));
             curIndex = (curIndex + 1) % 2; // swap buffers
             Coord c = new Coord();
             Coord size = ul.add(MCache.cutsz.mul(5));

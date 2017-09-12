@@ -27,7 +27,6 @@
 package haven;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.lang.annotation.ElementType;
@@ -41,7 +40,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CodingErrorAction;
 import java.util.*;
-import java.util.List;
 
 public class Resource implements Serializable {
     private static ResCache prscache;
@@ -1120,23 +1118,27 @@ public class Resource implements Serializable {
             final Tile[] order = new Tile[nt];
             final Coord[] place = new Coord[nt];
             Tex packbuf = new TexL(new Coord(minw, minh)) {
-                {
-                    mipmap(Mipmapper.avg);
-                    minfilter(javax.media.opengl.GL2.GL_NEAREST_MIPMAP_LINEAR);
-                    centroid = true;
+                @Override
+                public float tcx(int x) {
+                    return 0;
                 }
 
-                public BufferedImage fill() {
-                    BufferedImage buf = TexI.mkbuf(dim);
-                    Graphics g = buf.createGraphics();
-                    for (int i = 0; i < nt; i++)
-                        g.drawImage(order[i].img, place[i].x, place[i].y, null);
-                    g.dispose();
-                    return (buf);
+                @Override
+                public float tcy(int y) {
+                    return 0;
+                }
+
+                {
+                    mipmap(Mipmapper.avg);
                 }
 
                 public String toString() {
                     return ("TileTex(" + Resource.this.name + ")");
+                }
+
+                @Override
+                public BufferedImage fill() {
+                    return null;
                 }
 
                 public String loadname() {

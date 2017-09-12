@@ -26,20 +26,12 @@
 
 package haven.resutil;
 
-import java.util.*;
-
-import haven.*;
-import haven.glsl.*;
-
-import static haven.glsl.Cons.*;
-import static haven.glsl.Function.PDir.*;
-import static haven.glsl.Type.*;
-
-import haven.glsl.ValBlock.Value;
+import haven.Coord3f;
+import haven.Material;
+import haven.Resource;
 
 @Material.ResName("texrot")
-public class TexAnim extends GLState {
-    public static final Slot<TexAnim> slot = new Slot<TexAnim>(Slot.Type.DRAW, TexAnim.class);
+public class TexAnim {
     public final Coord3f ax;
 
     public TexAnim(Coord3f ax) {
@@ -50,20 +42,4 @@ public class TexAnim extends GLState {
         this(new Coord3f(((Number) args[0]).floatValue(), ((Number) args[1]).floatValue(), 0));
     }
 
-    private static final Uniform cax = new Uniform(VEC2);
-
-    public void reapply(GOut g) {
-        g.gl.glUniform2f(g.st.prog.uniform(cax), ax.x, ax.y);
-    }
-
-    public void apply(GOut g) {
-        reapply(g);
-    }
-
-    public void unapply(GOut g) {
-    }
-
-    public void prep(Buffer buf) {
-        buf.put(slot, this);
-    }
 }

@@ -103,15 +103,6 @@ public abstract class ConsoleHost extends Widget {
         super(ui, c, sz);
     }
 
-    public void drawcmd(GOut g, Coord c) {
-        if (cmdline != null) {
-            if ((cmdtext == null) || (cmdtextf != cmdline.line))
-                cmdtext = cmdfoundry.render(":" + (cmdtextf = cmdline.line));
-            g.image(cmdtext.tex(), c);
-            int lx = cmdtext.advance(cmdline.point + 1);
-        }
-    }
-
     public void entercmd() {
         kg = ui.grabkeys(this);
         hpos = history.size();

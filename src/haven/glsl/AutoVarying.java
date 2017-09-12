@@ -50,31 +50,4 @@ public abstract class AutoVarying extends Varying {
         }
     }
 
-    protected Expression root(VertexContext vctx) {
-        throw (new Error("Neither make() nor root() overridden"));
-    }
-
-    protected Value make(ValBlock vals, final VertexContext vctx) {
-        return (new Value(vals) {
-            public Expression root() {
-                return (AutoVarying.this.root(vctx));
-            }
-        });
-    }
-
-    public ValBlock.Value value(final VertexContext ctx) {
-        return (ctx.mainvals.ext(this, new ValBlock.Factory() {
-            public ValBlock.Value make(ValBlock vals) {
-                return (AutoVarying.this.make(vals, ctx));
-            }
-        }));
-    }
-
-    public void use(Context ctx) {
-        if (ctx instanceof FragmentContext) {
-            FragmentContext fctx = (FragmentContext) ctx;
-            value(fctx.prog.vctx).force();
-        }
-        super.use(ctx);
-    }
 }

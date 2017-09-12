@@ -1,28 +1,17 @@
 package haven.resutil;
 
-import haven.*;
-import haven.States.ColState;
-import haven.VertexBuf.NormalArray;
-import haven.VertexBuf.VertexArray;
+import haven.Sprite;
+import haven.Utils;
 
-import java.awt.*;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
 public class BPRadSprite extends Sprite {
-    public static final GLState smatDanger = new ColState(new Color(192, 0, 0, 80));
-    public static final GLState smatBeehive = new ColState(new Color(233, 234, 134, 80));
-    public static final GLState smatTrough = new ColState(new Color(147, 234, 133, 80));
-    final GLState smat;
-    final VertexArray posa;
-    final NormalArray nrma;
     final ShortBuffer sidx;
 
 
-    public BPRadSprite(float rad, float basez, GLState smat) {
+    public BPRadSprite(float rad, float basez) {
         super(null, null);
-
-        this.smat = smat;
         
         int per = Math.max(24, (int) (2 * Math.PI * (double) rad / 11.0D));
         FloatBuffer pa = Utils.mkfbuf(per * 3 * 2);
@@ -41,16 +30,6 @@ public class BPRadSprite extends Sprite {
             sa.put(v + 3, (short) (i + per)).put(v + 4, (short) ((i + 1) % per + per)).put(v + 5, (short) ((i + 1) % per));
         }
 
-        this.posa = new VertexArray(pa);
-        this.nrma = new NormalArray(na);
         this.sidx = sa;
-    }
-
-    public boolean setup(RenderList rl) {
-        rl.prepo(Rendered.eyesort);
-        rl.prepo(Material.nofacecull);
-        Location.goback(rl.state(), "gobx");
-        rl.state().put(States.color, null);
-        return true;
     }
 }

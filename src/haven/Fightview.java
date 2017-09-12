@@ -35,9 +35,6 @@ public class Fightview extends Widget {
     static int ymarg = 5;
     static int width = 165;
     static Coord avasz = new Coord(27, 27);
-    static Coord cavac = new Coord(width - Avaview.dasz.x - 10, 10);
-    static Coord cgivec = new Coord(cavac.x - 35, cavac.y);
-    static Coord cpursc = new Coord(cavac.x - 75, cgivec.y + 35);
     public LinkedList<Relation> lsrel = new LinkedList<Relation>();
     public Relation current = null;
     public Indir<Resource> blk, batk, iatk;
@@ -46,10 +43,8 @@ public class Fightview extends Widget {
     public long lastuse = 0;
     public int atkcd;
     private GiveButton curgive;
-    private Avaview curava;
     private Button curpurs;
     public final Bufflist buffs = add(new Bufflist());
-    private static final Gob.Overlay curol = new Gob.Overlay(new FightCurrentOpp());
     {
         buffs.hide();
     }
@@ -58,7 +53,6 @@ public class Fightview extends Widget {
 
     public class Relation {
         public final long gobid;
-        public final Avaview ava;
         public final GiveButton give;
         public final Button purs;
         public final Bufflist buffs = add(new Bufflist());
@@ -71,7 +65,6 @@ public class Fightview extends Widget {
 
         public Relation(long gobid) {
             this.gobid = gobid;
-            add(this.ava = new Avaview(avasz, gobid, "avacam")).canactivate = true;
             add(this.give = new GiveButton(0, new Coord(15, 15)));
             add(this.purs = new Button(70, "Pursue"));
         }
@@ -83,13 +76,11 @@ public class Fightview extends Widget {
         }
 
         public void show(boolean state) {
-            ava.show(state);
             give.show(state);
             purs.show(state);
         }
 
         public void remove() {
-            ui.destroy(ava);
             ui.destroy(give);
             ui.destroy(purs);
         }
@@ -156,35 +147,18 @@ public class Fightview extends Widget {
 
     private void setcur(Relation rel) {
         if ((current == null) && (rel != null)) {
-            add(curgive = new GiveButton(0), cgivec);
-            add(curava = new Avaview(Avaview.dasz, rel.gobid, "avacam"), cavac).canactivate = true;
-            add(curpurs = new Button(70, "Pursue"), cpursc);
+            add(curgive = new GiveButton(0));
+            add(curpurs = new Button(70, "Pursue"));
             curgive.state = rel.give.state;
         } else if ((current != null) && (rel == null)) {
             ui.destroy(curgive);
-            ui.destroy(curava);
             ui.destroy(curpurs);
             curgive = null;
-            curava = null;
             curpurs = null;
         } else if ((current != null) && (rel != null)) {
             curgive.state = rel.give.state;
-            curava.avagob = rel.gobid;
         }
         current = rel;
-
-        if (Config.hlightcuropp) {
-            if (current != null) {
-                Gob curgob = ui.sess.glob.oc.getgob(current.gobid);
-                if (curgob != null && !curgob.ols.contains(curol))
-                    curgob.ols.add(curol);
-            }
-            for (Relation r : lsrel) {
-                Gob relgob = ui.sess.glob.oc.getgob(r.gobid);
-                if (relgob != null && r != rel)
-                    relgob.ols.remove(curol);
-            }
-        }
     }
 
     public void destroy() {
@@ -210,10 +184,7 @@ public class Fightview extends Widget {
     }
 
     public void wdgmsg(Widget sender, String msg, Object... args) {
-        if (sender == curava) {
-            wdgmsg("click", (int) current.gobid, args[0]);
-            return;
-        } else if (sender == curgive) {
+        if (sender == curgive) {
             wdgmsg("give", (int) current.gobid, args[0]);
             return;
         } else if (sender == curpurs) {
@@ -221,10 +192,7 @@ public class Fightview extends Widget {
             return;
         }
         for (Relation rel : lsrel) {
-            if (sender == rel.ava) {
-                wdgmsg("click", (int) rel.gobid, args[0]);
-                return;
-            } else if (sender == rel.give) {
+            if (sender == rel.give) {
                 wdgmsg("give", (int) rel.gobid, args[0]);
                 return;
             } else if (sender == rel.purs) {
@@ -254,11 +222,6 @@ public class Fightview extends Widget {
             Relation rel = getrel((Integer) args[0]);
             OCache oc = ui.sess.glob.oc;
             oc.removedmgoverlay(rel.gobid);
-            if (Config.hlightcuropp) {
-                Gob relgob = ui.sess.glob.oc.getgob(rel.gobid);
-                if (relgob != null)
-                    relgob.ols.remove(curol);
-            }
             rel.remove();
             lsrel.remove(rel);
             if (lsrel.size() == 0) {

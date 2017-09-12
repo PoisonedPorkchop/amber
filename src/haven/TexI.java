@@ -26,13 +26,13 @@
 
 package haven;
 
-import java.awt.Graphics;
-import java.awt.image.*;
+import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
+import java.awt.*;
 import java.awt.color.ColorSpace;
-import java.nio.ByteBuffer;
-import javax.media.opengl.*;
+import java.awt.image.*;
 
-public class TexI extends TexGL {
+public class TexI extends Tex{
     public static ComponentColorModel glcm = new ComponentColorModel(ColorSpace.getInstance(ColorSpace.CS_sRGB), new int[]{8, 8, 8, 8}, true, false, ComponentColorModel.TRANSLUCENT, DataBuffer.TYPE_BYTE);
     public BufferedImage back;
     public boolean mutable;
@@ -40,7 +40,7 @@ public class TexI extends TexGL {
     public Mipmapper mmalg = Mipmapper.avg;
 
     public TexI(BufferedImage img) {
-        super(Utils.imgsz(img));
+        super(new Coord(0,0));
         back = img;
         mutable = false;
     }
@@ -48,6 +48,16 @@ public class TexI extends TexGL {
     public TexI(Coord sz) {
         super(sz);
         mutable = true;
+    }
+
+    @Override
+    public float tcx(int x) {
+        return 0;
+    }
+
+    @Override
+    public float tcy(int y) {
+        return 0;
     }
 
     /* Java's image model is a little bit complex, so these may not be
@@ -90,64 +100,6 @@ public class TexI extends TexGL {
             }
         }
         return (-1);
-    }
-
-    protected void fill(GOut g) {
-        BGL gl = g.gl;
-        Coord sz = Utils.imgsz(back);
-        int ifmt = detectfmt(back);
-        if ((ifmt == GL.GL_RGBA) || (ifmt == GL.GL_BGRA)) {
-            byte[] pixels = ((DataBufferByte) back.getRaster().getDataBuffer()).getData();
-            if (mutable)
-                pixels = Utils.splice(pixels, 0);
-            if (sz.equals(tdim)) {
-                gl.glTexImage2D(GL.GL_TEXTURE_2D, 0, fmt, tdim.x, tdim.y, 0, ifmt, GL.GL_UNSIGNED_BYTE, ByteBuffer.wrap(pixels));
-                if (mipmap)
-                    genmipmap(gl, 1, tdim, pixels, ifmt);
-            } else {
-                gl.glTexImage2D(GL.GL_TEXTURE_2D, 0, fmt, tdim.x, tdim.y, 0, ifmt, GL.GL_UNSIGNED_BYTE, null);
-                gl.glTexSubImage2D(GL.GL_TEXTURE_2D, 0, 0, 0, sz.x, sz.y, ifmt, GL.GL_UNSIGNED_BYTE, ByteBuffer.wrap(pixels));
-            }
-        } else if ((ifmt == GL.GL_RGB) || (ifmt == GL2.GL_BGR)) {
-            gl.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1);
-            byte[] pixels = ((DataBufferByte) back.getRaster().getDataBuffer()).getData();
-            if (mutable)
-                pixels = Utils.splice(pixels, 0);
-            if (sz.equals(tdim)) {
-                gl.glTexImage2D(GL.GL_TEXTURE_2D, 0, fmt, tdim.x, tdim.y, 0, ifmt, GL.GL_UNSIGNED_BYTE, ByteBuffer.wrap(pixels));
-                if (mipmap)
-                    genmipmap3(gl, 1, tdim, pixels, ifmt);
-            } else {
-                gl.glTexImage2D(GL.GL_TEXTURE_2D, 0, fmt, tdim.x, tdim.y, 0, ifmt, GL.GL_UNSIGNED_BYTE, null);
-                gl.glTexSubImage2D(GL.GL_TEXTURE_2D, 0, 0, 0, sz.x, sz.y, ifmt, GL.GL_UNSIGNED_BYTE, ByteBuffer.wrap(pixels));
-            }
-        } else {
-	    /* System.err.println("Weird: " + this); */
-            byte[] pixels = convert(back, tdim);
-            gl.glTexImage2D(GL.GL_TEXTURE_2D, 0, fmt, tdim.x, tdim.y, 0, GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, ByteBuffer.wrap(pixels));
-            if (mipmap)
-                genmipmap(gl, 1, tdim, pixels, GL.GL_RGBA);
-        }
-    }
-
-    private void genmipmap(BGL gl, int lev, Coord dim, byte[] data, int ifmt) {
-        Coord ndim = Mipmapper.nextsz(dim);
-        byte[] ndata = mmalg.gen4(dim, data, ifmt);
-        gl.glTexImage2D(GL.GL_TEXTURE_2D, lev, fmt, ndim.x, ndim.y, 0, ifmt, GL.GL_UNSIGNED_BYTE, ByteBuffer.wrap(ndata));
-        if ((ndim.x > 1) || (ndim.y > 1))
-            genmipmap(gl, lev + 1, ndim, ndata, ifmt);
-    }
-
-    private void genmipmap3(BGL gl, int lev, Coord dim, byte[] data, int ifmt) {
-        if (mmalg instanceof Mipmapper.Mipmapper3) {
-            Coord ndim = Mipmapper.nextsz(dim);
-            byte[] ndata = ((Mipmapper.Mipmapper3) mmalg).gen3(dim, data, ifmt);
-            gl.glTexImage2D(GL.GL_TEXTURE_2D, lev, fmt, ndim.x, ndim.y, 0, ifmt, GL.GL_UNSIGNED_BYTE, ByteBuffer.wrap(ndata));
-            if ((ndim.x > 1) || (ndim.y > 1))
-                genmipmap3(gl, lev + 1, ndim, ndata, ifmt);
-        } else {
-            genmipmap(gl, lev, dim, convert(back, dim), GL.GL_RGBA);
-        }
     }
 
     public int getRGB(Coord c) {

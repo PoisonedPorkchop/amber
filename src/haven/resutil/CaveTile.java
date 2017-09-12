@@ -26,12 +26,11 @@
 
 package haven.resutil;
 
-import java.util.*;
-
 import haven.*;
-import haven.Resource.Tile;
 import haven.MapMesh.Scan;
 import haven.Surface.Vertex;
+
+import java.util.Random;
 
 public class CaveTile extends Tiler {
     public static final float h = 16;
@@ -113,20 +112,6 @@ public class CaveTile extends Tiler {
 
     private void mkwall(MapMesh m, Walls w, Coord ltc, Coord rtc) {
         Vertex[] lw = w.fortile(ltc), rw = w.fortile(rtc);
-        MapMesh.Model mod = MapMesh.Model.get(m, wtex);
-        MeshBuf.Vertex[] lv = new MeshBuf.Vertex[lw.length], rv = new MeshBuf.Vertex[rw.length];
-        MeshBuf.Tex tex = mod.layer(mod.tex);
-        for (int i = 0; i < lv.length; i++) {
-            float ty = (float) i / (float) (lv.length - 1);
-            lv[i] = new Surface.MeshVertex(mod, lw[i]);
-            tex.set(lv[i], new Coord3f(0, ty, 0));
-            rv[i] = new Surface.MeshVertex(mod, rw[i]);
-            tex.set(rv[i], new Coord3f(1, ty, 0));
-        }
-        for (int i = 0; i < lv.length - 1; i++) {
-            mod.new Face(lv[i + 1], lv[i], rv[i + 1]);
-            mod.new Face(lv[i], rv[i], rv[i + 1]);
-        }
     }
 
     public void lay(MapMesh m, Random rnd, Coord lc, Coord gc) {

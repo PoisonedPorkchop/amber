@@ -2,22 +2,17 @@ package haven.res.lib.globfx;
 
 import haven.*;
 import haven.Sprite.Owner;
+
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.WeakHashMap;
+import java.util.*;
 
 public class GlobEffector extends Drawable {
     static Map<Glob, Reference<GlobEffector>> cur = new WeakHashMap<>();
     public final Glob glob;
     Collection<Gob> holder = null;
-    Map<Effect, Effect> effects = new HashMap<>();
     Map<Datum, Datum> data = new HashMap<>();
 
     private GlobEffector(Gob var1) {
@@ -25,51 +20,7 @@ public class GlobEffector extends Drawable {
         this.glob = var1.glob;
     }
 
-    public void setup(RenderList var1) {
-        synchronized(this.effects) {
-            Iterator var3 = this.effects.values().iterator();
-
-            while(var3.hasNext()) {
-                Effect var4 = (Effect)var3.next();
-                var1.add(var4, (GLState)null);
-            }
-
-        }
-    }
-
     public void ctick(int var1) {
-        synchronized(this.effects) {
-            Iterator var3 = this.effects.values().iterator();
-
-            while(var3.hasNext()) {
-                Effect var4 = (Effect)var3.next();
-                if(var4.tick((float)var1)) {
-                    var3.remove();
-                }
-            }
-
-            var3 = this.data.values().iterator();
-
-            while(true) {
-                if(!var3.hasNext()) {
-                    break;
-                }
-
-                Datum var12 = (Datum)var3.next();
-                if(var12.tick((float)var1)) {
-                    var3.remove();
-                }
-            }
-        }
-
-        synchronized(cur) {
-            synchronized(this.effects) {
-                if(this.effects.size() == 0 && this.data.size() == 0) {
-                    this.glob.oc.lrem(this.holder);
-                    cur.remove(this.glob);
-                }
-            }
-        }
     }
 
     public Resource getres() {
@@ -100,19 +51,6 @@ public class GlobEffector extends Drawable {
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends Effect> T get(T var1) {
-        synchronized(this.effects) {
-            Effect var3 = this.effects.get(var1);
-            if(var3 == null) {
-                var3 = var1;
-                this.effects.put(var1, var1);
-            }
-
-            return (T)var3;
-        }
-    }
-
-    @SuppressWarnings("unchecked")
     public <T extends Datum> T getdata(T var1) {
         synchronized(this.data) {
             Datum var3 = this.data.get(var1);
@@ -138,10 +76,6 @@ public class GlobEffector extends Drawable {
 
             return (GlobEffector)((Reference)var2).get();
         }
-    }
-
-    public static <T extends Effect> T get(Glob var0, T var1) {
-        return get(var0).get(var1);
     }
 
     public static <T extends Datum> T getdata(Glob var0, T var1) {

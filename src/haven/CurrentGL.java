@@ -30,10 +30,8 @@ import javax.media.opengl.*;
 
 public class CurrentGL {
     public final GL gl;
-    public final GLConfig cfg;
 
-    public CurrentGL(GL gl, GLConfig cfg) {
+    public CurrentGL(GL gl) {
         this.gl = gl;
-        this.cfg = cfg;
     }
 }

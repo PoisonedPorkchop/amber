@@ -28,12 +28,11 @@ package haven;
 
 import javax.media.opengl.*;
 
-public class TexE extends TexGL {
+public class TexE {
     public final int ifmt, dfmt, dtype;
     public boolean invert;
 
     public TexE(Coord sz, int ifmt, int dfmt, int dtype, boolean invert) {
-        super(sz, sz);
         this.ifmt = ifmt;
         this.dfmt = dfmt;
         this.dtype = dtype;

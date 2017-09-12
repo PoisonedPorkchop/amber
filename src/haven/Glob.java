@@ -67,7 +67,6 @@ public class Glob {
 
     @Resource.PublishedCode(name = "wtr")
     public static interface Weather {
-        public void gsetup(RenderList rl);
 
         public void update(Object... args);
 
@@ -314,14 +313,6 @@ public class Glob {
             });
         }
     };
-
-    /* XXX: This is actually quite ugly and there should be a better
-     * way, but until I can think of such a way, have this as a known
-     * entry-point to be forwards-compatible with compiled
-     * resources. */
-    public static DirLight amblight(RenderList rl) {
-        return (((MapView) ((PView.WidgetContext) rl.state().get(PView.ctx)).widget()).amb);
-    }
 
     public void cattr(Message msg) {
         synchronized (cattr) {

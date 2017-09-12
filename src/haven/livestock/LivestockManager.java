@@ -156,7 +156,6 @@ public class LivestockManager extends Window {
 
     public void applyId(Widget wdg) {
         if (pendingAnimal != null && !pendingAnimal.hasAllAttributes()) {
-            pendingAnimal.gobid = ((Avaview) wdg).avagob;
             pendingAnimal.attributeResolved();
         }
     }

@@ -33,9 +33,8 @@ import haven.mod.selector.ModSelectorWindow;
 import haven.resutil.FoodInfo;
 
 import java.awt.*;
-import java.util.*;
 import java.awt.event.KeyEvent;
-import java.awt.image.WritableRaster;
+import java.util.*;
 import java.util.List;
 
 import static haven.Inventory.invsq;
@@ -46,7 +45,6 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     public final String chrid;
     public final long plid;
     private final Hidepanel ulpanel, umpanel, urpanel, brpanel, menupanel;
-    public Avaview portrait;
     public MenuGrid menu;
     public MenuSearch menuSearch;
     public MapView map;
@@ -97,26 +95,6 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         public Belt(Coord sz) {
             super(sz);
         }
-
-        public void keyact(final int slot) {
-            if (map != null) {
-                Coord mvc = map.rootxlate(ui.mc);
-                if (mvc.isect(Coord.z, map.sz)) {
-                    map.delay(map.new Hittest(mvc) {
-                        protected void hit(Coord pc, Coord2d mc, MapView.ClickInfo inf) {
-                            if (inf == null)
-                                GameUI.this.wdgmsg("belt", slot, 1, ui.modflags(), mc.floor(OCache.posres));
-                            else
-                                GameUI.this.wdgmsg("belt", slot, 1, ui.modflags(), mc.floor(OCache.posres), (int) inf.gob.id, inf.gob.rc.floor(OCache.posres));
-                        }
-
-                        protected void nohit(Coord pc) {
-                            GameUI.this.wdgmsg("belt", slot, 1, ui.modflags());
-                        }
-                    });
-                }
-            }
-        }
     }
 
     @RName("gameui")
@@ -163,12 +141,6 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 
         brpanel.add(new Img(Resource.loadtex("gfx/hud/brframe")), 0, 0);
         menupanel.add(new MainMenu(), 0, 0);
-
-        portrait = ulpanel.add(new Avaview(Avaview.dasz, plid, "avacam") {
-            public boolean mousedown(Coord c, int button) {
-                return (true);
-            }
-        }, new Coord(10, 10));
         buffs = ulpanel.add(new Bufflist(), new Coord(95, 65));
         umpanel.add(new Cal(), new Coord(0, 10));
         add(new Widget(new Coord(300, 40)) {
@@ -451,7 +423,6 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         if (place == "mapview") {
             child.resize(sz);
             map = add((MapView) child, Coord.z);
-            map.lower();
             if (minimapWnd != null)
                 ui.destroy(minimapWnd);
             if(mapfile != null) {
@@ -551,7 +522,6 @@ public class GameUI extends ConsoleHost implements Console.Directory {
         } else if (place == "meter") {
             int x = (meters.size() % 3) * (IMeter.fsz.x + 5);
             int y = (meters.size() / 3) * (IMeter.fsz.y + 2);
-            ulpanel.add(child, portrait.c.x + portrait.sz.x + 10 + x, portrait.c.y + y);
             meters.add(child);
         } else if (place == "buff") {
             buffs.addchild(child);
@@ -914,7 +884,6 @@ public class GameUI extends ConsoleHost implements Console.Directory {
             Config.showplantgrowstage = !Config.showplantgrowstage;
             Utils.setprefb("showplantgrowstage", Config.showplantgrowstage);
             if (!Config.showplantgrowstage && map != null)
-                map.removeCustomSprites(Sprite.GROWTH_STAGE_ID);
             if (map != null)
                 map.refreshGobsGrowthStages();
         } else if (ev.isControlDown() && ev.getKeyCode() == KeyEvent.VK_X) {
@@ -1119,7 +1088,6 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 
                 {
                     this.tooltip = RichText.render(Resource.getLocString(Resource.BUNDLE_LABEL, "Chat ($col[255,255,0]{Ctrl+C})"), 0);
-                    glow = new TexI(PUtils.rasterimg(PUtils.blurmask(up.getRaster(), 2, 2, Color.WHITE)));
                 }
 
                 public void click() {
@@ -1170,7 +1138,6 @@ public class GameUI extends ConsoleHost implements Console.Directory {
             if (M) {
                 curbelt = i;
             } else {
-                keyact(i + (curbelt * 12));
             }
             return (true);
         }

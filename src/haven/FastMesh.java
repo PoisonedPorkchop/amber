@@ -26,48 +26,31 @@
 
 package haven;
 
-import haven.glsl.ShaderMacro.Program;
-import java.util.*;
-import java.nio.*;
-import javax.media.opengl.*;
+import java.nio.ShortBuffer;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
-public class FastMesh implements FRendered, Disposable {
-    public static final GLState.Slot<GLState> vstate = new GLState.Slot<GLState>(GLState.Slot.Type.SYS, GLState.class);
-    public final VertexBuf vert;
-    public final ShortBuffer indb;
-    public final int num, lo, hi;
+public class FastMesh implements Disposable{
     public FastMesh from;
     private Compiler compiler;
     private Coord3f nb, pb;
 
-    public FastMesh(VertexBuf vert, ShortBuffer ind) {
-        this.vert = vert;
-        num = ind.capacity() / 3;
-        if(ind.capacity() != num * 3)
-            throw(new RuntimeException("Invalid index array length"));
-        this.indb = ind;
+    public FastMesh(ShortBuffer ind) {
         int lo = 65536, hi = 0;
         for(int i = 0; i < ind.capacity(); i++) {
             int idx = ((int)ind.get(i)) & 0xffff;
             lo = Math.min(lo, idx);
             hi = Math.max(hi, idx);
         }
-        this.lo = (lo == 65536)?0:lo; this.hi = hi;
+    }
+    public FastMesh(short[] ind) {
+        this(Utils.bufcp(ind));
     }
 
-    public FastMesh(VertexBuf vert, short[] ind) {
-        this(vert, Utils.bufcp(ind));
-    }
 
-    public FastMesh(FastMesh from, VertexBuf vert) {
+    public FastMesh(FastMesh from) {
         this.from = from;
-        if(from.vert.num != vert.num)
-            throw(new RuntimeException("V-buf sizes must match"));
-        this.vert = vert;
-        this.indb = from.indb;
-        this.num = from.num;
-        this.lo = from.lo;
-        this.hi = from.hi;
     }
 
     public static abstract class Compiled {
@@ -78,11 +61,8 @@ public class FastMesh implements FRendered, Disposable {
         private Entry[] cache = new Entry[0];
 
         private class Entry {
-            GLProgram prog;
             Compiled mesh;
             Object id;
-
-            Entry(GLProgram prog, Compiled mesh, Object id) {this.prog = prog; this.mesh = mesh; this.id = id;}
         }
 
         public void dispose() {
@@ -93,39 +73,10 @@ public class FastMesh implements FRendered, Disposable {
     }
 
     public class DLCompiler extends Compiler {
-        public class DLCompiled extends Compiled {
-            private DisplayList list;
-
-            public void dispose() {
-                if(list != null) {
-                    list.dispose();
-                    list = null;
-                }
-            }
-        }
     }
 
     private void cbounds() {
         Coord3f nb = null, pb = null;
-        VertexBuf.VertexArray vbuf = null;
-        for(VertexBuf.AttribArray buf : vert.bufs) {
-            if(buf instanceof VertexBuf.VertexArray) {
-                vbuf = (VertexBuf.VertexArray)buf;
-                break;
-            }
-        }
-        for(int i = 0; i < indb.capacity(); i++) {
-            int vi = indb.get(i) * 3;
-            float x = vbuf.data.get(vi), y = vbuf.data.get(vi + 1), z = vbuf.data.get(vi + 2);
-            if(nb == null) {
-                nb = new Coord3f(x, y, z);
-                pb = new Coord3f(x, y, z);
-            } else {
-                nb.x = Math.min(nb.x, x); pb.x = Math.max(pb.x, x);
-                nb.y = Math.min(nb.y, y); pb.y = Math.max(pb.y, y);
-                nb.z = Math.min(nb.z, z); pb.z = Math.max(pb.z, z);
-            }
-        }
         this.nb = nb;
         this.pb = pb;
     }
@@ -137,31 +88,6 @@ public class FastMesh implements FRendered, Disposable {
     public Coord3f pbounds() {
         if(pb == null) cbounds();
         return(pb);
-    }
-
-    private GLSettings.MeshMode curmode = null;
-    private Compiler compiler(GLConfig gc) {
-        if(compile()) {
-            if(curmode != gc.pref.meshmode.val) {
-                if(compiler != null) {
-                    compiler.dispose();
-                    compiler = null;
-                }
-                switch(gc.pref.meshmode.val) {
-                    case VAO:
-                        break;
-                    case DLIST:
-                        compiler = new DLCompiler();
-                        break;
-                }
-                curmode = gc.pref.meshmode.val;
-            }
-        } else if(compiler != null) {
-            compiler.dispose();
-            compiler = null;
-            curmode = null;
-        }
-        return(compiler);
     }
 
     protected boolean compile() {
@@ -176,21 +102,14 @@ public class FastMesh implements FRendered, Disposable {
             compiler.dispose();
             compiler = null;
         }
-        vert.dispose();
-    }
-
-
-
-    public boolean setup(RenderList r) {
-        return(true);
     }
 
     public static class ResourceMesh extends FastMesh {
         public final int id;
         public final Resource res;
 
-        public ResourceMesh(VertexBuf vert, short[] ind, MeshRes info) {
-            super(vert, ind);
+        public ResourceMesh(short[] ind, MeshRes info) {
+            super(ind);
             this.id = info.id;
             this.res = info.getres();
         }
@@ -243,8 +162,7 @@ public class FastMesh implements FRendered, Disposable {
         }
 
         public void init() {
-            VertexBuf v = getres().layer(VertexBuf.VertexRes.class).b;
-            this.m = new ResourceMesh(v, this.tmp, this);
+            this.m = new ResourceMesh( this.tmp, this);
             this.tmp = null;
             if(matid >= 0) {
                 for(Material.Res mr : getres().layers(Material.Res.class)) {

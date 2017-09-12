@@ -90,106 +90,12 @@ public class OptWnd extends Window {
         }
 
         public class CPanel extends Widget {
-            public final GLSettings cf;
 
-            public CPanel(GLSettings gcf) {
-                this.cf = gcf;
+            public CPanel() {
                 final WidgetVerticalAppender appender = new WidgetVerticalAppender(withScrollport(this, new Coord(620, 350)));
                 appender.setVerticalMargin(VERTICAL_MARGIN);
                 appender.setHorizontalMargin(HORIZONTAL_MARGIN);
-                appender.add(new CheckBox("Per-fragment lighting") {
-                    {
-                        a = cf.flight.val;
-                    }
-
-                    public void set(boolean val) {
-                        if (val) {
-                            try {
-                                cf.flight.set(true);
-                            } catch (GLSettings.SettingException e) {
-                                GameUI gui = getparent(GameUI.class);
-                                if (gui != null)
-                                    gui.error(e.getMessage());
-                                return;
-                            }
-                        } else {
-                            cf.flight.set(false);
-                        }
-                        a = val;
-                        cf.dirty = true;
-                    }
-                });
-                appender.add(new CheckBox("Render shadows") {
-                    {
-                        a = cf.lshadow.val;
-                    }
-
-                    public void set(boolean val) {
-                        if (val) {
-                            try {
-                                cf.lshadow.set(true);
-                            } catch (GLSettings.SettingException e) {
-                                GameUI gui = getparent(GameUI.class);
-                                if (gui != null)
-                                    gui.error(e.getMessage());
-                                return;
-                            }
-                        } else {
-                            cf.lshadow.set(false);
-                        }
-                        a = val;
-                        cf.dirty = true;
-                    }
-                });
-                appender.add(new CheckBox("Antialiasing") {
-                    {
-                        a = cf.fsaa.val;
-                    }
-
-                    public void set(boolean val) {
-                        try {
-                            cf.fsaa.set(val);
-                        } catch (GLSettings.SettingException e) {
-                            GameUI gui = getparent(GameUI.class);
-                            if (gui != null)
-                                gui.error(e.getMessage());
-                            return;
-                        }
-                        a = val;
-                        cf.dirty = true;
-                    }
-                });
                 appender.add(new Label("Anisotropic filtering"));
-                if (cf.anisotex.max() <= 1) {
-                    appender.add(new Label("(Not supported)"));
-                } else {
-                    final Label dpy = new Label("");
-                    appender.addRow(
-                            new HSlider(160, (int) (cf.anisotex.min() * 2), (int) (cf.anisotex.max() * 2), (int) (cf.anisotex.val * 2)) {
-                                protected void added() {
-                                    dpy();
-                                }
-
-                                void dpy() {
-                                    if (val < 2)
-                                        dpy.settext("Off");
-                                    else
-                                        dpy.settext(String.format("%.1f\u00d7", (val / 2.0)));
-                                }
-
-                                public void changed() {
-                                    try {
-                                        cf.anisotex.set(val / 2.0f);
-                                    } catch (GLSettings.SettingException e) {
-                                        getparent(GameUI.class).error(e.getMessage());
-                                        return;
-                                    }
-                                    dpy();
-                                    cf.dirty = true;
-                                }
-                            },
-                            dpy);
-                }
                 appender.add(new CheckBox("Disable biome tile transitions (requires logout)") {
                     {
                         a = Config.disabletiletrans;
@@ -408,12 +314,8 @@ public class OptWnd extends Window {
         appender.add(new HSlider(200, 0, 1000, 0) {
             protected void attach(UI ui) {
                 super.attach(ui);
-                val = (int) (ui.audio.pos.volume * 1000);
             }
 
-            public void changed() {
-                ui.audio.pos.setvolume(val / 1000.0);
-            }
         });
         appender.setVerticalMargin(0);
         appender.add(new Label("Ambient volume"));
@@ -421,11 +323,6 @@ public class OptWnd extends Window {
         appender.add(new HSlider(200, 0, 1000, 0) {
             protected void attach(UI ui) {
                 super.attach(ui);
-                val = (int) (ui.audio.amb.volume * 1000);
-            }
-
-            public void changed() {
-                ui.audio.amb.setvolume(val / 1000.0);
             }
         });
         appender.setVerticalMargin(0);
@@ -570,10 +467,6 @@ public class OptWnd extends Window {
 
                 GameUI gui = gameui();
                 if (gui != null && gui.map != null) {
-                    if (val)
-                        gui.map.addHealthSprites();
-                    else
-                        gui.map.removeCustomSprites(Sprite.GOB_HEALTH_ID);
                 }
             }
         });
@@ -1193,7 +1086,6 @@ public class OptWnd extends Window {
                         if (text.length() == 6) {
                             Color clr = Utils.hex2rgb(text);
                             if (clr != null) {
-                                GobHitbox.fillclrstate = new States.ColState(clr);
                                 Utils.setpref("treeboxclr", text);
                             }
                         }

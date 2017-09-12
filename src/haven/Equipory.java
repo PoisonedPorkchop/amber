@@ -26,10 +26,8 @@
 
 package haven;
 
-import haven.res.ui.tt.Armor;
-
-import java.awt.*;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 import static haven.Inventory.invsq;
 
@@ -72,7 +70,6 @@ public class Equipory extends Widget implements DTarget {
     }
 
     Map<GItem, WItem[]> wmap = new HashMap<GItem, WItem[]>();
-    private final Avaview ava;
     public WItem[] quickslots = new WItem[ecoords.length];
 
     @RName("epry")
@@ -85,29 +82,12 @@ public class Equipory extends Widget implements DTarget {
                 gobid = -1;
             else
                 gobid = Utils.uint32((Integer)args[0]);
-            return(new Equipory(gobid));
+            return(new Equipory());
         }
     }
 
-    public Equipory(long gobid) {
+    public Equipory() {
         super(isz);
-        ava = add(new Avaview(bg.sz(), gobid, "equcam") {
-            public boolean mousedown(Coord c, int button) {
-                return (false);
-            }
-
-            Outlines outlines = new Outlines(true);
-
-            protected void setup(RenderList rl) {
-                super.setup(rl);
-                rl.add(outlines, null);
-            }
-
-            protected java.awt.Color clearcolor() {
-                return (null);
-            }
-        }, new Coord(34, 0));
-        ava.color = null;
     }
 
     @Override
@@ -165,11 +145,6 @@ public class Equipory extends Widget implements DTarget {
     }
 
     public void uimsg(String msg, Object... args) {
-        if(msg == "pop") {
-            ava.avadesc = Composited.Desc.decode(ui.sess, args);
-        } else {
-            super.uimsg(msg, args);
-        }
     }
 
     public int epat(Coord c) {
@@ -183,11 +158,6 @@ public class Equipory extends Widget implements DTarget {
     public boolean drop(Coord cc, Coord ul) {
         wdgmsg("drop", epat(cc));
         return (true);
-    }
-
-    public void drawslots(GOut g) {
-        for(int i = 0; i < 16; i++)
-            g.image(invsq, ecoords[i]);
     }
 
     public boolean iteminteract(Coord cc, Coord ul) {

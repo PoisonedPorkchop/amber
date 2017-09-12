@@ -98,7 +98,6 @@ public class Charlist extends Widget {
                         wdgmsg("play", c.name);
                 }
             }
-        } else if (sender instanceof Avaview) {
         } else {
             super.wdgmsg(sender, msg, args);
         }

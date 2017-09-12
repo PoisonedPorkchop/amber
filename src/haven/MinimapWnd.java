@@ -180,35 +180,6 @@ public class MinimapWnd extends Widget {
         parent.setfocus(this);
     }
 
-    private void drawframe(GOut g) {
-        Coord mdo, cbr;
-
-        g.image(cl, Coord.z);
-        mdo = new Coord(cl.sz().x, 0);
-        cbr = wsz.add(-tr.sz().x, hm.sz().y);
-        for (; mdo.x < cbr.x; mdo.x += hm.sz().x)
-            g.image(hm, mdo, Coord.z, cbr);
-        g.image(tr, new Coord(wsz.x - tr.sz().x, 0));
-
-        mdo = new Coord(0, cl.sz().y);
-        cbr = new Coord(vm.sz().x, wsz.y - bl.sz().y);
-        for (; mdo.y < cbr.y; mdo.y += vm.sz().y)
-            g.image(vm, mdo, Coord.z, cbr);
-
-        mdo = new Coord(wsz.x - vm.sz().x, tr.sz().y);
-        cbr = new Coord(wsz.x, wsz.y - br.sz().y);
-        for (; mdo.y < cbr.y; mdo.y += vm.sz().y)
-            g.image(vm, mdo, Coord.z, cbr);
-
-        g.image(bl, new Coord(0, wsz.y - bl.sz().y));
-
-        mdo = new Coord(bl.sz().x, wsz.y - hm.sz().y);
-        cbr = new Coord(wsz.x - br.sz().x, wsz.y);
-        for (; mdo.x < cbr.x; mdo.x += hm.sz().x)
-            g.image(hm, mdo, Coord.z, cbr);
-        g.image(br, wsz.sub(br.sz()));
-    }
-
     @Override
     public Coord contentsz() {
         Coord max = new Coord(0, 0);
