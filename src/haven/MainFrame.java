@@ -26,30 +26,13 @@
 
 package haven;
 
-import haven.mod.HavenMod;
 import haven.mod.Mod;
-import haven.mod.ModAPI;
-import haven.mod.event.CustomMenuButtonPressEvent;
-import haven.mod.event.InventoryCreateEvent;
-import haven.mod.event.RunStateChangeEvent;
-import haven.mod.event.UIMessageEvent;
-import haven.mod.event.flower.FlowerMenuCancelEvent;
-import haven.mod.event.flower.FlowerMenuChooseEvent;
-import haven.mod.event.flower.FlowerMenuChosenEvent;
-import haven.mod.event.flower.FlowerMenuCreateEvent;
-import haven.mod.event.widget.*;
 
 import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.*;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.*;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
-import java.util.zip.ZipEntry;
+import java.util.Collection;
+import java.util.Map;
+import java.util.TreeMap;
 
 
 public class MainFrame implements Runnable, Console.Directory {
@@ -233,12 +216,7 @@ public class MainFrame implements Runnable, Console.Directory {
 
     public static void main(final String[] args) {
 	    /* Set up the error handler as early as humanly possible. */
-        final haven.error.ErrorHandler hg = new haven.error.ErrorHandler();
-        hg.sethandler(new haven.error.ErrorGui(null) {
-            public void errorsent() {
-                hg.interrupt();
-            }
-        });
+        final ThreadGroup hg = new ThreadGroup("Haven Threads");
         ThreadGroup g = hg;
 
         Thread main = new HackThread(g, new Runnable() {

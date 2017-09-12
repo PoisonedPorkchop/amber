@@ -26,17 +26,17 @@
 
 package haven;
 
-import com.jogamp.opengl.util.awt.Screenshot;
-
 import javax.media.opengl.*;
-import javax.media.opengl.awt.GLCanvas;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.Map;
 import java.util.Queue;
+import java.util.TreeMap;
 
 public class HavenPanel implements Runnable, Console.Directory {
     UI ui;
@@ -79,17 +79,10 @@ public class HavenPanel implements Runnable, Console.Directory {
 
     public HavenPanel(int w, int h, GLCapabilitiesChooser cc) {
         newui(null);
-        initgl();
-        if (Toolkit.getDefaultToolkit().getMaximumCursorColors() >= 256 || Config.hwcursor)
-            cursmode = "awt";
     }
 
     public HavenPanel(int w, int h) {
         this(w, h, null);
-    }
-
-    private void initgl() {
-        final haven.error.ErrorHandler h = haven.error.ErrorHandler.find();
     }
 
     public static abstract class OrthoState extends GLState {
