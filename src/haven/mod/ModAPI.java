@@ -406,4 +406,22 @@ public class ModAPI {
     public Client getClient() {
         return client;
     }
+
+    public void startMod(String name)
+    {
+        for(HavenMod mod : getMods())
+            if(mod.getModName().equals(name)) {
+                mod.start();
+                break;
+            }
+    }
+
+    public void stopMod(String name)
+    {
+        for(HavenMod mod : getMods())
+            if(mod.getModName().equals(name)) {
+                mod.exit();
+                break;
+            }
+    }
 }
